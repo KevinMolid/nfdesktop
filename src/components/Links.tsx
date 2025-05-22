@@ -4,6 +4,7 @@ const Links = () => {
   const [isActive1, setIsActive1] = useState(false)
   const [isActive2, setIsActive2] = useState(false)
   const [isActive3, setIsActive3] = useState(false)
+  const [isActive4, setIsActive4] = useState(false)
 
   const links = [
     {category: "Internt",
@@ -20,12 +21,16 @@ const Links = () => {
     setIsActive1(!isActive1)
   } 
 
-    const toggle2 = () => {
+  const toggle2 = () => {
     setIsActive2(!isActive2)
   } 
 
-    const toggle3 = () => {
+  const toggle3 = () => {
     setIsActive3(!isActive3)
+  } 
+
+  const toggle4 = () => {
+    setIsActive4(!isActive4)
   } 
 
   return (
@@ -77,10 +82,20 @@ const Links = () => {
       </ul>}
 
       <div className="ul-heading" onClick={toggle3}>
-        <h4>Frakt</h4>
+        <h4>Verktøy</h4>
         {isActive3 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
       </div>
       {isActive3 && <ul>
+        <li>
+          <a href="https://labservices.kiwa.com/eCal_NO/Login.aspx?nochk=-1&lng=EN" target="_blank">Kiwa</a>
+        </li>
+      </ul>}
+
+      <div className="ul-heading" onClick={toggle4}>
+        <h4>Transport</h4>
+        {isActive4 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
+      </div>
+      {isActive4 && <ul>
         <li>
           <a href="https://www.mybring.com/frontpage/index.html" target="_blank">Bring</a>
         </li>
