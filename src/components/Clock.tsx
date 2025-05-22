@@ -4,6 +4,7 @@ const Clock = () => {
     const getTime = () => {
       let hrs = time.getHours().toString()
       let mins = time.getMinutes().toString()
+      let secs = time.getSeconds().toString()
       if (hrs in [0,1,2,3,4,5,6,7,8,9]){
         hrs = "0"+hrs
       }
@@ -11,12 +12,13 @@ const Clock = () => {
         mins = "0"+mins
       }
 
-      return hrs + ":" + mins
+      return hrs + ":" + mins + ":" + secs
     }
 
   return (
-    <div className="clock"><i className="fa-solid fa-clock lightgrey"></i>
-{getTime()}</div>
+    <div className="clock">
+      {getTime()}
+    </div>
   )
 }
 
