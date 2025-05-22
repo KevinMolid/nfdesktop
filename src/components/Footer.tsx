@@ -2,9 +2,10 @@ const Footer = () => {
   return (
     <div className="footer">
         <p><strong>Norrønafly Propeller & NDT AS</strong></p>
-        <p>Strømsveien 344, 0473 Oslo</p>
-        <p>propeller@norronafly.com</p>
-        <p>(+47) 45 26 38 58</p>
+        <p>Org / VAT No: 945 431 962</p>
+        <p>Strømsveien 344, N-1081 Oslo</p>
+        <p>prop@norronafly.com</p>
+        <p>(+47) 67 53 90 66</p>
     </div>
   )
 }
