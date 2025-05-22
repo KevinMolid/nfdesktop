@@ -23,6 +23,7 @@ const Sticker = ({ id, color, content, onColorChange, onContentChange, onDelete 
             </div>
         <textarea className="sticker-textarea"
             name="" id=""
+            spellCheck="false"
             value={content}
             onChange={(e) => onContentChange(e.target.value)}></textarea>
     </div>
