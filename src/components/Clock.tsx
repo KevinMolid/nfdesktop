@@ -1,25 +1,25 @@
+import { useEffect, useState } from "react";
+
 const Clock = () => {
-    const time = new Date();
+  const [time, setTime] = useState(new Date());
 
-    const getTime = () => {
-      let hrs = time.getHours().toString()
-      let mins = time.getMinutes().toString()
-      let secs = time.getSeconds().toString()
-      if (hrs in [0,1,2,3,4,5,6,7,8,9]){
-        hrs = "0"+hrs
-      }
-      if (mins in [0,1,2,3,4,5,6,7,8,9]){
-        mins = "0"+mins
-      }
+  // Update time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
 
-      return hrs + ":" + mins + ":" + secs
-    }
+    return () => clearInterval(interval); // Clean up on unmount
+  }, []);
 
-  return (
-    <div className="clock">
-      {getTime()}
-    </div>
-  )
-}
+  const getTime = () => {
+    const hrs = time.getHours().toString().padStart(2, "0");
+    const mins = time.getMinutes().toString().padStart(2, "0");
+    const secs = time.getSeconds().toString().padStart(2, "0");
+    return `${hrs}:${mins}:${secs}`;
+  };
 
-export default Clock
+  return <div className="clock">{getTime()}</div>;
+};
+
+export default Clock;

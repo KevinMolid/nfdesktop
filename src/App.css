@@ -280,6 +280,7 @@ ul {
   gap: 4px;
   color:#777;
   font-size: 0.8rem;
+  user-select: none;
 }
 
 /* Notes */
