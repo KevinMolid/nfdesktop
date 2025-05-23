@@ -1,7 +1,12 @@
 import avatar from "../assets/avatar.jpg"
 import { useState } from "react"
 
-const UserTag = () => {
+type UserTagProps = {
+  username: string;
+  onLogout: () => void;
+};
+
+const UserTag = ({username, onLogout}: UserTagProps) => {
     const [isDropdownActive, setIsDropdownActive] = useState(false)
 
     const toggleDropdown = () => {
@@ -11,10 +16,13 @@ const UserTag = () => {
   return (
     <div className="usertag-container">
         <div className="user-tag" onClick={toggleDropdown}>
-            <p>Kevin Molid</p>
+            <p>{username}</p>
             <img src={avatar} alt="" className="avatar"/>
         </div>
-        {isDropdownActive && <div className="usertag-dropdown">Logg ut <i className="fa-solid fa-sign-out grey m-l-1"></i></div>}
+        {isDropdownActive &&
+          <div className="usertag-dropdown" onClick={onLogout}>
+            Logg ut <i className="fa-solid fa-sign-out grey m-l-1"></i>
+          </div>}
     </div>
   )
 }

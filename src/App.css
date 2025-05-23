@@ -69,6 +69,12 @@ ul {
   padding: 0;
 }
 
+/* Users */
+.userlist {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+}
+
 .usertag-container {
   position: relative;
 }
@@ -115,6 +121,13 @@ ul {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* Login */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* Menu bar */
@@ -540,6 +553,16 @@ button {
 }
 button:hover {
   background-color: #ddd;
+}
+
+.btn {
+  color: white;
+  background-color: #2999f7;
+}
+
+.btn:hover {
+  color: white;
+  background-color: #3da8ff;
 }
 
 /* Input */
