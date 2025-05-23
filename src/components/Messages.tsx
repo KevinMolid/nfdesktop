@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
-const Messages = () => {
+type MessagesProps = {
+  username: string;
+}
+
+const Messages = ({username}: MessagesProps) => {
   const [messages, setMessages] = useState<any>([])
   const [newMessage, setNewMessage] = useState("");
 
@@ -26,7 +30,7 @@ const Messages = () => {
 
     try {
       await addDoc(collection(db, "messages"), {
-        sender: "Anonymous", // Replace with actual sender name or ID if using auth
+        sender: username,
         content: newMessage,
         createdAt: serverTimestamp(),
       });

@@ -13,6 +13,10 @@ html, body {
   background-color: var(--main-bg-color);
 }
 
+p {
+  margin: 0;
+}
+
 h3 {
   color: #26263d;
   font-size: 1em;
@@ -72,7 +76,8 @@ ul {
 /* Users */
 .userlist {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 36px 1fr;
+  gap: 8px;
 }
 
 .usertag-container {

@@ -1,4 +1,4 @@
-import avatar from "../assets/avatar.jpg"
+import avatar from "../assets/defaultAvatar.png"
 import { useState } from "react"
 
 type UserTagProps = {
@@ -16,7 +16,7 @@ const UserTag = ({username, onLogout}: UserTagProps) => {
   return (
     <div className="usertag-container">
         <div className="user-tag" onClick={toggleDropdown}>
-            <p>{username}</p>
+            <p><strong className="user">{username}</strong></p>
             <img src={avatar} alt="" className="avatar"/>
         </div>
         {isDropdownActive &&

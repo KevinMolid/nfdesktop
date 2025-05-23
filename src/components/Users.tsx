@@ -9,6 +9,7 @@ const Users = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [users, setUsers] = useState<any[]>([])
+  const [isCreateActive, setIsCreateActive] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
@@ -21,6 +22,10 @@ const Users = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const toggleCreateActive = () => {
+    setIsCreateActive(!isCreateActive)
+  }
 
   const registerUser = async (username: string, pin: string) => {
     if (username.length !== 3 || pin.length !== 4) {
@@ -51,13 +56,16 @@ const Users = () => {
         <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Brukere</h3>
-        <div className="icon-container">
-          <i className="fa-solid fa-plus blue icon-md hover"></i>
-        </div>
+        {!isCreateActive && <div className="icon-container">
+          <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
+        </div>}
       </div>
 
       <div className="card-body">
-        <h4>Opprett ny bruker</h4>
+
+        {isCreateActive && <div className="create-task-box">
+            Opprett ny bruker
+            <div className="create-task-input-container">
         <input
           type="text"
           placeholder="Brukernavn"
@@ -73,6 +81,9 @@ const Users = () => {
           onChange={(e) => setPin(e.target.value)}
         />
         <button onClick={() => registerUser(username, pin)}>Opprett</button>
+              <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={toggleCreateActive}></i>
+            </div>
+        </div>}
 
         {error && <p style={{ color: "red" }}>{error}</p>}
         {success && <p style={{ color: "green" }}>{success}</p>}
@@ -80,8 +91,8 @@ const Users = () => {
         <ul>
           {users.map((user) => (
             <li key={user.id} className="userlist">
-              <div>{user.username}</div>
-              <div>{user.role}</div>
+              <p><strong className="user">{user.username}</strong></p>
+              <p>{user.role}</p>
             </li>
           ))}
         </ul>

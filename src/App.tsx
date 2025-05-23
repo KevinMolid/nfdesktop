@@ -89,7 +89,7 @@ const [user, setUser] = useState<User | null>(null);
         {widgets[0].active && <Links/>}
         {widgets[1].active && <Tasklist />}
         {widgets[2].active && <Notes />}
-        {widgets[3].active && <Messages />}
+        {widgets[3].active && <Messages username={user.username}/>}
         <Footer />
       </div>
   ) : (
