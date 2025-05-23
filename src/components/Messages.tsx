@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
 const Messages = () => {
   const [messages, setMessages] = useState<any>([])
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "messages"));
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setMessages(data)
-      } catch (err) {
-      console.error("Error fetching data: ", err);
-    }}
-    
-    fetchData();
+    const unsubscribe = onSnapshot(collection(db, "messages"), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMessages(data);
+    }, (error) => {
+      console.error("Error with real-time listener:", error);
+    });
+
+    // Clean up listener on unmount
+    return () => unsubscribe();
   }, []);
 
   return (
