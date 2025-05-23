@@ -21,6 +21,8 @@ function App() {
 
 const [user, setUser] = useState<User | null>(null);
   const [widgets, setWidgets] = useState([
+    {name: "Brukere",
+      active: true},
     {name: "Lenker",
       active: true},
     {name: "Oppgaver",
@@ -28,7 +30,7 @@ const [user, setUser] = useState<User | null>(null);
     {name: "Notater",
       active: true},
     {name: "Meldinger",
-      active: false},
+      active: true},
   ])
 
   useEffect(() => {
@@ -85,11 +87,11 @@ const [user, setUser] = useState<User | null>(null);
           widgets={widgets} 
           toggleActive={toggleActive} 
           onLogout={handleLogout}/>
-        <Users />
-        {widgets[0].active && <Links/>}
-        {widgets[1].active && <Tasklist />}
-        {widgets[2].active && <Notes />}
-        {widgets[3].active && <Messages username={user.username}/>}
+        {widgets[0].active && <Users />}
+        {widgets[1].active && <Links/>}
+        {widgets[2].active && <Tasklist />}
+        {widgets[3].active && <Notes />}
+        {widgets[4].active && <Messages username={user.username}/>}
         <Footer />
       </div>
   ) : (
