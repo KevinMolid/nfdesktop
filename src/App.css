@@ -97,10 +97,12 @@ ul {
 }
 
 .usertag-dropdown {
+  min-width: max-content;
   font-weight: 500;
   background-color: white;
   padding: 4px 12px;
   position: absolute;
+  right: 0;
   z-index: 12;
   border: 1px solid #ccc;
 }
