@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 const Messages = () => {
   const [messages, setMessages] = useState<any>([])
+  const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "messages"), (snapshot) => {
@@ -20,6 +21,21 @@ const Messages = () => {
     return () => unsubscribe();
   }, []);
 
+    const handleSend = async () => {
+    if (!newMessage.trim()) return;
+
+    try {
+      await addDoc(collection(db, "messages"), {
+        sender: "Anonymous", // Replace with actual sender name or ID if using auth
+        content: newMessage,
+        createdAt: serverTimestamp(),
+      });
+      setNewMessage("");
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
+  };
+
   return (
     <div className="card has-header grow-1">
         <div className="card-header">
@@ -29,15 +45,22 @@ const Messages = () => {
       {messages.map((msg: any) => (
         <div key={msg.id}>
           <div className="message">
-            <p className="message-info"><strong className="user">{msg.sender}</strong><small className="message-timestamp">19.05.2025 kl 09:23</small></p>
+            <p className="message-info">
+              <strong className="user">{msg.sender}</strong>
+              <small className="message-timestamp">{msg.createdAt?.toDate().toLocaleString() || "Sending..."}</small>
+            </p>
             <p>{msg.content}</p>
           </div>
         </div>
       ))}
 
         <div className="message-input-container">
-          <textarea className="message-input"/>
-          <button className="message-btn"><i className="fa-solid fa-paper-plane m-r-1"></i> Send</button>
+          <textarea className="message-input" 
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}/>
+          <button className="message-btn" onClick={handleSend}>
+              <i className="fa-solid fa-paper-plane m-r-1"></i> Send
+          </button>
         </div>
     </div>
   )
