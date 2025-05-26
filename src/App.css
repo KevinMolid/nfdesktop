@@ -302,10 +302,6 @@ ul {
   border: 1px solid transparent;
 }
 
-.dropdown-item:hover {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
 .dropdown-item-icon-container {
   display: flex;
   justify-content: center;
@@ -575,8 +571,15 @@ ul {
   background-color: #fec5c5;
 }
 
-.hover {
+/* Hover effects */
+
+.hover:hover {
   cursor: pointer;
+}
+
+.hover-border:hover {
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 /* Button */

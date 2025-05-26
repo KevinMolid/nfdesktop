@@ -80,7 +80,7 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
             {STATUS_OPTIONS.map((option) => (
                 <div
                     key={option}
-                    className={`dropdown-item hover task-${option}`}
+                    className={`dropdown-item hover-border task-${option}`}
                     onClick={() => {
                     onStatusChange(id, option);
                     setIsStatusDropdownActive(false);
