@@ -361,6 +361,10 @@ ul {
   color: rgba(0, 0, 0, 0.2)
 }
 
+.sticker-icon:hover {
+  color: rgba(0, 0, 0, 0.3)
+}
+
 .sticker-textarea {
   font-size: 1rem;
   box-sizing: border-box;
