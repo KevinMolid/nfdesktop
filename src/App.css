@@ -316,6 +316,13 @@ ul {
   align-items: center;
 }
 
+.dropdown-item-text-container {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-left: 8px;
+}
+
 /* PIN-form */
 .pin-form {
   position: fixed;
