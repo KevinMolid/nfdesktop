@@ -41,7 +41,7 @@ const Links = () => {
         </div>
 
       <div className="ul-heading" onClick={toggle1}>
-        <h4>Internt</h4>
+        <p className="list-p">Internt</p>
         {isActive1 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
       </div>
       {isActive1 && <ul>
@@ -56,7 +56,7 @@ const Links = () => {
 
       {/* Leverandørliste */}
       <div className="ul-heading" onClick={toggle2}>
-        <h4>Leverandører</h4>
+        <p className="list-p">Leverandører</p>
         {isActive2 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
       </div>
       {isActive2 && <ul>
@@ -82,7 +82,7 @@ const Links = () => {
       </ul>}
 
       <div className="ul-heading" onClick={toggle3}>
-        <h4>Verktøy</h4>
+        <p className="list-p">Verktøy</p>
         {isActive3 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
       </div>
       {isActive3 && <ul>
@@ -92,7 +92,7 @@ const Links = () => {
       </ul>}
 
       <div className="ul-heading" onClick={toggle4}>
-        <h4>Transport</h4>
+        <p className="list-p">Transport</p>
         {isActive4 ? <i className="fa-solid fa-caret-up lightgrey"></i> : <i className="fa-solid fa-caret-down lightgrey"></i>}
       </div>
       {isActive4 && <ul>

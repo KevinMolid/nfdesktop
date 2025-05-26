@@ -76,16 +76,16 @@ const ToDo = () => {
               <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
               <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
               {isFilterActive && <div className="filter-dropdown">
-                <div className="filter filter-active">
+                <div className="filter filter-active hover-border">
                   <i className="fa-solid fa-circle lightgrey"></i>
                 </div>
-                <div className="filter filter-finished">
+                <div className="filter filter-finished hover-border">
                   <i className="fa-solid fa-check green"></i>
                 </div>
-                <div className="filter filter-onhold">
+                <div className="filter filter-onhold hover-border">
                   <i className="fa-solid fa-pause yellow"></i>
                 </div>
-                <div className="filter filter-cancelled">
+                <div className="filter filter-cancelled hover-border">
                   <i className="fa-solid fa-cancel red"></i>
                 </div>
               </div>}
@@ -110,36 +110,68 @@ const ToDo = () => {
           </div>}
 
         {/* Tasklist */}
-{/* Active tasks */}
-<ul className="task-list">
-  {tasks.filter(task => task.status === "active").map((task, index) => (
-    <Task 
-      key={task.id}
-      id={task.id} 
-      name={task.name} 
-      index={index}
-      status={task.status}
-      onDelete={() => deleteTask(task.id)}
-      onStatusChange={handleStatusChange}
-    />
-  ))}
-</ul>
+        {/* Active tasks */}
+        <ul className="task-list">
+          {tasks.filter(task => task.status === "active").map((task, index) => (
+            <Task 
+              key={task.id}
+              id={task.id} 
+              name={task.name} 
+              index={index}
+              status={task.status}
+              onDelete={() => deleteTask(task.id)}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
+        </ul>
 
-{/* Non-active tasks */}
-<h3 className="card-title">Inaktive</h3>
-<ul className="task-list">
-  {tasks.filter(task => task.status !== "active").map((task, index) => (
-    <Task 
-      key={task.id}
-      id={task.id} 
-      name={task.name} 
-      index={index}
-      status={task.status}
-      onDelete={() => deleteTask(task.id)}
-      onStatusChange={handleStatusChange}
-    />
-  ))}
-</ul>
+        {/* Finished tasks */}
+        <h4 className="card-title">Utførte oppgaver</h4>
+        <ul className="task-list">
+          {tasks.filter(task => task.status === "finished").map((task, index) => (
+            <Task 
+              key={task.id}
+              id={task.id} 
+              name={task.name} 
+              index={index}
+              status={task.status}
+              onDelete={() => deleteTask(task.id)}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
+        </ul>
+
+        {/* On-hold tasks */}
+        <h4 className="card-title">Pausede oppgaver</h4>
+        <ul className="task-list">
+          {tasks.filter(task => task.status === "onhold").map((task, index) => (
+            <Task 
+              key={task.id}
+              id={task.id} 
+              name={task.name} 
+              index={index}
+              status={task.status}
+              onDelete={() => deleteTask(task.id)}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
+        </ul>
+
+        {/* Cancelled tasks */}
+        <h4 className="card-title">Kansellerte oppgaver</h4>
+        <ul className="task-list">
+          {tasks.filter(task => task.status === "cancelled").map((task, index) => (
+            <Task 
+              key={task.id}
+              id={task.id} 
+              name={task.name} 
+              index={index}
+              status={task.status}
+              onDelete={() => deleteTask(task.id)}
+              onStatusChange={handleStatusChange}
+            />
+          ))}
+        </ul>
 
     </div>
   )
