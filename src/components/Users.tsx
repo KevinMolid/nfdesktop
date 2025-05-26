@@ -3,7 +3,14 @@ import bcrypt from "bcryptjs";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
-const Users = () => {
+type UsersProps = {
+  user: {
+    username: string;
+    role: string;
+  }
+};
+
+const Users = ({user}: UsersProps) => {
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -56,7 +63,7 @@ const Users = () => {
         <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Brukere</h3>
-        {!isCreateActive && <div className="icon-container">
+        {!isCreateActive && user.role === "admin" && <div className="icon-container">
           <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
         </div>}
       </div>

@@ -87,7 +87,7 @@ const [user, setUser] = useState<User | null>(null);
           widgets={widgets} 
           toggleActive={toggleActive} 
           onLogout={handleLogout}/>
-        {widgets[0].active && <Users />}
+        {widgets[0].active && <Users user={user}/>}
         {widgets[1].active && <Links/>}
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
