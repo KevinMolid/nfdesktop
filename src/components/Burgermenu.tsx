@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 type MenuProps = {
   widgets: {name: string, active: boolean}[];
@@ -7,13 +7,34 @@ type MenuProps = {
 
 const Burgermenu = ({widgets, toggleActive}: MenuProps) => {
     const [isActive, setIsActive] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const toggleMenuActive = () => {
         setIsActive(!isActive)
     }
 
+    // Close dropdown on outside click
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(event.target as Node)
+        ) {
+          setIsActive(false);
+        }
+      };
+
+      if (isActive) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [isActive]);
+
   return (
-    <div>
+    <div ref={containerRef}>
         <i className="fa-solid fa-bars icon-md burgermenu" 
             onClick={toggleMenuActive}></i>
         {isActive && <div className="burger-dropdown">
