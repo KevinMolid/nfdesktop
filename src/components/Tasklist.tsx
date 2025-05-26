@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Task from "./Task";
 
 const LOCAL_STORAGE_KEY = "tasks";
@@ -29,13 +29,33 @@ const ToDo = () => {
     }
   }
 
-  return {
-    active: true,
-    finished: true,
-    onhold: true,
-    cancelled: true,
-  };
-});
+    return {
+      active: true,
+      finished: true,
+      onhold: true,
+      cancelled: true,
+    };
+  });
+
+  const filterRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterActive(false);
+      }
+    };
+
+    if (isFilterActive) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterActive]);
 
   // Load from localStorage once on mount
   useEffect(() => {
@@ -113,7 +133,7 @@ const ToDo = () => {
             {!isCreateActive && <div className="icon-container">
               <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
               <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
-              {isFilterActive && <div className="filter-dropdown">
+              {isFilterActive && <div className="filter-dropdown" ref={filterRef}>
                 {["active", "finished", "onhold", "cancelled"].map((status) => (
                   <div
                     key={status}
