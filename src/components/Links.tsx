@@ -113,7 +113,7 @@ const Links = () => {
           <a href="https://mytnt.tnt.com/?locale=no_NO#/sign-in" target="_blank">TNT</a>
         </li>
         <li>
-          <i className="fa-solid fa-ellipsis-vertical m-r-3 grey hover"></i><a href="https://www.ups.com/no/no/home" target="_blank">UPS</a>
+          <a href="https://www.ups.com/no/no/home" target="_blank">UPS</a>
         </li>
       </ul>}
     </div>
