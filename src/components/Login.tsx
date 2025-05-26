@@ -60,7 +60,10 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
         placeholder="PIN-kode"
         maxLength={4}
         value={pin}
-        onChange={(e) => setPin(e.target.value)}
+        onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
+              setPin(numericValue);
+            }}
       />
       <button type="submit" className="btn login-btn">Logg inn</button>
       {error && <p style={{ color: "red" }}>{error}</p>}

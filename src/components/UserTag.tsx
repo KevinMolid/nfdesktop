@@ -1,52 +1,139 @@
-import avatar from "../assets/defaultAvatar.png"
-import { useState, useRef, useEffect } from "react"
+import avatar from "../assets/defaultAvatar.png";
+import { useState, useRef, useEffect } from "react";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
+import bcrypt from "bcryptjs";
 
 type UserTagProps = {
   username: string;
   onLogout: () => void;
 };
 
-const UserTag = ({username, onLogout}: UserTagProps) => {
-    const [isDropdownActive, setIsDropdownActive] = useState(false)
-    const containerRef = useRef<HTMLDivElement>(null);
+const UserTag = ({ username, onLogout }: UserTagProps) => {
+  const [isDropdownActive, setIsDropdownActive] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showPinForm, setShowPinForm] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [feedback, setFeedback] = useState("");
 
+  const toggleDropdown = () => {
+    setIsDropdownActive(!isDropdownActive);
+  };
 
-    const toggleDropdown = () => {
-        setIsDropdownActive(!isDropdownActive)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownActive(false);
+      }
+    };
+
+    if (isDropdownActive) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
-    // Close dropdown on outside click
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
-          setIsDropdownActive(false);
-        }
-      };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownActive]);
 
-      if (isDropdownActive) {
-        document.addEventListener("mousedown", handleClickOutside);
+  const handlePinUpdate = async () => {
+    if (newPin.length !== 4) {
+      setFeedback("PIN må være 4 siffer.");
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", "==", username.toUpperCase()));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userDocRef = doc(db, "users", userDoc.id);
+        const hashedPin = await bcrypt.hash(newPin, 10);
+
+        await updateDoc(userDocRef, { pinHash: hashedPin });
+
+        setFeedback("PIN-kode oppdatert.");
+        setShowPinForm(false);
+        setNewPin("");
+      } else {
+        setFeedback("Bruker ikke funnet.");
       }
-
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [isDropdownActive]);
+    } catch (error) {
+      console.error("Error updating PIN:", error);
+      setFeedback("En feil oppstod under oppdatering.");
+    }
+  };
 
   return (
     <div className="usertag-container" ref={containerRef}>
-        <div className="user-tag" onClick={toggleDropdown}>
-            <p><strong className="user">{username}</strong></p>
-            <img src={avatar} alt="" className="avatar"/>
-        </div>
-        {isDropdownActive &&
-          <div className="usertag-dropdown" onClick={onLogout}>
-            Logg ut <i className="fa-solid fa-sign-out grey m-l-1"></i>
-          </div>}
-    </div>
-  )
-}
+      <div className="user-tag" onClick={toggleDropdown}>
+        <p>
+          <strong className="user">{username}</strong>
+        </p>
+        <img src={avatar} alt="" className="avatar" />
+      </div>
 
-export default UserTag
+      {isDropdownActive && (
+        <div className="usertag-dropdown">
+          <div
+            className="dropdown-item default-select hover-border"
+            onClick={() => {
+              setShowPinForm(true);
+              setIsDropdownActive(false);
+            }}
+          >
+            <div className="dropdown-item-icon-container">
+              <i className="fa-solid fa-asterisk grey m-l-1"></i>
+            </div>
+            <span style={{ marginLeft: "8px" }}>Endre PIN</span>
+          </div>
+          <div
+            className="dropdown-item default-select hover-border"
+            onClick={onLogout}
+          >
+            <div className="dropdown-item-icon-container">
+              <i className="fa-solid fa-sign-out grey m-l-1"></i>
+            </div>
+            <span style={{ marginLeft: "8px" }}>Logg ut</span>
+          </div>
+        </div>
+      )}
+
+      {showPinForm && (
+        <div className="pin-form">
+          <h2>Endre PIN-kode</h2>
+          <input
+            type="password"
+            placeholder="Ny PIN"
+            value={newPin}
+            maxLength={4}
+            onChange={(e) => {
+              const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
+              setNewPin(numericValue);
+            }}
+          />
+          <div className="button-group">
+            <button onClick={handlePinUpdate}>Lagre</button>
+            <button onClick={() => setShowPinForm(false)}>Avbryt</button>
+          </div>
+          {feedback && <p className="feedback-message">{feedback}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserTag;

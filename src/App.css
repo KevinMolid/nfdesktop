@@ -108,17 +108,14 @@ ul {
   min-width: max-content;
   font-weight: 500;
   background-color: white;
-  padding: 4px 12px;
+  padding: 2px;
   position: absolute;
   right: 0;
   z-index: 12;
   border: 1px solid #ccc;
 }
 
-.usertag-dropdown:hover {
-  background-color: #f9f9f9;
-  cursor: pointer;
-}
+
 
 .user {
   color: #3da8ff;
@@ -317,6 +314,26 @@ ul {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* PIN-form */
+.pin-form {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  background-color: #3da8ff;
+  padding: 20px 40px 40px;
+  border-radius: 10px;
+  z-index: 20;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
 }
 
 /* Tabs */
