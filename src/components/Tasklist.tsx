@@ -95,7 +95,15 @@ const ToDo = () => {
         {isCreateActive && <div className="create-task-box">
             Opprett ny oppgave
             <div className="create-task-input-container">
-              <input value={newTaskName} onChange={e => setNewTaskName(e.target.value)}/>
+              <input
+                value={newTaskName}
+                onChange={e => setNewTaskName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    addNewTask();
+                  }
+                }}
+              />
               <button onClick={addNewTask}>Opprett</button>
               <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={clearNewTask}></i>
             </div>
