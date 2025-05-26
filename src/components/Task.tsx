@@ -15,10 +15,25 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [isStatusDropdownActive, setIsStatusDropdownActive] = useState(false);
 
+ const dropdownRef = useRef<HTMLDivElement>(null);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsDropdownActive((prev) => !prev);
   const toggleStatusDropdown = () => setIsStatusDropdownActive((prev) => !prev);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownActive(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Close status dropdown on outside click
   useEffect(() => {
@@ -68,7 +83,11 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
   return (
     <li className={`task task-${status}`} key={"task" + index}>
       <div className="task-info">
-        <i className="fa-solid fa-ellipsis-vertical grey hover" onClick={toggleDropdown}></i>
+        <div onClick={toggleDropdown} 
+            ref={dropdownRef}
+            className="icon-div hover">
+        <i className="fa-solid fa-ellipsis-vertical grey"></i>
+        </div>
         <p>{name}</p>
       </div>
 

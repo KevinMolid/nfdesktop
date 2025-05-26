@@ -528,6 +528,14 @@ ul {
   gap: 8px;
 }
 
+.icon-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 18px;
+  min-width: 18px;
+}
+
 .icon-md {
   font-size: 1.4em;
 }
