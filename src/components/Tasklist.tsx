@@ -117,7 +117,7 @@ const ToDo = () => {
                 {["active", "finished", "onhold", "cancelled"].map((status) => (
                   <div
                     key={status}
-                    className={`filter filter-${status} hover-border`}
+                    className={`filter filter-${status} hover-border ${visibleStatuses[status] ? "active-selection" : ""}`}
                     onClick={() => {
                       setVisibleStatuses((prev) => ({
                         ...prev,

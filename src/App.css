@@ -591,6 +591,10 @@ ul {
   background-color: #fec5c5;
 }
 
+.active-selection {
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
 /* Hover effects */
 
 .hover:hover {
