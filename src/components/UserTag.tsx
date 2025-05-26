@@ -1,5 +1,5 @@
 import avatar from "../assets/defaultAvatar.png"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 
 type UserTagProps = {
   username: string;
@@ -8,13 +8,35 @@ type UserTagProps = {
 
 const UserTag = ({username, onLogout}: UserTagProps) => {
     const [isDropdownActive, setIsDropdownActive] = useState(false)
+    const containerRef = useRef<HTMLDivElement>(null);
+
 
     const toggleDropdown = () => {
         setIsDropdownActive(!isDropdownActive)
     }
 
+    // Close dropdown on outside click
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(event.target as Node)
+        ) {
+          setIsDropdownActive(false);
+        }
+      };
+
+      if (isDropdownActive) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [isDropdownActive]);
+
   return (
-    <div className="usertag-container">
+    <div className="usertag-container" ref={containerRef}>
         <div className="user-tag" onClick={toggleDropdown}>
             <p><strong className="user">{username}</strong></p>
             <img src={avatar} alt="" className="avatar"/>
