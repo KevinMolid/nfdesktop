@@ -283,6 +283,37 @@ ul {
   background-color: #fec5c5;
 }
 
+.status-dropdown {
+  position: absolute;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: white;
+  z-index: 3;
+  padding: 4px;
+  user-select: none;
+}
+
+.dropdown-item {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+}
+
+.dropdown-item:hover {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-item-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tabs */
+
 .tabs {
   display: flex;
   justify-content: center;

@@ -51,28 +51,22 @@ const ToDo = () => {
   }
 
   {/* Handle status change */}
-  const handleStatusChange = (id: number) => {
+  const handleStatusChange = (id: number, newStatus: string) => {
     const updatedTasks = tasks.map((t) => {
-        if (t.id === id){
-            const newStatus = 
-            t.status === "active" ? "finished" :
-            t.status === "finished" ? "onhold" :
-            t.status === "onhold" ? "cancelled" :
-            "active";
-            return { ...t, status: newStatus}
-        } else {
-            return t
-        }
+      if (t.id === id) {
+        return { ...t, status: newStatus };
+      }
+      return t;
     });
-    setTasks(updatedTasks)
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
-  }
-
-  const deleteTask = (id: number) => {
-    const updatedTasks = tasks.filter((t) => t.id !== id);
     setTasks(updatedTasks);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
-  }
+  };
+
+    const deleteTask = (id: number) => {
+      const updatedTasks = tasks.filter((t) => t.id !== id);
+      setTasks(updatedTasks);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+    }
 
   return (
     <div className="card has-header grow-1">
@@ -118,7 +112,7 @@ const ToDo = () => {
       index={index}
       status={task.status}
       onDelete={() => deleteTask(task.id)}
-      onStatusChange={() => handleStatusChange(task.id)}
+      onStatusChange={handleStatusChange}
     />
   ))}
 </ul>
@@ -134,7 +128,7 @@ const ToDo = () => {
       index={index}
       status={task.status}
       onDelete={() => deleteTask(task.id)}
-      onStatusChange={() => handleStatusChange(task.id)}
+      onStatusChange={handleStatusChange}
     />
   ))}
 </ul>
