@@ -241,7 +241,8 @@ ul {
   justify-content: space-between;
   gap: 8px;
   line-height: 1.2;
-  padding: 0 12px;
+  padding: 0 12px 0 8px;
+  border: 1px solid transparent;
 }
 
 .task p {
@@ -252,14 +253,14 @@ ul {
   display: flex;
   text-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
 }
 
 .task-dropdown {
   position: absolute;
   top: 32px;
   background-color: white;
-  padding: 12px;
+  padding: 2px;
   border: 1px solid #ccc;
   z-index: 2;
 }
@@ -274,7 +275,7 @@ ul {
 }
 
 .task-onhold {
-  color:#846e00;
+  color:#5a4b00;
   background-color: #FFF9b1;
 }
 
@@ -626,6 +627,11 @@ input {
 }
 
 /* Colors */
+.default-select {
+  color: black;
+  background-color: var(--main-bg-color);
+}
+
 .yellow {
   color: #d2b10f;
 }

@@ -81,10 +81,9 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
 
 
   return (
-    <li className={`task task-${status}`} key={"task" + index}>
+    <li className={`task task-${status} hover-border`} key={"task" + index}>
       <div className="task-info">
         <div onClick={toggleDropdown} 
-            ref={dropdownRef}
             className="icon-div hover">
         <i className="fa-solid fa-ellipsis-vertical grey"></i>
         </div>
@@ -114,9 +113,11 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
       </div>
 
       {isDropdownActive && (
-        <div className="task-dropdown">
-          <div className="hover" onClick={() => onDelete(id)}>
-            <i className="fa-solid fa-trash red"></i> Slett oppgave
+        <div className="task-dropdown" ref={dropdownRef}>
+          <div className="dropdown-item default-select hover-border" onClick={() => onDelete(id)}>
+            <div className="dropdown-item-icon-container">
+              <i className="fa-solid fa-trash red"></i></div> 
+              <span style={{ marginLeft: "8px" }}>Slett oppgave</span>
           </div>
         </div>
       )}
