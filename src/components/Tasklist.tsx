@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import Task from "./Task";
 
 const LOCAL_STORAGE_KEY = "tasks";
+const FILTER_STORAGE_KEY = "visibleStatuses";
 
 const ToDo = () => {
   type TaskData = {
@@ -15,20 +16,57 @@ const ToDo = () => {
   const [newTaskName, setNewTaskName] = useState("")
   const [tasks, setTasks] = useState<TaskData[]>([])
 
+  const [visibleStatuses, setVisibleStatuses] = useState<Record<string, boolean>>(() => {
+  const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
+  if (storedFilters) {
+    try {
+      const parsed = JSON.parse(storedFilters);
+      if (parsed && typeof parsed === "object") {
+        return parsed;
+      }
+    } catch (e) {
+      console.error("Error parsing filters from localStorage", e);
+    }
+  }
+
+  return {
+    active: true,
+    finished: true,
+    onhold: true,
+    cancelled: true,
+  };
+});
+
   // Load from localStorage once on mount
   useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (stored) {
+    const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedTasks) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(storedTasks);
         if (Array.isArray(parsed)) {
           setTasks(parsed);
         }
       } catch (e) {
-        console.error("Error parsing localStorage", e);
+        console.error("Error parsing tasks from localStorage", e);
+      }
+    }
+
+    const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (storedFilters) {
+      try {
+        const parsedFilters = JSON.parse(storedFilters);
+        if (parsedFilters && typeof parsedFilters === "object") {
+          setVisibleStatuses(parsedFilters);
+        }
+      } catch (e) {
+        console.error("Error parsing filters from localStorage", e);
       }
     }
   }, []);
+
+  useEffect(() => {
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
+    }, [visibleStatuses]);
 
   const toggleCreateActive = () => {
     setIsCreateActive(!isCreateActive)
@@ -76,18 +114,23 @@ const ToDo = () => {
               <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
               <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
               {isFilterActive && <div className="filter-dropdown">
-                <div className="filter filter-active hover-border">
-                  <i className="fa-solid fa-circle lightgrey"></i>
-                </div>
-                <div className="filter filter-finished hover-border">
-                  <i className="fa-solid fa-check green"></i>
-                </div>
-                <div className="filter filter-onhold hover-border">
-                  <i className="fa-solid fa-pause yellow"></i>
-                </div>
-                <div className="filter filter-cancelled hover-border">
-                  <i className="fa-solid fa-cancel red"></i>
-                </div>
+                {["active", "finished", "onhold", "cancelled"].map((status) => (
+                  <div
+                    key={status}
+                    className={`filter filter-${status} hover-border`}
+                    onClick={() => {
+                      setVisibleStatuses((prev) => ({
+                        ...prev,
+                        [status]: !prev[status],
+                      }));
+                    }}
+                  >
+                    {status === "active" && <i className="fa-solid fa-circle lightgrey"></i>}
+                    {status === "finished" && <i className="fa-solid fa-check green"></i>}
+                    {status === "onhold" && <i className="fa-solid fa-pause yellow"></i>}
+                    {status === "cancelled" && <i className="fa-solid fa-xmark red"></i>}
+                  </div>
+                ))}
               </div>}
             </div>}
         </div>
@@ -111,7 +154,7 @@ const ToDo = () => {
 
         {/* Tasklist */}
         {/* Active tasks */}
-        <ul className="task-list">
+        {visibleStatuses.active && <ul className="task-list">
           {tasks.filter(task => task.status === "active").map((task, index) => (
             <Task 
               key={task.id}
@@ -123,55 +166,61 @@ const ToDo = () => {
               onStatusChange={handleStatusChange}
             />
           ))}
-        </ul>
+        </ul>}
 
         {/* Finished tasks */}
-        <h4 className="card-title">Utførte oppgaver</h4>
-        <ul className="task-list">
-          {tasks.filter(task => task.status === "finished").map((task, index) => (
-            <Task 
-              key={task.id}
-              id={task.id} 
-              name={task.name} 
-              index={index}
-              status={task.status}
-              onDelete={() => deleteTask(task.id)}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </ul>
+        {visibleStatuses.finished && <>
+          <h4 className="card-title">Utførte oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "finished").map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </ul>
+        </>}
 
         {/* On-hold tasks */}
-        <h4 className="card-title">Pausede oppgaver</h4>
-        <ul className="task-list">
-          {tasks.filter(task => task.status === "onhold").map((task, index) => (
-            <Task 
-              key={task.id}
-              id={task.id} 
-              name={task.name} 
-              index={index}
-              status={task.status}
-              onDelete={() => deleteTask(task.id)}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </ul>
+        {visibleStatuses.onhold && <>
+          <h4 className="card-title">Pausede oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "onhold").map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </ul>
+        </>}
 
         {/* Cancelled tasks */}
-        <h4 className="card-title">Kansellerte oppgaver</h4>
-        <ul className="task-list">
-          {tasks.filter(task => task.status === "cancelled").map((task, index) => (
-            <Task 
-              key={task.id}
-              id={task.id} 
-              name={task.name} 
-              index={index}
-              status={task.status}
-              onDelete={() => deleteTask(task.id)}
-              onStatusChange={handleStatusChange}
-            />
-          ))}
-        </ul>
+        {visibleStatuses.cancelled && <>
+          <h4 className="card-title">Kansellerte oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "cancelled").map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </ul>
+        </>}
 
     </div>
   )
