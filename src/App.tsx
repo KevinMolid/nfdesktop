@@ -11,6 +11,14 @@ import './App.css'
 
 import { useState, useEffect } from "react"
 
+const DEFAULT_WIDGETS = [
+  { name: "Brukere", active: true },
+  { name: "Lenker", active: true },
+  { name: "Oppgaver", active: true },
+  { name: "Notater", active: true },
+  { name: "Meldinger", active: true },
+];
+
 const LOCAL_STORAGE_KEY = "widgets";
 
 function App() {
@@ -20,27 +28,20 @@ function App() {
 };
 
 const [user, setUser] = useState<User | null>(null);
-  const [widgets, setWidgets] = useState([
-    {name: "Brukere",
-      active: true},
-    {name: "Lenker",
-      active: true},
-    {name: "Oppgaver",
-      active: true},
-    {name: "Notater",
-      active: true},
-    {name: "Meldinger",
-      active: true},
-  ])
+  const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
 
   useEffect(() => {
-    // Load widgets
+    // Load widgets from local storage and merge with default
     const storedWidgets = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedWidgets) {
       try {
         const parsed = JSON.parse(storedWidgets);
         if (Array.isArray(parsed)) {
-          setWidgets(parsed);
+          const merged = DEFAULT_WIDGETS.map((defaultWidget) => {
+            const stored = parsed.find((w) => w.name === defaultWidget.name);
+            return stored ? { ...defaultWidget, active: stored.active } : defaultWidget;
+          });
+          setWidgets(merged);
         }
       } catch (e) {
         console.error("Error parsing widgets from localStorage", e);
