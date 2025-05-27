@@ -1,11 +1,15 @@
 import MenuBar from "./components/MenuBar"
 import Login from "./components/Login"
+
+/* Pages */
 import Users from "./components/Users"
 import Links from "./components/Links"
 import logoB from "./assets/logo-b.png"
 import Tasklist from "./components/Tasklist"
 import Notes from "./components/Notes"
 import Messages from "./components/Messages"
+import Foodorders from "./components/Foodorders"
+
 import Footer from "./components/Footer"
 import './App.css'
 
@@ -93,6 +97,7 @@ const [user, setUser] = useState<User | null>(null);
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username}/>}
+        <Foodorders />
         <Footer />
       </div>
   ) : (

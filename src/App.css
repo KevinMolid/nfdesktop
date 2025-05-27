@@ -323,6 +323,25 @@ ul {
   margin-left: 8px;
 }
 
+/* Food */
+.food-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 12px;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.add-food-btn {
+  margin-top: 12px;
+  grid-column-start: 2;
+}
+
 /* PIN-form */
 .pin-form {
   position: fixed;
