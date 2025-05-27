@@ -52,6 +52,9 @@ const Links = () => {
         <li>
           <a href="https://app.ecoonline.com/login/" target="_blank">Eco Online</a>
         </li>
+        <li>
+          <a href="https://tripletex.no/execute/login?site=no" target="_blank">Tripletex</a>
+        </li>
       </ul>}
 
       {/* Leverandørliste */}
