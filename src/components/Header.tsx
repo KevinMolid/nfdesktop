@@ -1,6 +1,16 @@
+import Burgermenu from "./Burgermenu"
+import UserTag from "./UserTag";
+
 import logoB from "../assets/logo-b.png"
 
-const Header = () => {
+type MenuProps = {
+  username: string;
+  widgets: {name: string, active: boolean}[];
+  toggleActive: (name:string) => void;
+  onLogout: () => void;
+};
+
+const Header = ({username, widgets, toggleActive, onLogout}: MenuProps) => {
   return (
     <header>
         <div className='top-header'>
@@ -9,12 +19,18 @@ const Header = () => {
             <button>Send her</button>
         </div>
         <div className="bottom-header">
+            <div className="menu-bar-left">
+                <Burgermenu widgets={widgets} toggleActive={toggleActive}/>
+            </div>
             <div className='logo'>
                 <a href="https://www.norronafly.com/" target="_blank">
                     <img src={logoB} alt="Norrønafly logo" className='nflogo'/>
                 </a>
             </div>
-        </div>
+            <div className="menu-bar-right">
+                <UserTag username={username} onLogout={onLogout}/>
+            </div>
+      </div>
     </header>
   )
 }

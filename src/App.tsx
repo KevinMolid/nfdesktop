@@ -1,5 +1,4 @@
 import Header from "./components/Header"
-import MenuBar from "./components/MenuBar"
 import Login from "./components/Login"
 
 /* Pages */
@@ -83,8 +82,7 @@ const [user, setUser] = useState<User | null>(null);
 
   return user ? (
       <div className="main-container">
-        <Header />
-        <MenuBar username={user.username}
+        <Header username={user.username}
           widgets={widgets} 
           toggleActive={toggleActive} 
           onLogout={handleLogout}/>

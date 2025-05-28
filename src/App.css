@@ -48,6 +48,7 @@ header {
   top: 0;
   left: 0;
   width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 0px 30px;
 }
 
 .top-header {
@@ -83,9 +84,12 @@ header {
 }
 
 .bottom-header {
-  padding-top: 4px;
-  background-color: white;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 0px 30px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+  background-color: #fff;
+  padding: 4px 20px 0;
 }
 
 /* Lists */
