@@ -12,7 +12,7 @@ type MenuProps = {
 
 const MenuBar = ({username, widgets, toggleActive, onLogout}: MenuProps) => {
   return (
-    <header className="menu-bar">
+    <div className="menu-bar">
       <div className="menu-bar-left">
         <Burgermenu widgets={widgets} toggleActive={toggleActive}/>
       </div>
@@ -23,7 +23,7 @@ const MenuBar = ({username, widgets, toggleActive, onLogout}: MenuProps) => {
       <div className="menu-bar-right">
         <UserTag username={username} onLogout={onLogout}/>
       </div>
-    </header>
+    </div>
   )
 }
 

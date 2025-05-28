@@ -1,3 +1,4 @@
+import Header from "./components/Header"
 import MenuBar from "./components/MenuBar"
 import Login from "./components/Login"
 
@@ -82,12 +83,7 @@ const [user, setUser] = useState<User | null>(null);
 
   return user ? (
       <div className="main-container">
-        <div className='logo'>
-          <a href="https://www.norronafly.com/" target="_blank">
-            <img src={logoB} alt="Norrønafly logo" className='nflogo'/>
-          </a>
-        </div>
-
+        <Header />
         <MenuBar username={user.username}
           widgets={widgets} 
           toggleActive={toggleActive} 

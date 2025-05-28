@@ -6,7 +6,7 @@
 }
 
 :root {
-    --main-bg-color: #f5f7fb;
+    --main-bg-color: #faf9f6;
 }
 
 html, body {
@@ -37,10 +37,54 @@ h4 {
   line-height: 1;
 }
 
+/* Header */
+
 header {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 10px 20px;
 }
+
+.top-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 20px;
+  color: white;
+  background-color: #3da8ff;
+}
+
+.top-header i {
+  font-size: 2rem;
+}
+
+.top-header h2 {
+  font-weight: 500;
+  line-height: 1;
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+}
+
+.top-header button {
+  background: none;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 16px;
+}
+
+.top-header button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.bottom-header {
+  padding-top: 4px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 0px 30px;
+}
+
+/* Lists */
 
 ul {
   list-style: none;
@@ -133,6 +177,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  padding-top: 114px;
 }
 
 /* Login */
@@ -146,9 +191,12 @@ ul {
 .menu-bar {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+  padding: 10px 20px;
   box-shadow: rgba(0, 0, 0, 0.04) 0px 6px 24px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
   border-radius: 10px;
   background-color: #fff;
+  z-index: 2;
 }
 
 .menu-bar-left {
