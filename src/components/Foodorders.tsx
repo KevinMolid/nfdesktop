@@ -1,55 +1,69 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import "./Foodorders.css"; // External CSS for better control
 
 const Foodorders = () => {
   const menu = [
     {
       name: "Kebab i Pita",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     },
     {
       name: "Kebab i Rull",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     },
     {
       name: "Döner i Pita",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     },
     {
       name: "Döner i Rull",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     },
     {
       name: "Kebab Tallerken",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     },
     {
       name: "Döner Tallerken",
+      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       spice: ["Sterk", "Medium", "Mild"],
       extra: ["Ekstra dressing", "Ekstra pita"],
-      remove: ["Løk"]
+      remove: ["Løk"],
+      price: "100"
     }
   ];
 
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedFood, setSelectedFood] = useState<string | null>(null);
   const [orderOptions, setOrderOptions] = useState<any>({});
 
   const handleSelectFood = (foodName: string) => {
     setSelectedFood(foodName);
-    setOrderOptions({}); // Reset options when switching
+    setOrderOptions({});
   };
 
   const handleChange = (type: string, value: string, isRadio = false) => {
@@ -58,14 +72,19 @@ const Foodorders = () => {
         return { ...prev, [type]: value };
       } else {
         const currentSet = new Set(prev[type] || []);
-        if (currentSet.has(value)) {
-          currentSet.delete(value);
-        } else {
-          currentSet.add(value);
-        }
+        currentSet.has(value) ? currentSet.delete(value) : currentSet.add(value);
         return { ...prev, [type]: Array.from(currentSet) };
       }
     });
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -200 : 200,
+        behavior: "smooth"
+      });
+    }
   };
 
   const selectedItem = menu.find((item) => item.name === selectedFood);
@@ -73,103 +92,66 @@ const Foodorders = () => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Bestille Kebab</h3>
+        <h3>Bestille Kebab</h3>
       </div>
 
-      <div className="card-body">
-        <label>
-          <select
-            value={selectedFood || ""}
-            onChange={(e) => handleSelectFood(e.target.value)}
-            style={{ display: "block", margin: "1rem 0", padding: "0.5rem" }}
-          >
-            <option value="">-- Velg matrett --</option>
-            {menu.map((food) => (
-              <option key={food.name} value={food.name}>
-                {food.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {selectedItem && (
-          <div className="food-options">
-            {selectedItem.sizes && (
-              <div>
-                <h4>Størrelse:</h4>
-                <div className="inputs">
-                    {selectedItem.sizes.map((size) => (
-                    <label key={size} style={{ display: "block" }}>
-                        <input
-                        type="radio"
-                        name="size"
-                        checked={orderOptions.sizes === size}
-                        onChange={() => handleChange("sizes", size, true)}
-                        />
-                        {size}
-                    </label>
-                    ))}
-                </div>
+      <div className="scroll-wrapper">
+        <button className="scroll-button left" onClick={() => scroll("left")}>
+          <i className="fa-solid fa-chevron-left"></i>
+        </button>
+        <div className="food-scroll" ref={scrollRef}>
+          {menu.map((food) => (
+            <div
+              key={food.name}
+              className={`food-card ${selectedFood === food.name ? "selected" : ""}`}
+              onClick={() => handleSelectFood(food.name)}
+            >
+              {food.img ? (
+                <img src={food.img} alt={food.name} />
+              ) : (
+                <div className="placeholder" />
+              )}
+              <div className="food-info">
+                <h3>{food.name}</h3>
+                <p>{food.price}NOK</p>
               </div>
-            )}
-
-            {selectedItem.spice && (
-              <div>
-                <h4>Styrke:</h4>
-                <div className="inputs">
-                    {selectedItem.spice.map((level) => (
-                    <label key={level} style={{ display: "block" }}>
-                        <input
-                        type="radio"
-                        name="spice"
-                        checked={orderOptions.spice === level}
-                        onChange={() => handleChange("spice", level, true)}
-                        />
-                        {level}
-                    </label>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {selectedItem.extra && (
-            <div>
-                <h4>Ekstra:</h4>
-                {selectedItem.extra.map((extra) => (
-                <label key={extra} style={{ display: "block" }}>
-                    <input
-                    type="checkbox"
-                    checked={orderOptions.extra?.includes(extra) || false}
-                    onChange={() => handleChange("extra", extra)}
-                    />
-                    {extra}
-                </label>
-                ))}
             </div>
-            )}
-
-            {selectedItem.remove && (
-            <div>
-                <h4>Uten:</h4>
-                {selectedItem.remove.map((item) => (
-                <label key={item} style={{ display: "block" }}>
-                    <input
-                    type="checkbox"
-                    checked={orderOptions.remove?.includes(item) || false}
-                    onChange={() => handleChange("remove", item)}
-                    />
-                    {item}
-                </label>
-                ))}
-            </div>
-            )}
-
-            <button className="add-food-btn">Legg til</button>
-          </div>
-        )}
+          ))}
+        </div>
+        <button className="scroll-button right" onClick={() => scroll("right")}>
+          <i className="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
+
+      {selectedItem && (
+        <div className="food-options">
+          {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
+            selectedItem[type]?.length ? (
+              <div key={type}>
+                <h4>{type === "sizes" ? "Størrelse" : type === "spice" ? "Styrke" : type === "extra" ? "Ekstra" : "Uten"}:</h4>
+                {selectedItem[type].map((val: string) => (
+                  <label key={val}>
+                    <input
+                      type={type === "sizes" || type === "spice" ? "radio" : "checkbox"}
+                      name={type}
+                      checked={
+                        type === "sizes" || type === "spice"
+                          ? orderOptions[type] === val
+                          : orderOptions[type]?.includes(val)
+                      }
+                      onChange={() => handleChange(type, val, type === "sizes" || type === "spice")}
+                    />
+                    {val}
+                  </label>
+                ))}
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
 
       <button
+        className="confirm-btn"
         onClick={() => {
           console.log("Bestilling:", { item: selectedFood, options: orderOptions });
           alert("Bestilling sendt! Se konsollen for detaljer.");

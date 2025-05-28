@@ -1,0 +1,136 @@
+.scroll-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.food-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  gap: 8px;
+  padding-top: 8px;
+  flex-grow: 1;
+}
+
+.food-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.food-card {
+  flex: 0 0 auto;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.food-card.selected {
+  color: white;
+  background-color: #007bff;
+}
+
+.food-card.selected .food-info h3 {
+  color: white;
+}
+
+.food-card.selected .food-info p {
+  color: white;
+}
+
+.food-card img {
+  width: 240px;
+  height: 140px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.food-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 16px;
+}
+
+.food-info h3 {
+  color: #333;
+  line-height: 1;
+  margin: 0;
+}
+
+.food-info p {
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.scroll-button {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.scroll-button i {
+  font-size: 36px;
+}
+
+.scroll-button:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.scroll-button.left {
+  left: 0;
+  margin-right: 0.5rem;
+}
+
+.scroll-button.right {
+  right: 0;
+  margin-left: 0.5rem;
+}
+
+.food-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 40px;
+  margin-top: 16px;
+  padding: 1rem;
+  background-color: #f0f7ff;
+  border: 1px solid #007bff55;
+  border-radius: 10px;
+}
+
+.food-options h4 {
+  margin: 0.5rem 0 0.2rem;
+}
+
+.confirm-btn {
+  margin: 1rem 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.confirm-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

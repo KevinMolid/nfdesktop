@@ -5,7 +5,6 @@ import Login from "./components/Login"
 /* Pages */
 import Users from "./components/Users"
 import Links from "./components/Links"
-import logoB from "./assets/logo-b.png"
 import Tasklist from "./components/Tasklist"
 import Notes from "./components/Notes"
 import Messages from "./components/Messages"
@@ -22,6 +21,7 @@ const DEFAULT_WIDGETS = [
   { name: "Oppgaver", active: true },
   { name: "Notater", active: true },
   { name: "Meldinger", active: true },
+  { name: "Bestille Kebab", active: false },
 ];
 
 const LOCAL_STORAGE_KEY = "widgets";
@@ -93,7 +93,7 @@ const [user, setUser] = useState<User | null>(null);
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username}/>}
-        <Foodorders />
+        {widgets[5].active && <Foodorders />}
         <Footer />
       </div>
   ) : (
