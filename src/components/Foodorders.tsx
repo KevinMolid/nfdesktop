@@ -63,8 +63,13 @@ const Foodorders = () => {
   const [orderOptions, setOrderOptions] = useState<any>({});
 
   const handleSelectFood = (foodName: string) => {
+    const selected = menu.find((item) => item.name === foodName);
+    const initialSize = selected?.sizes?.[0]; // usually "Liten"
+
     setSelectedFood(foodName);
-    setOrderOptions({});
+    setOrderOptions({
+      sizes: initialSize,
+    });
   };
 
   const handleChange = (type: string, value: string, isRadio = false) => {
