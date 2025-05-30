@@ -4,6 +4,8 @@
   align-items: center;
   margin-top: 0.7rem;
   cursor: pointer;
+   user-select: none;
+
 }
 
 /* NEW shared wrapper to constrain both slider + labels */
@@ -26,7 +28,7 @@
   height: 4px;
   background: #fff;
   border-radius: 8px;
-  border: 1px solid #007bff;
+  border: 1px solid #666;
   outline: none;
   cursor: pointer;
 }

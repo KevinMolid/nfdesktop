@@ -115,6 +115,11 @@
   border-radius: 10px;
 }
 
+.options {
+ margin: 4px 0 0 0;
+ user-select: none;
+}
+
 .food-options h4 {
   margin: 0.5rem 0 0.2rem;
 }

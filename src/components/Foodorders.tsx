@@ -160,15 +160,17 @@ const Foodorders = () => {
                 />
               ) : (
                 selectedItem[type].map((val: string) => (
-                  <label key={val}>
-                    <input
-                      type="checkbox"
-                      name={type}
-                      checked={orderOptions[type]?.includes(val)}
-                      onChange={() => handleChange(type, val)}
-                    />
-                    {val}
-                  </label>
+                  <div className="options">
+                    <label key={val}>
+                      <input
+                        type="checkbox"
+                        name={type}
+                        checked={orderOptions[type]?.includes(val)}
+                        onChange={() => handleChange(type, val)}
+                      />
+                      {val}
+                    </label>
+                  </div>
                 ))
               )}
             </div>
