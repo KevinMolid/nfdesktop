@@ -10,6 +10,12 @@ type TaskProps = {
 };
 
 const STATUS_OPTIONS = ["active", "finished", "onhold", "cancelled"];
+const STATUS_LABELS: Record<string, string> = {
+  active: "aktiv",
+  finished: "ferdig",
+  onhold: "pause",
+  cancelled: "kansellert",
+};
 
 const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
@@ -105,7 +111,7 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete }: TaskProps) 
                     }}
                 >
                     <div className="dropdown-item-icon-container">{getStatusIconForOption(option)}</div>
-                    <span style={{ marginLeft: "8px", textTransform: "capitalize" }}>{option}</span>
+                    <span style={{ marginLeft: "8px", textTransform: "capitalize" }}>{STATUS_LABELS[option]}</span>
                 </div>
                 ))}
           </div>
