@@ -134,3 +134,43 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+/* */
+
+.toggle-switch {
+  display: flex;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+  margin: 0.5rem 0;
+}
+
+.toggle-option {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: #007bff;
+  transition: background-color 0.3s, color 0.3s;
+  border-radius: 0;
+}
+
+/* Left option when selected: round left */
+.toggle-option:first-child.active {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+/* Right option when selected: round right */
+.toggle-option:last-child.active {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.toggle-option.active {
+  background-color: #007bff;
+  color: white;
+}

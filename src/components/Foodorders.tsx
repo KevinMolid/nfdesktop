@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import "./Foodorders.css"; // External CSS for better control
+import ToggleSwitch from "./ToggleSwitch";
 
 const Foodorders = () => {
   const menu = [
@@ -129,21 +130,33 @@ const Foodorders = () => {
             selectedItem[type]?.length ? (
               <div key={type}>
                 <h4>{type === "sizes" ? "Størrelse" : type === "spice" ? "Styrke" : type === "extra" ? "Ekstra" : "Uten"}:</h4>
-                {selectedItem[type].map((val: string) => (
-                  <label key={val}>
-                    <input
-                      type={type === "sizes" || type === "spice" ? "radio" : "checkbox"}
-                      name={type}
-                      checked={
-                        type === "sizes" || type === "spice"
-                          ? orderOptions[type] === val
-                          : orderOptions[type]?.includes(val)
-                      }
-                      onChange={() => handleChange(type, val, type === "sizes" || type === "spice")}
-                    />
-                    {val}
-                  </label>
-                ))}
+                  {type === "sizes" && selectedItem.sizes?.length === 2 ? (
+                    (() => {
+                      const [size1, size2] = selectedItem.sizes!;
+                      return (
+                        <ToggleSwitch
+                          value={orderOptions.sizes}
+                          onChange={(val) => handleChange("sizes", val, true)}
+                          labels={[size1, size2]}/>
+                      );
+                    })()
+                  ) : (
+                    selectedItem[type].map((val: string) => (
+                      <label key={val}>
+                        <input
+                          type={type === "spice" ? "radio" : "checkbox"}
+                          name={type}
+                          checked={
+                            type === "spice"
+                              ? orderOptions[type] === val
+                              : orderOptions[type]?.includes(val)
+                          }
+                          onChange={() => handleChange(type, val, type === "spice")}
+                        />
+                        {val}
+                      </label>
+                    ))
+                  )}
               </div>
             ) : null
           )}
