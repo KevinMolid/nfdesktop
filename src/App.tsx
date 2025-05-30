@@ -91,7 +91,7 @@ const [user, setUser] = useState<User | null>(null);
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username}/>}
-        {widgets[5].active && <Foodorders />}
+        {widgets[5].active && <Foodorders user={user}/>}
         <Footer />
       </div>
   ) : (

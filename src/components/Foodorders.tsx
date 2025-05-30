@@ -2,9 +2,19 @@ import { useRef, useState } from "react";
 import ToggleSwitch from "./ToggleSwitch";
 import StageSlider from "./StageSlider";
 
+import { db } from "./firebase";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
+
 import "./Foodorders.css";
 
-const Foodorders = () => {
+type UsersProps = {
+  user: {
+    username: string;
+    role: string;
+  }
+};
+
+const Foodorders = ({user}: UsersProps) => {
   const menu = [
     {
       name: "Kebab i Pita",
@@ -63,6 +73,7 @@ const Foodorders = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedFood, setSelectedFood] = useState<string | null>(null);
   const [orderOptions, setOrderOptions] = useState<any>({});
+  const [orderList, setOrderList] = useState<{ item: string; options: any }[]>([]);
 
   const handleSelectFood = (foodName: string) => {
     const selected = menu.find((item) => item.name === foodName);
@@ -176,17 +187,71 @@ const Foodorders = () => {
             </div>
           ) : null
         )}
-        <button className="add-btn">Legg til</button>
+          <button
+            className="add-btn"
+            onClick={() => {
+              if (selectedFood) {
+                setOrderList((prev) => [...prev, { item: selectedFood, options: orderOptions }]);
+                setSelectedFood(null);         // Reset selected food
+                setOrderOptions({});           // Reset options
+              }
+            }}
+          >
+            Legg til
+          </button>
+        </div>
+      )}
+
+      {/* Active order */}
+      {orderList.length > 0 && (
+        <div className="order-list">
+          <h4>Min bestilling</h4>
+          <ul>
+            {orderList.map((order, index) => (
+              <li key={index}>
+                <div>
+                  <strong>
+                    {order.item}
+                    {order.options.sizes === "Stor" ? ` ${order.options.sizes}` : ""}
+                  </strong>
+                </div>
+                <div>
+                  {Object.entries(order.options)
+                    .filter(([key, val]) => {
+                      if (key === "sizes") return false; // skip showing size
+                      if (key === "spice" && val === "Medium") return false; // skip default spice
+                      return true; // show all other options
+                    })
+                    .map(([key, val]) => (
+                      <div key={key}>
+                        {Array.isArray(val) ? (val as any[]).join(", ") : (val as any)}
+                      </div>
+                    ))}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
       <button
         className="confirm-btn"
-        onClick={() => {
-          console.log("Bestilling:", { item: selectedFood, options: orderOptions });
-          alert("Bestilling sendt! Se konsollen for detaljer.");
+        onClick={async () => {
+          try {
+            const docRef = await addDoc(collection(db, "foodorders"), {
+              order: orderList,
+              createdAt: Timestamp.now(),
+              createdBy: user.username,
+            });
+            console.log("Order placed with ID: ", docRef.id);
+            alert("Bestilling sendt!");
+            setOrderList([]); // Clear the order list
+          } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("Noe gikk galt med bestillingen.");
+          }
         }}
-        disabled={!selectedFood}
+        disabled={orderList.length === 0}
       >
         Bestill
       </button>
