@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
-import "./Foodorders.css"; // External CSS for better control
 import ToggleSwitch from "./ToggleSwitch";
+import StageSlider from "./StageSlider";
+
+import "./Foodorders.css";
 
 const Foodorders = () => {
   const menu = [
@@ -8,7 +10,7 @@ const Foodorders = () => {
       name: "Kebab i Pita",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -17,7 +19,7 @@ const Foodorders = () => {
       name: "Kebab i Rull",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -26,7 +28,7 @@ const Foodorders = () => {
       name: "Döner i Pita",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -35,7 +37,7 @@ const Foodorders = () => {
       name: "Döner i Rull",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -43,7 +45,7 @@ const Foodorders = () => {
     {
       name: "Kebab Tallerken",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -51,7 +53,7 @@ const Foodorders = () => {
     {
       name: "Döner Tallerken",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
-      spice: ["Sterk", "Medium", "Mild"],
+      spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Ekstra pita"],
       remove: ["Løk"],
       price: "100"
@@ -64,11 +66,15 @@ const Foodorders = () => {
 
   const handleSelectFood = (foodName: string) => {
     const selected = menu.find((item) => item.name === foodName);
-    const initialSize = selected?.sizes?.[0]; // usually "Liten"
+    const initialSize = selected?.sizes?.[0];
+      const defaultSpice = selected?.spice?.includes("Medium")
+    ? "Medium"
+    : selected?.spice?.[0];
 
     setSelectedFood(foodName);
     setOrderOptions({
       sizes: initialSize,
+      spice: defaultSpice,
     });
   };
 
@@ -131,40 +137,43 @@ const Foodorders = () => {
 
       {selectedItem && (
         <div className="food-options">
-          {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
-            selectedItem[type]?.length ? (
-              <div key={type}>
-                <h4>{type === "sizes" ? "Størrelse" : type === "spice" ? "Styrke" : type === "extra" ? "Ekstra" : "Uten"}:</h4>
-                  {type === "sizes" && selectedItem.sizes?.length === 2 ? (
-                    (() => {
-                      const [size1, size2] = selectedItem.sizes!;
-                      return (
-                        <ToggleSwitch
-                          value={orderOptions.sizes}
-                          onChange={(val) => handleChange("sizes", val, true)}
-                          labels={[size1, size2]}/>
-                      );
-                    })()
-                  ) : (
-                    selectedItem[type].map((val: string) => (
-                      <label key={val}>
-                        <input
-                          type={type === "spice" ? "radio" : "checkbox"}
-                          name={type}
-                          checked={
-                            type === "spice"
-                              ? orderOptions[type] === val
-                              : orderOptions[type]?.includes(val)
-                          }
-                          onChange={() => handleChange(type, val, type === "spice")}
-                        />
-                        {val}
-                      </label>
-                    ))
-                  )}
-              </div>
-            ) : null
-          )}
+        {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
+          selectedItem[type]?.length ? (
+            <div key={type}>
+              <h4>{type === "sizes" ? "Størrelse" : type === "spice" ? "Styrke" : type === "extra" ? "Ekstra" : "Uten"}:</h4>
+              {type === "sizes" && selectedItem.sizes?.length === 2 ? (
+                (() => {
+                  const [size1, size2] = selectedItem.sizes!;
+                  return (
+                    <ToggleSwitch
+                      value={orderOptions.sizes}
+                      onChange={(val) => handleChange("sizes", val, true)}
+                      labels={[size1, size2]}
+                    />
+                  );
+                })()
+              ) : type === "spice" ? (
+                <StageSlider
+                  value={orderOptions.spice || selectedItem.spice[0]}
+                  onChange={(val) => handleChange("spice", val, true)}
+                  labels={selectedItem.spice}
+                />
+              ) : (
+                selectedItem[type].map((val: string) => (
+                  <label key={val}>
+                    <input
+                      type="checkbox"
+                      name={type}
+                      checked={orderOptions[type]?.includes(val)}
+                      onChange={() => handleChange(type, val)}
+                    />
+                    {val}
+                  </label>
+                ))
+              )}
+            </div>
+          ) : null
+        )}
         </div>
       )}
 
