@@ -99,7 +99,7 @@ const Users = ({user}: UsersProps) => {
           {users.map((user) => (
             <li key={user.id} className="userlist">
               <p><strong className="user">{user.username}</strong></p>
-              <p>{user.role}</p>
+              <p>{user.role === "admin" ? "Admin" : "Bruker"}</p>
             </li>
           ))}
         </ul>
