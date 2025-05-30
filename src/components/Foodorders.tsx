@@ -176,6 +176,7 @@ const Foodorders = () => {
             </div>
           ) : null
         )}
+        <button className="add-btn">Legg til</button>
         </div>
       )}
 

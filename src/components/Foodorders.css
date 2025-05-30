@@ -135,9 +135,29 @@
   cursor: pointer;
 }
 
+.confirm-btn:hover {
+  background-color: #248eff;
+}
+
 .confirm-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.add-btn {
+  margin-top: auto;
+  margin-left: auto;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background-color: #248eff;
 }
 
 /* */
