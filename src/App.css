@@ -7,10 +7,32 @@
 }
 
 :root {
-    --main-bg-color: #faf9f6;
+  --main-bg-color: #faf9f6;
+  --text-color: #000;
+  --text2-color: #333;
+  --card-bg: #fff;
+  --button-bg: #eee;
+  --button-hover-bg: #ddd;
+  --border-color: #ccc;
+  --active-selection-color: rgba(0, 0, 0, 0.5);
+  --selection-hover-color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] {
+  --main-bg-color: #121212;
+  --text-color: #f0f0f0;
+  --text2-color: #b9c8d8;
+  --card-bg: #1e1e1e;
+  --button-bg: #333;
+  --button-hover-bg: #444;
+--border-color: #555;
+  --active-selection-color: rgba(255, 255, 255, 0.5);
+  --selection-hover-color: rgba(255, 255, 255, 0.5);
+
 }
 
 html, body {
+  color: var(--text-color);
   background-color: var(--main-bg-color);
   margin: 0;
   padding: 0;
@@ -34,7 +56,7 @@ h3 {
 }
 
 h4 {
-  color: #333;
+  color: var(--text2-color);
   font-size: 0.9em;
   margin-top: 12px;
   margin-bottom: 8px;
@@ -87,7 +109,7 @@ header {
   width: 100%;
   display: flex;
   justify-content: center;
-  background-color: #fff;
+  background-color: var(--card-bg);
 }
 
 /* Lists */
@@ -99,7 +121,7 @@ ul {
 }
 
 .ul-heading {
-  color: #464668;
+  color: var(--text2-color);
   user-select: none;
   display: flex;
   align-items: center;
@@ -109,7 +131,6 @@ ul {
 
 .ul-heading:hover {
   cursor: pointer;
-  color: #26263d;
 }
 
 .logo {
@@ -157,14 +178,13 @@ ul {
 .usertag-dropdown {
   min-width: max-content;
   font-weight: 500;
-  background-color: white;
+  background-color: var(--card-bg);
   padding: 2px;
   position: absolute;
   right: 0;
   z-index: 12;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
-
 
 
 .user {
@@ -244,7 +264,7 @@ ul {
   min-width: 200px;
   padding: 4px 20px 4px 20px;
   border-radius: 10px;
-  background-color: #fff;
+  background-color: var(--card-bg);
   box-shadow: rgba(0, 0, 0, 0.04) 0px 6px 24px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
 }
 
@@ -317,9 +337,9 @@ ul {
 .task-dropdown {
   position: absolute;
   top: 32px;
-  background-color: white;
+  background-color: var(--card-bg);
   padding: 2px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   z-index: 2;
 }
 
@@ -349,11 +369,11 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background-color: white;
+  background-color: var(--card-bg);
   z-index: 3;
   padding: 4px;
   user-select: none;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
 }
 
 .dropdown-item {
@@ -503,9 +523,9 @@ ul {
 
 .burger-dropdown {
   position: absolute;
-  background-color: white;
+  background-color: var(--card-bg);
   z-index: 2;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   user-select: none;
   padding: 4px;
 }
@@ -636,8 +656,8 @@ ul {
   transform: translateY(calc(100% + 4px));
   display: flex;
   gap: 2px;
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
   padding: 4px;
   z-index: 2;
 }
@@ -669,7 +689,7 @@ ul {
 }
 
 .active-selection {
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--active-selection-color);
 }
 
 /* Hover effects */
@@ -680,7 +700,7 @@ ul {
 
 .hover-border:hover {
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--selection-hover-color);
 }
 
 /* Button */
@@ -691,14 +711,14 @@ button {
   font-size: 0.8em;
   font-weight: 500;
   font-family: inherit;
-  color: black;
-  background-color: #eee;
+  color: var(--text-color);
+  background-color: var(--button-bg);
   cursor: pointer;
   user-select: none;
   transition: background-color 0.25s;
 }
 button:hover {
-  background-color: #ddd;
+  background-color: var(--button-hover-bg);
 }
 
 .btn {
@@ -711,6 +731,16 @@ button:hover {
   background-color: #3da8ff;
 }
 
+.darkmode-btn {
+  background: none;
+  width: max-content;
+  padding: 0;
+}
+
+.darkmode-btn:hover {
+  background: none;
+}
+
 /* Input */
 input {
   padding: 0.4em;
@@ -718,7 +748,7 @@ input {
 
 /* Colors */
 .default-select {
-  color: black;
+  color: var(--text-color);
   background-color: var(--main-bg-color);
 }
 

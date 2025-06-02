@@ -11,6 +11,8 @@ import {
 } from "firebase/firestore";
 import bcrypt from "bcryptjs";
 
+import DarkModeToggle from "./DarkModeToggle";
+
 type UserTagProps = {
   username: string;
   onLogout: () => void;
@@ -88,6 +90,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
 
       {isDropdownActive && (
         <div className="usertag-dropdown">
+          <DarkModeToggle />
           <div
             className="dropdown-item default-select hover-border"
             onClick={() => {
