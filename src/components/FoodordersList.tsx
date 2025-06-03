@@ -54,7 +54,7 @@ const FoodordersList = () => {
         ) : (
           <ul className="foodorders-list">
             {orders.map((order) => (
-              <li key={order.id} style={{ marginBottom: "1rem" }}>
+              <li className="foodorders-item" key={order.id} style={{ marginBottom: "1rem" }}>
                 <p className="message-info">
                     <strong className="user">{order.createdBy}</strong>
                     <small className="message-timestamp">{order.createdAt?.toDate().toLocaleString("no-NO")}</small>
