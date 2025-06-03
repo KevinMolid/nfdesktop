@@ -13,7 +13,7 @@ import FoodordersList from "./components/FoodordersList"
 import Footer from "./components/Footer"
 import './App.css'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useLayoutEffect } from "react"
 
 const DEFAULT_WIDGETS = [
   { name: "Brukere", active: true },
@@ -33,7 +33,31 @@ function App() {
 };
 
 const [user, setUser] = useState<User | null>(null);
-  const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
+const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
+const headerRef = useRef<HTMLDivElement>(null);
+const [headerHeight, setHeaderHeight] = useState(0);
+
+  useLayoutEffect(() => {
+  if (!headerRef.current) return;
+
+  const updateHeight = () => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  };
+
+  updateHeight();
+
+  const observer = new ResizeObserver(updateHeight);
+  observer.observe(headerRef.current);
+
+  window.addEventListener("resize", updateHeight);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener("resize", updateHeight);
+  };
+}, []);
 
   useEffect(() => {
     // Load widgets from local storage and merge with default
@@ -82,20 +106,38 @@ const [user, setUser] = useState<User | null>(null);
   }
 
   return user ? (
-      <div className="main-container">
-        <Header username={user.username}
-          widgets={widgets} 
-          toggleActive={toggleActive} 
-          onLogout={handleLogout}/>
-        {widgets[0].active && <Users user={user}/>}
-        {widgets[1].active && <Links/>}
+    <>
+      {/* Header absolutely positioned and measured with ref */}
+      <div
+        ref={headerRef}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+        }}
+      >
+        <Header
+          username={user.username}
+          widgets={widgets}
+          toggleActive={toggleActive}
+          onLogout={handleLogout}
+          onHeightChange={setHeaderHeight}
+        />
+      </div>
+
+      {/* Main container pushed down by header height */}
+      <div className="main-container" style={{ paddingTop: headerHeight - 15 || 120 }}>
+        {widgets[0].active && <Users user={user} />}
+        {widgets[1].active && <Links />}
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
-        {widgets[4].active && <Messages username={user.username}/>}
-        {widgets[5].active && <Foodorders user={user}/>}
+        {widgets[4].active && <Messages username={user.username} />}
+        {widgets[5].active && <Foodorders user={user} />}
         {widgets[5].active && <FoodordersList />}
         <Footer />
       </div>
+    </>
   ) : (
     <Login
       onLogin={(u) => {
@@ -103,7 +145,6 @@ const [user, setUser] = useState<User | null>(null);
         localStorage.setItem("authUser", JSON.stringify(u));
       }}
     />
-  );
-}
+  );}
 
 export default App

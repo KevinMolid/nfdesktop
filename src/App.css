@@ -205,7 +205,6 @@ ul {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding-top: 114px;
   max-width: 1200px;
 }
 
@@ -741,6 +740,12 @@ button:hover {
 
 .darkmode-btn:hover {
   background: none;
+}
+
+.close-button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
 }
 
 /* Input */

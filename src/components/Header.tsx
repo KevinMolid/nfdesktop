@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Burgermenu from "./Burgermenu";
 import UserTag from "./UserTag";
 
@@ -10,12 +10,33 @@ type MenuProps = {
   widgets: { name: string; active: boolean }[];
   toggleActive: (name: string) => void;
   onLogout: () => void;
+  onHeightChange: (height: number) => void;
 };
 
-const Header = ({ username, widgets, toggleActive, onLogout }: MenuProps) => {
+const Header = ({ username, widgets, toggleActive, onLogout, onHeightChange }: MenuProps) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
+  const [showTopHeader, setShowTopHeader] = useState(true);
+
+  const headerWrapperRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (headerWrapperRef.current) {
+        onHeightChange(headerWrapperRef.current.offsetHeight);
+      }
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    if (headerWrapperRef.current) {
+      observer.observe(headerWrapperRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [onHeightChange]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -32,12 +53,21 @@ const Header = ({ username, widgets, toggleActive, onLogout }: MenuProps) => {
   }, []);
 
   return (
-    <header>
-      <div className="top-header">
-        <i className="fa-regular fa-comment"></i>
-        <h2>Tilbakemeldinger?</h2>
-        <button>Send her</button>
-      </div>
+    <header ref={headerWrapperRef}>
+      {showTopHeader && (
+        <div className="top-header">
+          <i className="fa-regular fa-comment"></i>
+          <h2>Tilbakemeldinger?</h2>
+          <button>Send her</button>
+          <button
+            className="close-button"
+            onClick={() => setShowTopHeader(false)}
+            aria-label="Lukk"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div className="bottom-header">
         <div className="menu-bar">
           <div className="menu-bar-left">
