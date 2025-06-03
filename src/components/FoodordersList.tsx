@@ -59,7 +59,7 @@ const FoodordersList = () => {
                     <strong className="user">{order.createdBy}</strong>
                     <small className="message-timestamp">{order.createdAt?.toDate().toLocaleString("no-NO")}</small>
                 </p>
-                <ul style={{ paddingLeft: "1rem" }}>
+                <ul style={{ paddingLeft: "rem" }}>
                   {order.order.map((item, index) => {
                     const removeList = item.options?.remove ?? [];
                     const extraList = item.options?.extra ?? [];
