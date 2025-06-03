@@ -41,7 +41,7 @@ const Foodorders = ({user}: UsersProps) => {
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
-      price: "100"
+      price: "129"
     },
     {
       name: "Döner i Rull",
@@ -50,7 +50,7 @@ const Foodorders = ({user}: UsersProps) => {
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
       remove: ["Løk"],
-      price: "100"
+      price: "129"
     },
     {
       name: "Kebab Tallerken",
@@ -58,16 +58,8 @@ const Foodorders = ({user}: UsersProps) => {
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Ekstra pita"],
       remove: ["Løk"],
-      price: "100"
+      price: "159"
     },
-    {
-      name: "Döner Tallerken",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
-      spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Ekstra pita"],
-      remove: ["Løk"],
-      price: "100"
-    }
   ];
 
   const scrollRef = useRef<HTMLDivElement>(null);

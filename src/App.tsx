@@ -8,6 +8,7 @@ import Tasklist from "./components/Tasklist"
 import Notes from "./components/Notes"
 import Messages from "./components/Messages"
 import Foodorders from "./components/Foodorders"
+import FoodordersList from "./components/FoodordersList"
 
 import Footer from "./components/Footer"
 import './App.css'
@@ -92,6 +93,7 @@ const [user, setUser] = useState<User | null>(null);
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username}/>}
         {widgets[5].active && <Foodorders user={user}/>}
+        {widgets[5].active && <FoodordersList />}
         <Footer />
       </div>
   ) : (
