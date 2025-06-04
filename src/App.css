@@ -452,9 +452,9 @@ ul {
   font-family: "Kalam", cursive;
   box-sizing: border-box;
   padding-top: 32px;
-  width: 200px;
-  min-height: 200px;
+  height: 240px;
   box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 0px 1px;
+  transition: width 0.2s ease;
 }
 
 .sticker-yellow {
