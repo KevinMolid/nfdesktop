@@ -108,6 +108,7 @@ header {
 }
 
 .bottom-header {
+  padding-top: 4px;
   width: 100%;
   display: flex;
   justify-content: center;
