@@ -1,14 +1,9 @@
 import { useState, useEffect } from "react";
 
-type LinkCategory = {
-  category: string;
-  links: {
-    name: string;
-    href: string;
-  }[];
-};
+type Link = { name: string; href: string };
+type LinkCategory = { category: string; links: Link[] };
 
-const linkCategories: LinkCategory[] = [
+const STATIC_CATEGORIES: LinkCategory[] = [
   {
     category: "Internt",
     links: [
@@ -31,9 +26,7 @@ const linkCategories: LinkCategory[] = [
   },
   {
     category: "Verktøy",
-    links: [
-      { name: "Kiwa", href: "https://labservices.kiwa.com/eCal_NO/Login.aspx?nochk=-1&lng=EN" },
-    ],
+    links: [{ name: "Kiwa", href: "https://labservices.kiwa.com/eCal_NO/Login.aspx?nochk=-1&lng=EN" }],
   },
   {
     category: "Transport",
@@ -48,29 +41,39 @@ const linkCategories: LinkCategory[] = [
   },
 ];
 
-const LOCAL_STORAGE_KEY = "expandedCategories";
+const EXPANDED_KEY = "expandedCategories";
+const CUSTOM_LINKS_KEY = "customLinks";
 
-// Load from localStorage synchronously at component initialization
-const getInitialExpandedCategories = (): Record<string, boolean> => {
-  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      console.warn("Invalid JSON in localStorage");
-    }
+const getInitialExpanded = (): Record<string, boolean> => {
+  try {
+    return JSON.parse(localStorage.getItem(EXPANDED_KEY) || "{}");
+  } catch {
+    return {};
   }
-  // Initialize all categories as collapsed
-  return {};
+};
+
+const getInitialCustomLinks = (): Link[] => {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_LINKS_KEY) || "[]");
+  } catch {
+    return [];
+  }
 };
 
 const Links = () => {
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(getInitialExpandedCategories);
+  const [expandedCategories, setExpandedCategories] = useState(getInitialExpanded);
+  const [customLinks, setCustomLinks] = useState<Link[]>(getInitialCustomLinks);
+  const [showForm, setShowForm] = useState(false);
+  const [newLinkName, setNewLinkName] = useState("");
+  const [newLinkHref, setNewLinkHref] = useState("");
 
-  // Save to localStorage whenever expandedCategories changes
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(expandedCategories));
+    localStorage.setItem(EXPANDED_KEY, JSON.stringify(expandedCategories));
   }, [expandedCategories]);
+
+  useEffect(() => {
+    localStorage.setItem(CUSTOM_LINKS_KEY, JSON.stringify(customLinks));
+  }, [customLinks]);
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({
@@ -79,14 +82,51 @@ const Links = () => {
     }));
   };
 
+  const handleAddLink = () => {
+    if (!newLinkName.trim() || !newLinkHref.trim()) return;
+    const newLink = { name: newLinkName.trim(), href: newLinkHref.trim() };
+    setCustomLinks(prev => [...prev, newLink]);
+    setExpandedCategories(prev => ({ ...prev, "Egne lenker": true }));
+    setNewLinkName("");
+    setNewLinkHref("");
+    setShowForm(false);
+  };
+
+  const allCategories: LinkCategory[] = [
+    ...STATIC_CATEGORIES,
+    ...(customLinks.length > 0 ? [{ category: "Egne lenker", links: customLinks }] : []),
+  ];
+
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Lenker</h3>
-        <i className="fa-solid fa-plus blue icon-md"></i>
+        <i className="fa-solid fa-plus blue icon-md hover" onClick={() => setShowForm(prev => !prev)}></i>
       </div>
 
-      {linkCategories.map(({ category, links }) => {
+      {showForm && (
+        <div className="custom-link-form p-2">
+          <input
+            type="text"
+            placeholder="Navn"
+            value={newLinkName}
+            onChange={(e) => setNewLinkName(e.target.value)}
+            className="input m-b-1"
+          />
+          <input
+            type="text"
+            placeholder="https://..."
+            value={newLinkHref}
+            onChange={(e) => setNewLinkHref(e.target.value)}
+            className="input m-b-1"
+          />
+          <button onClick={handleAddLink} className="button">
+            Legg til lenke
+          </button>
+        </div>
+      )}
+
+      {allCategories.map(({ category, links }) => {
         const isExpanded = expandedCategories[category] ?? false;
 
         return (
