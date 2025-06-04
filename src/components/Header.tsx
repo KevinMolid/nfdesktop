@@ -17,7 +17,7 @@ const Header = ({ username, widgets, toggleActive, onLogout, onHeightChange }: M
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
-  const [showTopHeader, setShowTopHeader] = useState(true);
+  const [showTopHeader, setShowTopHeader] = useState(false);
 
   const headerWrapperRef = useRef<HTMLDivElement>(null);
 
