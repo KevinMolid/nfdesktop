@@ -18,7 +18,7 @@ const Foodorders = ({user}: UsersProps) => {
   const menu = [
     {
       name: "Kebab i Pita",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
+      img: "https://www.gilde.no/assets/images/_heroimage/3456020/Gilde_Kebabkjott_kebab_i_pita_miljobilde_no034179_Foto_Stian_Broch.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
@@ -36,7 +36,7 @@ const Foodorders = ({user}: UsersProps) => {
     },
     {
       name: "Döner i Pita",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
+      img: "https://oppdagoslo.no/wp-content/uploads/2024/08/Kebab-Oslo.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
@@ -45,7 +45,7 @@ const Foodorders = ({user}: UsersProps) => {
     },
     {
       name: "Döner i Rull",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
+      img: "https://imageproxy.wolt.com/menu/menu-images/shared/8c5f553c-a72c-11ee-80cb-2e89079b6b30_doner_i_rull.jpg",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
@@ -54,7 +54,7 @@ const Foodorders = ({user}: UsersProps) => {
     },
     {
       name: "Kebab Tallerken",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
+      img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Ekstra pita"],
       remove: ["Løk"],
@@ -128,7 +128,7 @@ const Foodorders = ({user}: UsersProps) => {
               )}
               <div className="food-info">
                 <h3>{food.name}</h3>
-                <p>{food.price}NOK</p>
+                <p>{food.price} NOK</p>
               </div>
             </div>
           ))}
