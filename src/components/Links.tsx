@@ -86,7 +86,7 @@ const Links = () => {
     if (!newLinkName.trim() || !newLinkHref.trim()) return;
     const newLink = { name: newLinkName.trim(), href: newLinkHref.trim() };
     setCustomLinks(prev => [...prev, newLink]);
-    setExpandedCategories(prev => ({ ...prev, "Egne lenker": true }));
+    setExpandedCategories(prev => ({ ...prev, "Mine lenker": true }));
     setNewLinkName("");
     setNewLinkHref("");
     setShowForm(false);
@@ -94,7 +94,7 @@ const Links = () => {
 
   const allCategories: LinkCategory[] = [
     ...STATIC_CATEGORIES,
-    ...(customLinks.length > 0 ? [{ category: "Egne lenker", links: customLinks }] : []),
+    ...(customLinks.length > 0 ? [{ category: "Mine lenker", links: customLinks }] : []),
   ];
 
   return (
