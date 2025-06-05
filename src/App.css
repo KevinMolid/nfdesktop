@@ -532,7 +532,7 @@ ul {
 }
 
 .burgermenu:hover {
-  color: var(--text5-color);
+  color: var(--text3-color);
 }
 
 .burger-dropdown {
