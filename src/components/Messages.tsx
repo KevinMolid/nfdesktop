@@ -1,9 +1,27 @@
 import { useEffect, useState } from "react";
 import { query, collection, onSnapshot, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
+import { format, formatDistanceToNow, isYesterday, isToday, parseISO } from "date-fns";
+import { nb } from "date-fns/locale";
+
 
 type MessagesProps = {
   username: string;
+};
+
+const formatTimestamp = (date: Date) => {
+  if (isToday(date)) {
+    return format(date, "'I dag' HH:mm", { locale: nb });
+  } else if (isYesterday(date)) {
+    return format(date, "'I går' HH:mm", { locale: nb });
+  } else {
+    const diffInDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffInDays < 30) {
+      return `${formatDistanceToNow(date, { locale: nb, addSuffix: true })}`;
+    } else {
+      return format(date, "d. MMM yyyy, HH:mm", { locale: nb });
+    }
+  }
 };
 
 const Messages = ({ username }: MessagesProps) => {
@@ -51,19 +69,22 @@ const Messages = ({ username }: MessagesProps) => {
         <h3 className="card-title">Meldinger</h3>
       </div>
 
-      {messages.map((msg: any) => (
-        <div key={msg.id}>
-          <div className="message">
-            <p className="message-info">
-              <strong className="user">{msg.sender}</strong>
-              <small className="message-timestamp">
-                {msg.createdAt?.toDate().toLocaleString() || "Sending..."}
-              </small>
-            </p>
-            <p>{msg.content}</p>
+      {messages.map((msg: any) => {
+        const date: Date | null = msg.createdAt?.toDate?.() || null;
+
+        return (
+          <div key={msg.id}>
+            <div className="message">
+              <p className="message-info">
+                <strong className="user">{msg.sender}</strong>
+                <small className="message-timestamp">
+                  {date ? formatTimestamp(date) : "Sender..."}
+                </small>
+              </p>
+              <p>{msg.content}</p>
+            </div>
           </div>
-        </div>
-      ))}
+      )})}
 
       <div className="message-input-container">
         <textarea
