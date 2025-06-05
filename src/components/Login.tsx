@@ -1,13 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 import bcrypt from "bcryptjs";
 import logoB from "../assets/logo-b.png";
+import logoBW from "../assets/logo-bw.png";
 
 const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") === "dark";
+  });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      setIsDarkMode(isDark);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault(); // Prevent form reload
@@ -45,7 +63,8 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
     <form className="login-container" onSubmit={handleLogin}>
       <div className='logo'>
         <a href="https://www.norronafly.com/" target="_blank">
-          <img src={logoB} alt="Norrønafly logo" className='nflogo'/>
+          <img src={isDarkMode ? logoBW : logoB}
+            alt="Norrønafly logo" className='nflogo'/>
         </a>
       </div>
       <input
