@@ -346,6 +346,7 @@ ul {
 }
 
 .task-active {
+  color:var(--text-color);
   background-color: var(--main-bg-color);
 }
 
