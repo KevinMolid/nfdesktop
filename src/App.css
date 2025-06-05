@@ -549,8 +549,11 @@ input.task-edit-input {
 }
 
 /* Burgermenu */
-.burgermenu {
+.burgermenu-container {
   position: relative;
+}
+
+.burgermenu {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -591,6 +594,13 @@ input.task-edit-input {
   padding: 8px 16px;
   line-height: 0;
   cursor: pointer;
+  min-width: max-content;
+}
+
+.burger-li i{
+  display: flex;
+  justify-content: center;
+  min-width: 18px;
 }
 
 .burger-li-active {

@@ -34,8 +34,10 @@ const Burgermenu = ({widgets, toggleActive}: MenuProps) => {
     }, [isActive]);
 
   return (
-    <div className="burgermenu" ref={containerRef} onClick={toggleMenuActive}>
-      <i className="fa-solid fa-bars icon-md" ></i>
+    <div ref={containerRef} className="burgermenu-container">
+      <div className="burgermenu" onClick={toggleMenuActive}>
+        <i className="fa-solid fa-eye icon-md" ></i>
+      </div>
       {isActive && <div className="burger-dropdown">
         <ul>
             {widgets.map((widget, index) => 
