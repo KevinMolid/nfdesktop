@@ -1,27 +1,36 @@
 import { useEffect, useState } from "react";
 import { query, collection, onSnapshot, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
-import { format, formatDistanceToNow, isYesterday, isToday, parseISO } from "date-fns";
-import { nb } from "date-fns/locale";
+import { differenceInHours, isYesterday, format, formatDistanceToNow } from "date-fns";
+import { nb as originalNb } from "date-fns/locale";
 
 
 type MessagesProps = {
   username: string;
 };
 
+// Clone and override formatDistance
+const nbWithoutAbout = {
+  ...originalNb,
+  formatDistance: (token: string, count: number, options: any): string => {
+    const original = (originalNb.formatDistance as Function)(token, count, options);
+    return original.replace(/^omtrent\s+/i, "").replace(/^ca.\s+/i, "");
+  },
+};
+
 const formatTimestamp = (date: Date) => {
-  if (isToday(date)) {
-    return format(date, "'I dag' HH:mm", { locale: nb });
-  } else if (isYesterday(date)) {
-    return format(date, "'I går' HH:mm", { locale: nb });
-  } else {
-    const diffInDays = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffInDays < 30) {
-      return `${formatDistanceToNow(date, { locale: nb, addSuffix: true })}`;
-    } else {
-      return format(date, "d. MMM yyyy, HH:mm", { locale: nb });
-    }
+  const now = new Date();
+  const hoursAgo = differenceInHours(now, date);
+
+  if (hoursAgo < 24) {
+    return formatDistanceToNow(date, { locale: nbWithoutAbout, addSuffix: true }); // "2 minutter siden"
   }
+
+  if (isYesterday(date)) {
+    return format(date, "'I går' HH:mm", { locale: nbWithoutAbout }); // "I går 16:45"
+  }
+
+  return format(date, "d. MMM yyyy, HH:mm", { locale: nbWithoutAbout }); // "4. mai 2025, 14:25"
 };
 
 const Messages = ({ username }: MessagesProps) => {
