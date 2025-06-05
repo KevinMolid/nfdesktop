@@ -108,6 +108,14 @@ const ToDo = () => {
     setNewTaskName("")
   }
 
+  const handleRename = (id: number, newName: string) => {
+  const updatedTasks = tasks.map((task) =>
+    task.id === id ? { ...task, name: newName } : task
+  );
+  setTasks(updatedTasks);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+};
+
   {/* Handle status change */}
   const handleStatusChange = (id: number, newStatus: string) => {
     const updatedTasks = tasks.map((t) => {
@@ -184,6 +192,7 @@ const ToDo = () => {
               status={task.status}
               onDelete={() => deleteTask(task.id)}
               onStatusChange={handleStatusChange}
+              onRename={handleRename}
             />
           ))}
         </ul>}

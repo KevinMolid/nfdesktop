@@ -328,17 +328,22 @@ ul {
   line-height: 1.2;
   padding: 0 12px 0 8px;
   border: 1px solid transparent;
-}
-
-.task p {
-  margin: 12px 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .task-info {
   display: flex;
   text-wrap: wrap;
   align-items: center;
+  width: 100%;
   gap: 4px;
+  overflow: hidden;
+}
+
+.task-info > .icon-div {
+  flex-shrink: 0;
 }
 
 .task-dropdown {
@@ -348,6 +353,30 @@ ul {
   padding: 2px;
   border: 1px solid var(--border-color);
   z-index: 2;
+}
+
+.task-info > p,
+.task-info > .task-edit-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-family: inherit;
+  font-weight: inherit;
+  padding: 12px 0;
+  margin: 0;
+  color: var(--text-color);
+  background: none;
+  outline: none;
+  border: none;
+  white-space: nowrap;
+  text-wrap: wrap;
+}
+
+input.task-edit-input {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .task-active {
