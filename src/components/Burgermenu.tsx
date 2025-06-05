@@ -34,27 +34,27 @@ const Burgermenu = ({widgets, toggleActive}: MenuProps) => {
     }, [isActive]);
 
   return (
-    <div ref={containerRef}>
-        <i className="fa-solid fa-bars icon-md burgermenu" 
-            onClick={toggleMenuActive}></i>
-        {isActive && <div className="burger-dropdown">
-            <ul>
-                {widgets.map((widget, index) => 
-                    widget.active ? 
-                    <li className="burger-li burger-li-active" key={"burger" + index}
-                        onClick={() => toggleActive(widget.name)}>
-                        <p>{widget.name}</p>
-                        <i className="fa-solid fa-check"></i>
-                    </li> : 
-                    <li className="burger-li burger-li-inactive" key={"burger" + index}
-                        onClick={() => toggleActive(widget.name)}>
-                        <p>{widget.name}</p>
-                        <i className="fa-solid fa-cancel"></i>
-                    </li>
-                )}
-            </ul>
-        </div>}
+    <div className="burgermenu" ref={containerRef} onClick={toggleMenuActive}>
+      <i className="fa-solid fa-bars icon-md" ></i>
+      {isActive && <div className="burger-dropdown">
+        <ul>
+            {widgets.map((widget, index) => 
+                widget.active ? 
+                <li className="burger-li burger-li-active" key={"burger" + index}
+                    onClick={() => toggleActive(widget.name)}>
+                    <p>{widget.name}</p>
+                    <i className="fa-solid fa-check"></i>
+                </li> : 
+                <li className="burger-li burger-li-inactive" key={"burger" + index}
+                    onClick={() => toggleActive(widget.name)}>
+                    <p>{widget.name}</p>
+                    <i className="fa-solid fa-cancel"></i>
+                </li>
+            )}
+        </ul>
+      </div>}
     </div>
+
   )
 }
 
