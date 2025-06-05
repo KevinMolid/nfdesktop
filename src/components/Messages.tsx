@@ -30,6 +30,12 @@ const formatTimestamp = (date: Date) => {
     return format(date, "'I går' HH:mm", { locale: nbWithoutAbout }); // "I går 16:45"
   }
 
+  const daysAgo = Math.floor(hoursAgo / 24);
+
+  if (daysAgo < 30) {
+    return formatDistanceToNow(date, { locale: nbWithoutAbout, addSuffix: true }); // "12 dager siden"
+  }
+
   return format(date, "d. MMM yyyy, HH:mm", { locale: nbWithoutAbout }); // "4. mai 2025, 14:25"
 };
 
