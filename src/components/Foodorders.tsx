@@ -77,9 +77,9 @@ const Foodorders = ({user, setMessage}: UsersProps) => {
 
     setSelectedFood(foodName);
     setOrderOptions({
-      sizes: initialSize,
-      spice: defaultSpice,
-    });
+  ...(initialSize ? { sizes: initialSize } : {}),
+  ...(defaultSpice ? { spice: defaultSpice } : {}),
+});
   };
 
   const handleChange = (type: string, value: string, isRadio = false) => {
