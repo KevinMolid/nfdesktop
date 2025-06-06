@@ -88,8 +88,12 @@ const Users = ({user}: UsersProps) => {
                 onChange={(e) => setPin(e.target.value)}
               />
               <div className="button-group">
-                <button onClick={() => registerUser(username, pin)}>Opprett</button>
-                <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={toggleCreateActive}></i>
+                <button className="btn"
+                  onClick={() => registerUser(username, pin)}>Opprett</button>
+                <button onClick={toggleCreateActive}>
+                  <p>Avbryt</p>
+                  <i className="fa-solid fa-cancel red" ></i>
+                </button>
               </div>
           </div>
         </div>}

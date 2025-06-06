@@ -786,7 +786,8 @@ input.task-edit-input {
 button {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: baseline;
+  gap: 8px;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.4em 0.8em;
@@ -832,6 +833,9 @@ button:hover {
 /* Input */
 input {
   padding: 0.4em;
+  color: var(--text-color);
+  background-color: var(--main-bg-color);
+  border: none;
 }
 
 /* Colors */
