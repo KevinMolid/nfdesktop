@@ -341,7 +341,6 @@ ul {
   line-height: 1.2;
   padding: 0 12px 0 8px;
   border: 1px solid transparent;
-  width: 100%;
   max-width: 100%;
 }
 
@@ -349,8 +348,7 @@ ul {
   display: flex;
   text-wrap: wrap;
   align-items: center;
-  width: 100%;
-  gap: 4px;
+  gap: 12px;
   overflow: hidden;
 }
 
@@ -369,7 +367,6 @@ ul {
 
 .task-info > p,
 .task-info > .task-edit-input {
-  flex: 1;
   min-width: 0;
   box-sizing: border-box;
   font-size: 1rem;

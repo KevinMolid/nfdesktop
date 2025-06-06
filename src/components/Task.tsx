@@ -105,7 +105,7 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete, onRename }: T
     <li className={`task task-${status} hover-border`} key={"task" + index}>
       <div className="task-info">
         <div onClick={toggleDropdown} className="icon-div hover">
-          <i className="fa-solid fa-ellipsis-vertical grey"></i>
+          <i className="fa-solid fa-bars"></i>
         </div>
 
         {isEditing ? (
