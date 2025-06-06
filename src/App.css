@@ -299,6 +299,19 @@ ul {
   border-radius: 10px 10px 0 0;
 }
 
+/* Message */
+.message-container {
+  display: flex;
+  width: 100%;
+  background-color: #0fad73;
+}
+
+.message-container p {
+  font-weight: 500;
+  color: white;
+  text-align: center;
+}
+
 /* ToDo */
 .task-list {
   display: flex;

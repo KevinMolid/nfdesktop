@@ -1,6 +1,8 @@
 import Header from "./components/Header"
 import Login from "./components/Login"
 
+import Message from "./components/Message"
+
 /* Pages */
 import Users from "./components/Users"
 import Links from "./components/Links"
@@ -36,6 +38,7 @@ const [user, setUser] = useState<User | null>(null);
 const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
 const headerRef = useRef<HTMLDivElement>(null);
 const [headerHeight, setHeaderHeight] = useState(0);
+const [message, setMessage] = useState("");
 
   useLayoutEffect(() => {
   if (!headerRef.current) return;
@@ -128,12 +131,13 @@ const [headerHeight, setHeaderHeight] = useState(0);
 
       {/* Main container pushed down by header height */}
       <div className="main-container" style={{ paddingTop: headerHeight - 15 || 120 }}>
+        {message && <Message message={message}/>}
         {widgets[0].active && <Users user={user} />}
         {widgets[1].active && <Links />}
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username} />}
-        {widgets[5].active && <Foodorders user={user} />}
+        {widgets[5].active && <Foodorders user={user} setMessage={setMessage}/>}
         {widgets[5].active && <FoodordersList />}
         <Footer />
       </div>

@@ -11,10 +11,11 @@ type UsersProps = {
   user: {
     username: string;
     role: string;
-  }
+  },
+  setMessage: (msg: string) => void
 };
 
-const Foodorders = ({user}: UsersProps) => {
+const Foodorders = ({user, setMessage}: UsersProps) => {
   const menu = [
     {
       name: "Kebab i Pita",
@@ -184,6 +185,7 @@ const Foodorders = ({user}: UsersProps) => {
             onClick={() => {
               if (selectedFood) {
                 setOrderList((prev) => [...prev, { item: selectedFood, options: orderOptions }]);
+                setMessage(`${selectedFood} lagt til i bestilling`);
                 setSelectedFood(null);         // Reset selected food
                 setOrderOptions({});           // Reset options
               }
@@ -236,11 +238,11 @@ const Foodorders = ({user}: UsersProps) => {
               createdBy: user.username,
             });
             console.log("Order placed with ID: ", docRef.id);
-            alert("Bestilling sendt!");
+            setMessage("Bestilling sendt!");
             setOrderList([]); // Clear the order list
           } catch (error) {
             console.error("Error adding document: ", error);
-            alert("Noe gikk galt med bestillingen.");
+            setMessage("Noe gikk galt med bestillingen.");
           }
         }}
         disabled={orderList.length === 0}
