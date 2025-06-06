@@ -210,6 +210,7 @@ const ToDo = () => {
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
+                onRename={handleRename}
               />
             ))}
           </ul>
@@ -228,6 +229,7 @@ const ToDo = () => {
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
+                onRename={handleRename}
               />
             ))}
           </ul>
@@ -246,6 +248,7 @@ const ToDo = () => {
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
+                onRename={handleRename}
               />
             ))}
           </ul>
