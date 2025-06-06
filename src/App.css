@@ -452,15 +452,47 @@ input.task-edit-input {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
-  background-color: #3da8ff;
+  color: var(--text-color);
+  background-color: var(--main-bg-color);
   padding: 10px 40px 30px;
   border-radius: 10px;
   z-index: 20;
+  border: 1px solid var(--text4-color);
 }
 
 .pin-input {
+  width: 100px;
+  text-align: center;
+  font-size: 18px;
+  padding: 4px;
   margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--text4-color);
+}
+
+.pin-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  padding: 8px 16px;
+  color: white;
+}
+
+.pin-btn-green {
+  background-color: #009e42;
+}
+
+.pin-btn-green:hover {
+  background-color: #008b3a;
+}
+
+.pin-btn-red {
+  background-color: #e02323;
+}
+
+.pin-btn-red:hover {
+  background-color: #c51a1a;
 }
 
 .button-group {

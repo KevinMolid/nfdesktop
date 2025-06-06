@@ -133,8 +133,8 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             }}
           />
           <div className="button-group">
-            <button onClick={handlePinUpdate}>Lagre</button>
-            <button onClick={() => setShowPinForm(false)}>Avbryt</button>
+            <button className="pin-btn pin-btn-green" onClick={handlePinUpdate}>Lagre</button>
+            <button className="pin-btn pin-btn-red" onClick={() => setShowPinForm(false)}>Avbryt</button>
           </div>
           {feedback && <p className="feedback-message">{feedback}</p>}
         </div>
