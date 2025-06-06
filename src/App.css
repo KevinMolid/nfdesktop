@@ -672,7 +672,6 @@ input.task-edit-input {
   height: 50px;
   padding: 4px 8px;
   resize: none;
-  border: none;
   color: var(--text-color);
   background-color: var(--main-bg-color);
 }
@@ -835,7 +834,11 @@ input {
   padding: 0.4em;
   color: var(--text-color);
   background-color: var(--main-bg-color);
-  border: none;
+  border: 1px solid var(--border-color);
+}
+
+textarea {
+    border: 1px solid var(--border-color);
 }
 
 /* Colors */
