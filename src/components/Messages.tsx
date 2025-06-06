@@ -47,7 +47,7 @@ const Messages = ({ username }: MessagesProps) => {
     // Query messages in order of creation time
     const messagesQuery = query(
       collection(db, "messages"),
-      orderBy("createdAt", "asc")
+      orderBy("createdAt", "desc")
     );
 
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
@@ -84,22 +84,24 @@ const Messages = ({ username }: MessagesProps) => {
         <h3 className="card-title">Meldinger</h3>
       </div>
 
-      {messages.map((msg: any) => {
-        const date: Date | null = msg.createdAt?.toDate?.() || null;
+      <div className="messages-container">
+        {messages.map((msg: any) => {
+          const date: Date | null = msg.createdAt?.toDate?.() || null;
 
-        return (
-          <div key={msg.id}>
-            <div className="message">
-              <p className="message-info">
-                <strong className="user">{msg.sender}</strong>
-                <small className="message-timestamp">
-                  {date ? formatTimestamp(date) : "Sender..."}
-                </small>
-              </p>
-              <p>{msg.content}</p>
+          return (
+            <div key={msg.id}>
+              <div className="message">
+                <p className="message-info">
+                  <strong className="user">{msg.sender}</strong>
+                  <small className="message-timestamp">
+                    {date ? formatTimestamp(date) : "Sender..."}
+                  </small>
+                </p>
+                <p>{msg.content}</p>
+              </div>
             </div>
-          </div>
-      )})}
+        )})}
+      </div>
 
       <div className="message-input-container">
         <textarea

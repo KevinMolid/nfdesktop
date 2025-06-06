@@ -630,6 +630,12 @@ input.task-edit-input {
 
 
 /* Messages */
+.messages-container {
+  display: flex;
+  max-height: 300px;
+  overflow-y: scroll;
+  flex-direction: column-reverse;
+}
 
 .message {
   display: flex;
