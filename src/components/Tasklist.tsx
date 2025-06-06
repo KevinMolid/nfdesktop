@@ -175,8 +175,16 @@ const ToDo = () => {
                   }
                 }}
               />
-              <button onClick={addNewTask}>Opprett</button>
-              <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={clearNewTask}></i>
+              <div className="button-group">
+                <button className="btn" onClick={addNewTask}>
+                  <i className="fa-solid fa-check" ></i>
+                  <p>Opprett</p>
+                </button>
+                <button onClick={clearNewTask}>
+                  <p>Avbryt</p>
+                  <i className="fa-solid fa-cancel red" ></i>
+                </button>
+              </div>
             </div>
           </div>}
 

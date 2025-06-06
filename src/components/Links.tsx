@@ -101,28 +101,39 @@ const Links = () => {
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Lenker</h3>
-        <i className="fa-solid fa-plus blue icon-md hover" onClick={() => setShowForm(prev => !prev)}></i>
+        {!showForm && <i className="fa-solid fa-plus blue icon-md hover" onClick={() => setShowForm(prev => !prev)}></i>}
       </div>
 
       {showForm && (
-        <div className="custom-link-form p-2">
-          <input
-            type="text"
-            placeholder="Navn"
-            value={newLinkName}
-            onChange={(e) => setNewLinkName(e.target.value)}
-            className="input m-b-1"
-          />
-          <input
-            type="text"
-            placeholder="https://..."
-            value={newLinkHref}
-            onChange={(e) => setNewLinkHref(e.target.value)}
-            className="input m-b-1"
-          />
-          <button onClick={handleAddLink} className="button">
-            Legg til lenke
-          </button>
+        <div className="create-task-box">
+          Opprett ny lenke
+          <div className="create-task-input-container">
+            <input
+              type="text"
+              placeholder="Navn"
+              value={newLinkName}
+              onChange={(e) => setNewLinkName(e.target.value)}
+              className="input m-b-1"
+            />
+            <input
+              type="text"
+              placeholder="https://..."
+              value={newLinkHref}
+              onChange={(e) => setNewLinkHref(e.target.value)}
+              className="input m-b-1"
+            />
+            <div className="button-group">
+              <button className="btn"
+                onClick={handleAddLink}>
+                  <i className="fa-solid fa-check" ></i>
+                  <p>Opprett</p>
+              </button>
+              <button onClick={() => setShowForm(false)}>
+                <p>Avbryt</p>
+                <i className="fa-solid fa-cancel red" ></i>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

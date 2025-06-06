@@ -89,10 +89,13 @@ const Users = ({user}: UsersProps) => {
               />
               <div className="button-group">
                 <button className="btn"
-                  onClick={() => registerUser(username, pin)}>Opprett</button>
+                  onClick={() => registerUser(username, pin)}>
+                    <i className="fa-solid fa-check" ></i>
+                    <p>Opprett</p>
+                    </button>
                 <button onClick={toggleCreateActive}>
-                  <p>Avbryt</p>
                   <i className="fa-solid fa-cancel red" ></i>
+                  <p>Avbryt</p>
                 </button>
               </div>
           </div>
