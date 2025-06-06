@@ -164,8 +164,8 @@ const Foodorders = ({user, setMessage}: UsersProps) => {
                 />
               ) : (
                 selectedItem[type].map((val: string) => (
-                  <div className="options">
-                    <label key={val}>
+                  <div className="options" key={val}>
+                    <label>
                       <input
                         type="checkbox"
                         name={type}
