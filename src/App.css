@@ -328,7 +328,8 @@ ul {
 
 .create-task-input-container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
   gap: 4px;
 }
 
@@ -453,16 +454,20 @@ input.task-edit-input {
   transform: translate(-50%, -50%);
   color: white;
   background-color: #3da8ff;
-  padding: 20px 40px 40px;
+  padding: 10px 40px 30px;
   border-radius: 10px;
   z-index: 20;
+}
+
+.pin-input {
+  margin-bottom: 20px;
 }
 
 .button-group {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 4px;
-  padding: 8px;
 }
 
 /* Tabs */
@@ -779,6 +784,9 @@ input.task-edit-input {
 
 /* Button */
 button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.4em 0.8em;

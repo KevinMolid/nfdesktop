@@ -122,7 +122,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
       {showPinForm && (
         <div className="pin-form">
           <h2>Endre PIN-kode</h2>
-          <input
+          <input className="pin-input"
             type="password"
             placeholder="Ny PIN"
             value={newPin}

@@ -73,23 +73,25 @@ const Users = ({user}: UsersProps) => {
         {isCreateActive && <div className="create-task-box">
             Opprett ny bruker
             <div className="create-task-input-container">
-        <input
-          type="text"
-          placeholder="Brukernavn"
-          value={username}
-          maxLength={3}
-          onChange={(e) => setUsername(e.target.value.toUpperCase())}
-        />
-        <input
-          type="password"
-          placeholder="PIN-kode"
-          value={pin}
-          maxLength={4}
-          onChange={(e) => setPin(e.target.value)}
-        />
-        <button onClick={() => registerUser(username, pin)}>Opprett</button>
-              <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={toggleCreateActive}></i>
-            </div>
+              <input
+                type="text"
+                placeholder="Brukernavn"
+                value={username}
+                maxLength={3}
+                onChange={(e) => setUsername(e.target.value.toUpperCase())}
+              />
+              <input
+                type="password"
+                placeholder="PIN-kode"
+                value={pin}
+                maxLength={4}
+                onChange={(e) => setPin(e.target.value)}
+              />
+              <div className="button-group">
+                <button onClick={() => registerUser(username, pin)}>Opprett</button>
+                <i className="fa-solid fa-cancel red red-hover icon-md hover" onClick={toggleCreateActive}></i>
+              </div>
+          </div>
         </div>}
 
         {error && <p style={{ color: "red" }}>{error}</p>}
