@@ -829,7 +829,6 @@ button {
   background-color: var(--button-bg);
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.25s;
 }
 button:hover {
   background-color: var(--button-hover-bg);
