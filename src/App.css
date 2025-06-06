@@ -343,7 +343,6 @@ ul {
   border: 1px solid transparent;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
 }
 
 .task-info {
@@ -365,7 +364,7 @@ ul {
   background-color: var(--card-bg);
   padding: 2px;
   border: 1px solid var(--border-color);
-  z-index: 2;
+  z-index: 3;
 }
 
 .task-info > p,
@@ -379,7 +378,6 @@ ul {
   font-weight: inherit;
   padding: 12px 0;
   margin: 0;
-  color: var(--text-color);
   background: none;
   outline: none;
   border: none;
@@ -392,22 +390,26 @@ input.task-edit-input {
   appearance: none;
 }
 
-.task-active {
+.task-active,
+.task-active input {
   color:var(--text-color);
   background-color: var(--main-bg-color);
 }
 
-.task-finished {
+.task-finished,
+.task-finished input {
   color:#006b2d;
   background-color: #b1ffc7;
 }
 
-.task-onhold {
+.task-onhold,
+.task-onhold input {
   color:#5a4b00;
   background-color: #FFF9b1;
 }
 
-.task-cancelled {
+.task-cancelled,
+.task-cancelled input {
   color:#6b0000;
   background-color: #fec5c5;
 }
