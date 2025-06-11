@@ -364,9 +364,6 @@ ul {
 }
 
 .task-priority {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-size: 1.2rem;
   font-weight: 500;
   width: 40px;
@@ -375,6 +372,51 @@ ul {
   background: #555;
   background: linear-gradient(60deg,rgb(79, 82, 85) 0%, rgb(110, 114, 116) 100%);
   border: 1px solid #555;
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-priority-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.priority-dropdown {
+  position: absolute;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--card-bg);
+  z-index: 3;
+  padding: 4px;
+  user-select: none;
+  border: 1px solid var(--border-color);
+}
+
+.priority-dropdown li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+}
+
+.priority-0 {
+  color: white;
+  background: #555;
+  background: linear-gradient(60deg,rgb(79, 82, 85) 0%, rgb(110, 114, 116) 100%);
+  border: 1px solid #555;
+}
+
+.priority-dropdown .priority-0:hover,
+.priority-dropdown .priority-1:hover,
+.priority-dropdown .priority-2:hover,
+.priority-dropdown .priority-3:hover {
+  border: 1px solid var(--text2-color);
 }
 
 .priority-1 {

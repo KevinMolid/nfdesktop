@@ -112,36 +112,24 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
           <i className="fa-solid fa-bars"></i>
         </div>
 
-<       div className={`task-priority priority-${priority}`} onClick={() => setIsEditingPriority(true)}>
-          {isEditingPriority ? (
-            <input
-              type="number"
-              value={editedPriority}
-              onChange={(e) => setEditedPriority(parseInt(e.target.value))}
-              onBlur={() => {
-                setIsEditingPriority(false);
-                if (onPriorityChange && editedPriority !== priority) {
-                  onPriorityChange(id, editedPriority);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setIsEditingPriority(false);
-                  if (onPriorityChange && editedPriority !== priority) {
-                    onPriorityChange(id, editedPriority);
-                  }
-                }
-                if (e.key === "Escape") {
-                  setIsEditingPriority(false);
-                  setEditedPriority(priority); // revert changes
-                }
-              }}
-              className="priority-input"
-              style={{ width: "30px" }}
-            />
-          ) : (
-            <span>{priority ? priority : "0"}</span>
-          )}
+<       div className={`task-priority priority-${priority}`}>
+            <span className="task-priority-number" onClick={() => setIsEditingPriority(!isEditingPriority)}>{priority ? priority : "0"}</span>
+            {isEditingPriority && 
+              <div>
+                <ul className="priority-dropdown">
+                  {[0, 1, 2, 3].map((num) => {
+                    return <li 
+                    className={`priority-${num}`} key={num}
+                    onClick={() => {
+                      setIsEditingPriority(false);
+                      if (onPriorityChange) onPriorityChange(id, num);
+                    }}>
+                      {num}
+                    </li>
+                  })}
+                </ul>
+              </div>
+            }
         </div>
 
         {isEditing ? (
