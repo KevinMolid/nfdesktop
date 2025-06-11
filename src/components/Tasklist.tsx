@@ -200,7 +200,10 @@ const ToDo = () => {
         {/* Tasklist */}
         {/* Active tasks */}
         {visibleStatuses.active && <ul className="task-list">
-          {tasks.filter(task => task.status === "active").map((task, index) => (
+          {tasks.filter(task => task.status === "active").sort((a, b) => {
+              const order = [1, 2, 3, 0];
+              return order.indexOf(a.priority) - order.indexOf(b.priority);
+            }).map((task, index) => (
             <Task 
               key={task.id}
               id={task.id} 
@@ -220,7 +223,10 @@ const ToDo = () => {
         {visibleStatuses.finished && <>
           <h4 className="card-title">Utførte oppgaver</h4>
           <ul className="task-list">
-            {tasks.filter(task => task.status === "finished").map((task, index) => (
+            {tasks.filter(task => task.status === "finished").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
               <Task 
                 key={task.id}
                 id={task.id} 
@@ -241,7 +247,10 @@ const ToDo = () => {
         {visibleStatuses.onhold && <>
           <h4 className="card-title">Pausede oppgaver</h4>
           <ul className="task-list">
-            {tasks.filter(task => task.status === "onhold").map((task, index) => (
+            {tasks.filter(task => task.status === "onhold").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
               <Task 
                 key={task.id}
                 id={task.id} 
@@ -262,7 +271,10 @@ const ToDo = () => {
         {visibleStatuses.cancelled && <>
           <h4 className="card-title">Kansellerte oppgaver</h4>
           <ul className="task-list">
-            {tasks.filter(task => task.status === "cancelled").map((task, index) => (
+            {tasks.filter(task => task.status === "cancelled").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
               <Task 
                 key={task.id}
                 id={task.id} 
