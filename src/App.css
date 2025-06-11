@@ -442,7 +442,7 @@ ul {
 
 .task-info > p,
 .task-info > .task-edit-input {
-  width: 300px;
+  min-width: 300px;
   box-sizing: border-box;
   font-size: 1rem;
   line-height: 1.5;
