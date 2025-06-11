@@ -341,20 +341,17 @@ ul {
   gap: 8px;
   line-height: 1.2;
   padding: 0 12px 0 8px;
-  border: 1px solid transparent;
+  min-height: 48px;
   max-width: 100%;
 }
 
 .task-info {
   display: flex;
+  height: 100%;
   text-wrap: wrap;
   align-items: center;
   gap: 12px;
   overflow: hidden;
-}
-
-.task-info > .icon-div {
-  flex-shrink: 0;
 }
 
 .task-dropdown {
@@ -366,9 +363,44 @@ ul {
   z-index: 3;
 }
 
+.task-priority {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 500;
+  width: 40px;
+  height: 100%;
+  color: white;
+  background: #555;
+  background: linear-gradient(60deg,rgb(79, 82, 85) 0%, rgb(110, 114, 116) 100%);
+  border: 1px solid #555;
+}
+
+.priority-1 {
+  color: white;
+  background: #b60000;
+  background: linear-gradient(60deg,rgb(190, 0, 0) 0%, rgb(255, 11, 11) 100%);
+  border: 1px solid #b60000;
+}
+
+.priority-2 {
+  color: white;
+  background: #ff4800;
+  background: linear-gradient(60deg,rgba(255, 72, 0, 1) 0%, rgba(255, 111, 0, 1) 100%);
+  border: 1px solid #ff4800;
+}
+
+.priority-3 {
+  color: black;
+  background: #ffee00;
+  background: linear-gradient(60deg,rgb(255, 208, 0) 0%, rgb(255, 252, 57) 100%);
+  border: 1px solid #ffee00;
+}
+
 .task-info > p,
 .task-info > .task-edit-input {
-  min-width: 0;
+  width: 300px;
   box-sizing: border-box;
   font-size: 1rem;
   line-height: 1.5;

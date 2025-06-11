@@ -7,6 +7,7 @@ const FILTER_STORAGE_KEY = "visibleStatuses";
 const ToDo = () => {
   type TaskData = {
         id: number;
+        priority: number;
         name: string;
         status: string;
     }
@@ -97,7 +98,7 @@ const ToDo = () => {
   }
 
   const addNewTask = () => {
-    const updatedTasks = [...tasks, {name: newTaskName, id: Date.now(), status: "active"}];
+    const updatedTasks = [...tasks, {priority: 0, name: newTaskName, id: Date.now(), status: "active"}];
     setTasks(updatedTasks);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
     clearNewTask()
@@ -128,11 +129,19 @@ const ToDo = () => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
   };
 
-    const deleteTask = (id: number) => {
-      const updatedTasks = tasks.filter((t) => t.id !== id);
-      setTasks(updatedTasks);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
-    }
+  const handlePriorityChange = (id: number, newPriority: number) => {
+    const updatedTasks = tasks.map(task =>
+      task.id === id ? { ...task, priority: newPriority } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+  };
+
+  const deleteTask = (id: number) => {
+    const updatedTasks = tasks.filter((t) => t.id !== id);
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+  }
 
   return (
     <div className="card has-header grow-1">
@@ -195,12 +204,14 @@ const ToDo = () => {
             <Task 
               key={task.id}
               id={task.id} 
+              priority={task.priority}
               name={task.name} 
               index={index}
               status={task.status}
               onDelete={() => deleteTask(task.id)}
               onStatusChange={handleStatusChange}
-              onRename={handleRename}
+              onRename={handleRename}  
+              onPriorityChange={handlePriorityChange}
             />
           ))}
         </ul>}
@@ -213,12 +224,14 @@ const ToDo = () => {
               <Task 
                 key={task.id}
                 id={task.id} 
+                priority={task.priority}
                 name={task.name} 
                 index={index}
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
                 onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
               />
             ))}
           </ul>
@@ -232,12 +245,14 @@ const ToDo = () => {
               <Task 
                 key={task.id}
                 id={task.id} 
+                priority={task.priority}
                 name={task.name} 
                 index={index}
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
                 onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
               />
             ))}
           </ul>
@@ -251,12 +266,14 @@ const ToDo = () => {
               <Task 
                 key={task.id}
                 id={task.id} 
+                priority={task.priority}
                 name={task.name} 
                 index={index}
                 status={task.status}
                 onDelete={() => deleteTask(task.id)}
                 onStatusChange={handleStatusChange}
                 onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
               />
             ))}
           </ul>

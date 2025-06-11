@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from "react";
 
 type TaskProps = {
   id: number;
+  priority: number;
   name: string;
   status: string;
   index: number;
   onStatusChange: (id: number, newStatus: string) => void;
   onDelete: (id: number) => void;
   onRename?: (id: number, newName: string) => void;
+  onPriorityChange?: (id: number, newPriority: number) => void; // NEW
 };
 
 const STATUS_OPTIONS = ["active", "finished", "onhold", "cancelled"];
@@ -18,11 +20,13 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "kansellert",
 };
 
-const Task = ({ id, name, status, index, onStatusChange, onDelete, onRename }: TaskProps) => {
+const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onRename, onPriorityChange }: TaskProps) => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [isStatusDropdownActive, setIsStatusDropdownActive] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
+  const [isEditingPriority, setIsEditingPriority] = useState(false);
+  const [editedPriority, setEditedPriority] = useState(priority);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
@@ -102,10 +106,42 @@ const Task = ({ id, name, status, index, onStatusChange, onDelete, onRename }: T
   };
 
   return (
-    <li className={`task task-${status} hover-border`} key={"task" + index}>
+    <li className={`task task-${status}`} key={"task" + index}>
       <div className="task-info">
         <div onClick={toggleDropdown} className="icon-div hover">
           <i className="fa-solid fa-bars"></i>
+        </div>
+
+<       div className={`task-priority priority-${priority}`} onClick={() => setIsEditingPriority(true)}>
+          {isEditingPriority ? (
+            <input
+              type="number"
+              value={editedPriority}
+              onChange={(e) => setEditedPriority(parseInt(e.target.value))}
+              onBlur={() => {
+                setIsEditingPriority(false);
+                if (onPriorityChange && editedPriority !== priority) {
+                  onPriorityChange(id, editedPriority);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setIsEditingPriority(false);
+                  if (onPriorityChange && editedPriority !== priority) {
+                    onPriorityChange(id, editedPriority);
+                  }
+                }
+                if (e.key === "Escape") {
+                  setIsEditingPriority(false);
+                  setEditedPriority(priority); // revert changes
+                }
+              }}
+              className="priority-input"
+              style={{ width: "30px" }}
+            />
+          ) : (
+            <span>{priority ? priority : "0"}</span>
+          )}
         </div>
 
         {isEditing ? (
