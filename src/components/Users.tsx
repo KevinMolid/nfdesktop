@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import bcrypt from "bcryptjs";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { doc, updateDoc, collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
 type UsersProps = {
   user: {
     username: string;
+    name?: string;
     role: string;
   }
 };
@@ -45,6 +46,7 @@ const Users = ({user}: UsersProps) => {
 
       await addDoc(collection(db, "users"), {
         username: username.toUpperCase(),
+        name: "",
         pinHash: hashedPin,
         role: "user",
       });
@@ -105,10 +107,35 @@ const Users = ({user}: UsersProps) => {
         {success && <p style={{ color: "green" }}>{success}</p>}
 
         <ul>
-          {users.map((user) => (
-            <li key={user.id} className="userlist">
-              <p><strong className="user">{user.username}</strong></p>
-              <p>{user.role === "admin" ? "Admin" : "Bruker"}</p>
+          <li className="userlist">
+            <p>Kode</p>
+            <p>Navn</p>
+            <p>Status</p>
+          </li>
+          {users.map((u) => (
+            <li key={u.id} className="userlist">
+              <p><strong className="user">{u.username}</strong></p>
+              <p>
+                {user.role === "admin" ? (
+                  <input
+                    type="text"
+                    value={u.name}
+                    onChange={(e) => {
+                      const updatedUsers = users.map((usr) =>
+                        usr.id === u.id ? { ...usr, name: e.target.value } : usr
+                      );
+                      setUsers(updatedUsers);
+                    }}
+                    onBlur={async () => {
+                      const userRef = doc(db, "users", u.id);
+                      await updateDoc(userRef, { name: u.name });
+                    }}
+                  />
+                ) : (
+                  <p>{u.name}</p>
+                )}
+              </p>
+              <p>{u.role === "admin" ? "Admin" : "Bruker"}</p>
             </li>
           ))}
         </ul>

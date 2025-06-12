@@ -162,7 +162,7 @@ ul {
 /* Users */
 .userlist {
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: 48px 1fr 1fr;
   gap: 8px;
 }
 
