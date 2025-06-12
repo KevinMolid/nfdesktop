@@ -794,6 +794,29 @@ input.task-edit-input {
   background-color: #3da8ff;
 }
 
+/* Alphabet */
+.nato-alphabet-container {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.nato-letter-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  background-color: var(--main-bg-color);
+}
+
+.nato-letter {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
 /* Display */
 
 .flex {

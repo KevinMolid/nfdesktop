@@ -9,6 +9,7 @@ import Links from "./components/Links"
 import Tasklist from "./components/Tasklist"
 import Notes from "./components/Notes"
 import Messages from "./components/Messages"
+import NatoAlphabet from "./components/NatoAlphabet"
 import Foodorders from "./components/Foodorders"
 import FoodordersList from "./components/FoodordersList"
 
@@ -23,6 +24,7 @@ const DEFAULT_WIDGETS = [
   { name: "Oppgaver", active: true },
   { name: "Notater", active: true },
   { name: "Meldinger", active: true },
+  { name: "Nato-alfabet", active: false},
   { name: "Bestille Kebab", active: false },
 ];
 
@@ -137,8 +139,9 @@ const [message, setMessage] = useState("");
         {widgets[2].active && <Tasklist />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username} />}
-        {widgets[5].active && <Foodorders user={user} setMessage={setMessage}/>}
-        {widgets[5].active && <FoodordersList />}
+        {widgets[5].active && <NatoAlphabet />}
+        {widgets[6].active && <Foodorders user={user} setMessage={setMessage}/>}
+        {widgets[6].active && <FoodordersList />}
         <Footer />
       </div>
     </>
