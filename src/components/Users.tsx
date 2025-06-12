@@ -108,9 +108,9 @@ const Users = ({user}: UsersProps) => {
 
         <ul>
           <li className="userlist">
-            <p>Kode</p>
-            <p>Navn</p>
-            <p>Status</p>
+            <h4>Kode</h4>
+            <h4>Navn</h4>
+            <h4>Status</h4>
           </li>
           {users.map((u) => (
             <li key={u.id} className="userlist">
