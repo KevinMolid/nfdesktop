@@ -813,6 +813,7 @@ input.task-edit-input {
 }
 
 .nato-letter {
+  color: var(--text3-color);
   font-size: 1.5rem;
   font-weight: 500;
 }
