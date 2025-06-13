@@ -50,7 +50,7 @@ const FoodordersList = () => {
         {loading ? (
           <p>Laster bestillinger...</p>
         ) : orders.length === 0 ? (
-          <p>Ingen bestillinger ennå.</p>
+          <p>Det finnes ingen bestillinger.</p>
         ) : (
           <ul className="foodorders-list">
             {orders.map((order) => (
@@ -75,7 +75,7 @@ const FoodordersList = () => {
                         </div>
                         {spice && spice !== "Medium" && <div>{spice}</div>}
                         {removeList.length > 0 && (
-                            <div>Uten: {removeList.join(", ")}</div>
+                            <div>Uten {removeList.join(", ")}</div>
                         )}
                         {extraList.map((extra, i) => (
                             <div key={i}>{extra}</div>

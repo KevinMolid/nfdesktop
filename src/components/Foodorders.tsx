@@ -212,15 +212,25 @@ const Foodorders = ({user, setMessage}: UsersProps) => {
                 <div>
                   {Object.entries(order.options)
                     .filter(([key, val]) => {
-                      if (key === "sizes") return false; // skip showing size
-                      if (key === "spice" && val === "Medium") return false; // skip default spice
-                      return true; // show all other options
+                      if (key === "sizes") return false;
+                      if (key === "spice" && val === "Medium") return false;
+                      return true;
                     })
-                    .map(([key, val]) => (
-                      <div key={key}>
-                        {Array.isArray(val) ? (val as any[]).join(", ") : (val as any)}
-                      </div>
-                    ))}
+                    .map(([key, val]) => {
+                      if (key === "remove" && Array.isArray(val)) {
+                        return (
+                          <div key={key}>
+                            Uten {val.join(", ")}
+                          </div>
+                        );
+                      }
+
+                      if (Array.isArray(val)) {
+                        return <div key={key}>{val.join(", ")}</div>;
+                      }
+
+                      return <div key={key}>{String(val)}</div>;
+                    })}
                 </div>
               </li>
             ))}
