@@ -26,12 +26,13 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
   const [isEditingPriority, setIsEditingPriority] = useState(false);
-  const [editedPriority, setEditedPriority] = useState(priority);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
+  const priorityDropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  /* Handle click outside dropdown */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,6 +43,7 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  /* Handle click outside status dropdown */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
@@ -51,6 +53,26 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  /* Handle click outside priority dropdown */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        priorityDropdownRef.current &&
+        !priorityDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsEditingPriority(false);
+      }
+    };
+
+    if (isEditingPriority) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditingPriority]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -112,7 +134,7 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
           <i className="fa-solid fa-bars"></i>
         </div>
 
-<       div className={`task-priority priority-${priority}`}>
+<       div className={`task-priority priority-${priority}`} ref={priorityDropdownRef}>
             <span className="task-priority-number" onClick={() => setIsEditingPriority(!isEditingPriority)}>{priority ? priority : "0"}</span>
             {isEditingPriority && 
               <div>
