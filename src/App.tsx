@@ -134,7 +134,7 @@ const [message, setMessage] = useState("");
 
       {/* Main container pushed down by header height */}
       <div className="main-container" style={{ paddingTop: headerHeight - 15 || 120 }}>
-        {message && <Message message={message}/>}
+        {message && <Message message={message} setMessage={setMessage}/>}
         {widgets[0].active && <Users user={user} />}
         {widgets[1].active && <Links />}
         {widgets[2].active && <Tasklist />}

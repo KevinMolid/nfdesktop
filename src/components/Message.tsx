@@ -1,11 +1,18 @@
 type MessageProps = {
   message: string;
+  setMessage: (value: string) => void;
 };
 
-const Message = ({message}: MessageProps) => {
+const Message = ({message, setMessage }: MessageProps) => {
   return (
     <div className="card message-container">
-        <p>{message}</p>
+      <button
+        onClick={() => setMessage("")}
+        className="close-button-msg"
+      >
+        <i className="fa-solid fa-x"></i>
+      </button>
+      <p>{message}</p>
     </div>
   )
 }

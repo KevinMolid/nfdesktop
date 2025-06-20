@@ -969,6 +969,26 @@ button:hover {
   right: 2px;
 }
 
+.close-button-msg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  height: 100%;
+  right: 0;
+  top: 0;
+  background-color: #00000022;
+  border-radius: 0 10px 10px 0;
+}
+
+.close-button-msg i {
+  font-size: 0.8rem;
+}
+
+.close-button-msg:hover {
+  background-color: #00000033;
+}
+
 /* Input */
 input {
   padding: 0.4em;
