@@ -38,7 +38,7 @@ const FoodordersList = () => {
       setLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -57,7 +57,6 @@ const FoodordersList = () => {
               <li className="foodorders-item" key={order.id} style={{ marginBottom: "1rem" }}>
                 <p className="message-info">
                     <strong className="user">{order.createdBy}</strong>
-                    <small className="message-timestamp">{order.createdAt?.toDate().toLocaleString("no-NO")}</small>
                 </p>
                 <ul style={{ paddingLeft: "rem" }}>
                   {order.order.map((item, index) => {
