@@ -49,7 +49,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       const isMatch = await bcrypt.compare(pin, userData.pinHash);
 
       if (isMatch) {
-        onLogin(userData);
+        onLogin({ id: userDoc.id, ...userData });
       } else {
         setError("Feil brukernavn eller PIN.");
       }

@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 
 type TaskProps = {
-  id: number;
+  id: string;
   priority: number;
   name: string;
   status: string;
   index: number;
-  onStatusChange: (id: number, newStatus: string) => void;
-  onDelete: (id: number) => void;
-  onRename?: (id: number, newName: string) => void;
-  onPriorityChange?: (id: number, newPriority: number) => void; // NEW
+  onStatusChange: (id: string, newStatus: string) => void;
+  onDelete: (id: string) => void;
+  onRename?: (id: string, newName: string) => void;
+  onPriorityChange?: (id: string, newPriority: number) => void; // NEW
 };
 
 const STATUS_OPTIONS = ["active", "finished", "onhold", "cancelled"];

@@ -32,8 +32,9 @@ const LOCAL_STORAGE_KEY = "widgets";
 
 function App() {
   type User = {
-  username: string;
-  role: string;
+    id: number;  
+    username: string;
+    role: string;
 };
 
 const [user, setUser] = useState<User | null>(null);
