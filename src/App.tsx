@@ -142,7 +142,7 @@ const [message, setMessage] = useState("");
         {widgets[4].active && <Messages username={user.username} />}
         {widgets[5].active && <NatoAlphabet />}
         {widgets[6].active && <Foodorders user={user} setMessage={setMessage}/>}
-        {widgets[6].active && <FoodordersList />}
+        {widgets[6].active && <FoodordersList user={user}/>}
         <Footer />
       </div>
     </>

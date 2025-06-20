@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onSnapshot, collection, Timestamp } from "firebase/firestore";
+import { onSnapshot, collection, Timestamp, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "./firebase";
 import "./Foodorders.css";
 
@@ -20,7 +20,17 @@ type FoodOrder = {
   order: FoodItem[];
 };
 
-const FoodordersList = () => {
+type User = {
+  id: number;
+  username: string;
+  role: string;
+};
+
+type FoodordersListProps = {
+  user: User;
+};
+
+const FoodordersList = ({ user }: FoodordersListProps) => {
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,10 +51,30 @@ const FoodordersList = () => {
     return () => unsubscribe();
   }, []);
 
+  const clearAllOrders = async () => {
+    const confirm = window.confirm("Er du sikker på at du vil slette alle bestillinger?");
+    if (!confirm) return;
+
+    try {
+      const querySnapshot = await getDocs(collection(db, "foodorders"));
+      const deletions = querySnapshot.docs.map((docSnap) =>
+        deleteDoc(doc(db, "foodorders", docSnap.id))
+      );
+      await Promise.all(deletions);
+      console.log("Alle bestillinger er slettet.");
+    } catch (error) {
+      console.error("Feil ved sletting av bestillinger:", error);
+    }
+  };
+
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3>Bestillinger</h3>
+        {user.role === "admin" && orders.length !== 0 && <button className="btn-red small danger" onClick={clearAllOrders}>
+          <i className="fa-solid fa-trash"></i>
+          Slett ordre
+        </button>}
       </div>
       <div className="card-content">
         {loading ? (
