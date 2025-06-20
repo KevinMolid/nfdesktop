@@ -24,10 +24,17 @@ const Users = ({ user }: UsersProps) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const userList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const userList = snapshot.docs
+        .map((doc) => {
+          const data = doc.data() as {
+            username: string;
+            name?: string;
+            nickname?: string;
+            role: string;
+          };
+          return { id: doc.id, ...data };
+        })
+        .sort((a, b) => a.username.localeCompare(b.username));
       setUsers(userList);
     });
 
