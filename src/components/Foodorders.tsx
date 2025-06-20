@@ -22,43 +22,61 @@ const Foodorders = ({user, setMessage}: UsersProps) => {
       img: "https://www.gilde.no/assets/images/_heroimage/3456020/Gilde_Kebabkjott_kebab_i_pita_miljobilde_no034179_Foto_Stian_Broch.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"],
-      price: "100"
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "100/135"
     },
     {
       name: "Kebab i Rull",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"],
-      price: "100"
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "100/135"
     },
     {
       name: "Döner i Pita",
       img: "https://oppdagoslo.no/wp-content/uploads/2024/08/Kebab-Oslo.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"],
-      price: "129"
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "129/165"
     },
     {
       name: "Döner i Rull",
       img: "https://imageproxy.wolt.com/menu/menu-images/shared/8c5f553c-a72c-11ee-80cb-2e89079b6b30_doner_i_rull.jpg",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pommes Frittes oppi", "Ekstra pita"],
-      remove: ["Løk"],
-      price: "129"
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "129/165"
+    },
+    {
+      name: "Shawarma i Pita",
+      img: "https://smakfullpbk.com/wp-content/uploads/2021/10/Syrisk-Shawarma-Kylling-Rull-i-Norge.jpg",
+      sizes: ["Liten", "Stor"],
+      spice: ["Mild", "Medium", "Sterk"],
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "???"
+    },
+    {
+      name: "Shawarma i Rull",
+      img: "https://ministryofcurry.com/wp-content/uploads/2021/05/chicken-shawarma-6.jpg",
+      sizes: ["Liten", "Stor"],
+      spice: ["Mild", "Medium", "Sterk"],
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
+      price: "???"
     },
     {
       name: "Kebab Tallerken",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Ekstra pita"],
-      remove: ["Løk"],
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      remove: ["Løk", "Pepper"],
       price: "159"
     },
   ];
