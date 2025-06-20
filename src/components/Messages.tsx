@@ -42,6 +42,7 @@ const formatTimestamp = (date: Date) => {
 const Messages = ({ username }: MessagesProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [usersMap, setUsersMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Query messages in order of creation time
@@ -63,6 +64,24 @@ const Messages = ({ username }: MessagesProps) => {
     return () => unsubscribe();
   }, []);
 
+  /* Fetch users data */
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const map: Record<string, string> = {};
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const username = data.username;
+        const nickname = data.nickname?.trim();
+        const name = data.name?.trim();
+        map[username] = nickname || name || username; // fallback
+      });
+      setUsersMap(map);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  /* Send message */
   const handleSend = async () => {
     if (!newMessage.trim()) return;
 
@@ -92,7 +111,7 @@ const Messages = ({ username }: MessagesProps) => {
             <div key={msg.id}>
               <div className="message">
                 <p className="message-info">
-                  <strong className="user">{msg.sender}</strong>
+                  <strong className="user">{usersMap[msg.sender] || msg.sender}</strong>
                   <small className="message-timestamp">
                     {date ? formatTimestamp(date) : "Sender..."}
                   </small>
