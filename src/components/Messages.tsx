@@ -109,9 +109,9 @@ const Messages = ({ username }: MessagesProps) => {
 
           return (
             <div key={msg.id}>
-              <div className={`message ${msg.sender === username ? "user-msg" : ""}`}>
+              <div className="message">
                 <p className="message-info">
-                  {msg.sender !== username && <strong className="user">{usersMap[msg.sender] || msg.sender}</strong>}
+                  <strong className="user">{usersMap[msg.sender] || msg.sender}</strong>
                   <small className="message-timestamp">
                     {date ? formatTimestamp(date) : "Sender..."}
                   </small>
