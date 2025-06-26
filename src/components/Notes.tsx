@@ -22,30 +22,36 @@ const Notes = ({ userId }: NotesProps) => {
       const notesRef = collection(db, "users", userId, "notes");
       const snapshot = await getDocs(notesRef);
 
-      if (!snapshot.empty) {
-        // Firestore has notes – use them
-        const notes: StickerData[] = snapshot.docs.map((doc) => doc.data() as StickerData);
-        setStickers(notes);
-      } else {
-        // Firestore empty – try migrate from localStorage
-        const stored = localStorage.getItem("stickers");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-              setStickers(parsed);
-              // Save to Firestore
-              parsed.forEach(async (note: StickerData) => {
-                await setDoc(doc(db, "users", userId, "notes", note.id.toString()), note);
-              });
-              localStorage.removeItem("stickers"); // Clean up
-            }
-          } catch (e) {
-            console.error("Feil ved parsing av localStorage", e);
+      // Notes from Firestore
+      const firestoreNotes: StickerData[] = snapshot.docs.map((doc) => doc.data() as StickerData);
+      const firestoreIds = new Set(firestoreNotes.map(note => note.id));
+
+      // Notes from localStorage
+      const stored = localStorage.getItem("stickers");
+      let localNotes: StickerData[] = [];
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            localNotes = parsed.filter(note => !firestoreIds.has(note.id)); // avoid duplicates
           }
+        } catch (e) {
+          console.error("Feil ved parsing av localStorage", e);
         }
       }
+
+      // If there are local notes not in Firestore, upload them
+      if (localNotes.length > 0) {
+        for (const note of localNotes) {
+          await setDoc(doc(db, "users", userId, "notes", note.id.toString()), note);
+        }
+        localStorage.removeItem("stickers"); // Clean up after migration
+      }
+
+      // Merge and set state
+      setStickers([...firestoreNotes, ...localNotes]);
     };
+
 
     loadStickers();
   }, [userId]);
