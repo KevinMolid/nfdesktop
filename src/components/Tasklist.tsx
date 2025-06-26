@@ -1,17 +1,29 @@
 import { useState, useEffect, useRef } from "react"
 import Task from "./Task";
+import {
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./firebase";
 
 const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
 
-const ToDo = () => {
-  type TaskData = {
-        id: number;
-        priority: number;
-        name: string;
-        status: string;
-    }
-  
+type ToDoProps = {
+  userId: string;
+};
+
+type TaskData = {
+      id: number;
+      priority: number;
+      name: string;
+      status: string;
+  }
+
+const ToDo = ({ userId }: ToDoProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [isCreateActive, setIsCreateActive] = useState(false)
   const [newTaskName, setNewTaskName] = useState("")
@@ -58,32 +70,44 @@ const ToDo = () => {
     };
   }, [isFilterActive]);
 
-  // Load from localStorage once on mount
+  // Load tasks (and migrate if needed)
   useEffect(() => {
-    const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (storedTasks) {
-      try {
-        const parsed = JSON.parse(storedTasks);
-        if (Array.isArray(parsed)) {
-          setTasks(parsed);
-        }
-      } catch (e) {
-        console.error("Error parsing tasks from localStorage", e);
-      }
-    }
+    const loadTasks = async () => {
+      const tasksRef = collection(db, "users", userId, "tasks");
+      const snapshot = await getDocs(tasksRef);
 
-    const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
-    if (storedFilters) {
-      try {
-        const parsedFilters = JSON.parse(storedFilters);
-        if (parsedFilters && typeof parsedFilters === "object") {
-          setVisibleStatuses(parsedFilters);
+      if (!snapshot.empty) {
+        // Firestore has tasks
+        const tasksFromDb = snapshot.docs.map((doc) => doc.data() as TaskData);
+        setTasks(tasksFromDb);
+      } else {
+        // Try migrate from localStorage
+        const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedTasks) {
+          try {
+            const parsed: TaskData[] = JSON.parse(storedTasks);
+            if (Array.isArray(parsed)) {
+              setTasks(parsed);
+              // Write each to Firestore
+              await Promise.all(
+                parsed.map((task) =>
+                  setDoc(
+                    doc(db, "users", userId, "tasks", task.id.toString()),
+                    task
+                  )
+                )
+              );
+              localStorage.removeItem(LOCAL_STORAGE_KEY);
+            }
+          } catch (e) {
+            console.error("Error migrating tasks from localStorage:", e);
+          }
         }
-      } catch (e) {
-        console.error("Error parsing filters from localStorage", e);
       }
-    }
-  }, []);
+    };
+
+    loadTasks();
+  }, [userId]);
 
   useEffect(() => {
       localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));

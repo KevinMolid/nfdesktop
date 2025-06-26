@@ -137,7 +137,7 @@ const [message, setMessage] = useState("");
         {message && <Message message={message} setMessage={setMessage}/>}
         {widgets[0].active && <Users user={user} />}
         {widgets[1].active && <Links />}
-        {widgets[2].active && <Tasklist />}
+        {widgets[2].active && <Tasklist userId={user.id.toString()}/>}
         {widgets[3].active && <Notes userId={user.id.toString()}/>}
         {widgets[4].active && <Messages username={user.username} />}
         {widgets[5].active && <NatoAlphabet />}
