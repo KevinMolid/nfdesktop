@@ -34,8 +34,10 @@ function App() {
   type User = {
     id: string;  
     username: string;
+    name: string;
+    nickname: string;
     role: string;
-};
+  };
 
 const [user, setUser] = useState<User | null>(null);
 const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
@@ -137,7 +139,7 @@ const [message, setMessage] = useState("");
         {message && <Message message={message} setMessage={setMessage}/>}
         {widgets[0].active && <Users user={user} />}
         {widgets[1].active && <Links />}
-        {widgets[2].active && <Tasklist />}
+        {widgets[2].active && <Tasklist user={user} />}
         {widgets[3].active && <Notes />}
         {widgets[4].active && <Messages username={user.username} />}
         {widgets[5].active && <NatoAlphabet />}
