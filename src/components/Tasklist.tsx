@@ -7,7 +7,6 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  onSnapshot,
 } from "firebase/firestore";
 import Task from "./Task";
 
@@ -75,53 +74,58 @@ const ToDo = ({ user }: Props) => {
   }, [isFilterActive]);
 
   useEffect(() => {
-    const db = getFirestore();
-    const userTasksRef = collection(db, "users", user.id, "tasks");
+    const syncAndLoadTasks = async () => {
+      const db = getFirestore();
+      const userTasksRef = collection(db, "users", user.id, "tasks");
 
-    // 1. Upload any local tasks once, then remove localStorage
-    const uploadLocalTasks = async () => {
+      // 1. Load localStorage tasks
+      const localTasks: TaskData[] = [];
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
         try {
-          const localTasks: TaskData[] = JSON.parse(stored);
-          if (Array.isArray(localTasks)) {
-            for (const task of localTasks) {
-              const idStr = String(task.id);
-              await setDoc(doc(userTasksRef, idStr), {
-                id: task.id,
-                name: task.name,
-                priority: task.priority,
-                status: task.status,
-              });
-            }
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((t: any) => localTasks.push(t));
           }
         } catch (e) {
-          console.error("Failed to upload local tasks", e);
+          console.error("Failed to parse localStorage tasks", e);
         }
       }
-    };
 
-    uploadLocalTasks();
-
-    // 2. Start real-time listener
-    const unsubscribe = onSnapshot(userTasksRef, (snapshot) => {
-      const updatedTasks: TaskData[] = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        updatedTasks.push({
-          id: Number(docSnap.id),
+      // 2. Load DB tasks
+      let dbTasks: TaskData[] = [];
+      const snapshot = await getDocs(userTasksRef);
+      const dbTaskIDs = new Set<string>();
+      snapshot.forEach((doc) => {
+        dbTaskIDs.add(doc.id);
+        const data = doc.data();
+        dbTasks.push({
+          id: Number(doc.id),
           name: data.name,
           priority: data.priority,
           status: data.status,
         });
       });
-      setTasks(updatedTasks);
-    });
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+      // 3. Upload all local tasks to DB
+      for (const task of localTasks) {
+        const idStr = String(task.id);
+        await setDoc(doc(userTasksRef, idStr), {
+          id: task.id,
+          name: task.name,
+          priority: task.priority,
+          status: task.status,
+        });
+      }
+
+      // 4. Clear localStorage after successful upload
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+      setTasks(dbTasks); // Only DB tasks shown
+    };
+
+    syncAndLoadTasks();
   }, [user.id]);
-
 
   useEffect(() => {
     localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
@@ -143,6 +147,7 @@ const ToDo = ({ user }: Props) => {
       priority: newTask.priority,
       status: newTask.status,
     });
+    setTasks((prev) => [...prev, newTask]);
     clearNewTask();
   };
 
