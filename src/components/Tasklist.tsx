@@ -1,41 +1,17 @@
 import { useState, useEffect, useRef } from "react"
-import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Task from "./Task";
 
 const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
 
-type TaskData = {
-    id: number;
-    priority: number;
-    name: string;
-    status: string;
-    source?: "local" | "db";
-  }
-
-type User = {
-  id: string;
-  username: string;
-  name: string;
-  nickname: string;
-  role: string;
-};
-
-type Props = {
-  user: User;
-};
-
-/* Helper function to merge local storage and database */
-function mergeTasks(localTasks: TaskData[], dbTasks: TaskData[]): TaskData[] {
-  const taskMap = new Map<number, TaskData>();
-
-  dbTasks.forEach(task => taskMap.set(task.id, { ...task, source: "db" }));
-  localTasks.forEach(task => taskMap.set(task.id, { ...task, source: "local" }));
-
-  return Array.from(taskMap.values());
-}
-
-const ToDo = ({ user }: Props) => {
+const ToDo = () => {
+  type TaskData = {
+        id: number;
+        priority: number;
+        name: string;
+        status: string;
+    }
+  
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [isCreateActive, setIsCreateActive] = useState(false)
   const [newTaskName, setNewTaskName] = useState("")
@@ -82,59 +58,36 @@ const ToDo = ({ user }: Props) => {
     };
   }, [isFilterActive]);
 
+  // Load from localStorage once on mount
   useEffect(() => {
-    const loadTasks = async () => {
-      const localTasks: TaskData[] = [];
-      const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
-
-      if (storedTasks) {
-        try {
-          const parsed = JSON.parse(storedTasks);
-          if (Array.isArray(parsed)) {
-            parsed.forEach((t: any) =>
-              localTasks.push({ ...t, source: "local" })
-            );
-          }
-        } catch (e) {
-          console.error("Error parsing local tasks", e);
-        }
-      }
-
-      const db = getFirestore();
-      let dbTasks: TaskData[] = [];
-
+    const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedTasks) {
       try {
-        const snapshot = await getDocs(collection(db, "users", user.id, "tasks"));
-        dbTasks = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: Number(doc.id),
-            name: data.name,
-            priority: data.priority,
-            status: data.status,
-            source: "db"
-          };
-        });
+        const parsed = JSON.parse(storedTasks);
+        if (Array.isArray(parsed)) {
+          setTasks(parsed);
+        }
       } catch (e) {
-        console.error("Error loading tasks from Firestore", e);
+        console.error("Error parsing tasks from localStorage", e);
       }
+    }
 
-      const combined = mergeTasks(localTasks, dbTasks);
-      setTasks(combined);
-    };
-
-    loadTasks();
-  }, [user.id]);
+    const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (storedFilters) {
+      try {
+        const parsedFilters = JSON.parse(storedFilters);
+        if (parsedFilters && typeof parsedFilters === "object") {
+          setVisibleStatuses(parsedFilters);
+        }
+      } catch (e) {
+        console.error("Error parsing filters from localStorage", e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
       localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
     }, [visibleStatuses]);
-
-  /* Helper function */
-  const updateLocalStorageTasks = (updated: TaskData[]) => {
-    const localOnly = updated.filter(task => task.source === "local");
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localOnly));
-  };
 
   const toggleCreateActive = () => {
     setIsCreateActive(!isCreateActive)
