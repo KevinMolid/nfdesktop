@@ -70,68 +70,48 @@ const ToDo = ({ userId }: ToDoProps) => {
     };
   }, [isFilterActive]);
 
+  // Load tasks (and migrate if needed)
   useEffect(() => {
     const loadTasks = async () => {
       const tasksRef = collection(db, "users", userId, "tasks");
-
-      // 1. Load existing tasks from Firestore
       const snapshot = await getDocs(tasksRef);
-      const tasksFromDb: TaskData[] = snapshot.docs.map((doc) => doc.data() as TaskData);
 
-      // 2. Check if localStorage has additional tasks
-      const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
-      let localTasks: TaskData[] = [];
-
-      if (storedTasks) {
-        try {
-          const parsed = JSON.parse(storedTasks);
-          if (Array.isArray(parsed)) {
-            localTasks = parsed;
+      if (!snapshot.empty) {
+        // Firestore has tasks
+        const tasksFromDb = snapshot.docs.map((doc) => doc.data() as TaskData);
+        setTasks(tasksFromDb);
+      } else {
+        // Try migrate from localStorage
+        const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedTasks) {
+          try {
+            const parsed: TaskData[] = JSON.parse(storedTasks);
+            if (Array.isArray(parsed)) {
+              setTasks(parsed);
+              // Write each to Firestore
+              await Promise.all(
+                parsed.map((task) =>
+                  setDoc(
+                    doc(db, "users", userId, "tasks", task.id.toString()),
+                    task
+                  )
+                )
+              );
+              localStorage.removeItem(LOCAL_STORAGE_KEY);
+            }
+          } catch (e) {
+            console.error("Error migrating tasks from localStorage:", e);
           }
-        } catch (e) {
-          console.error("Error parsing localStorage tasks:", e);
         }
       }
-
-      // 3. Merge localStorage tasks that aren't already in Firestore
-      const dbTaskIds = new Set(tasksFromDb.map(task => task.id));
-      const tasksToAdd = localTasks.filter(task => !dbTaskIds.has(task.id));
-      const mergedTasks = [...tasksFromDb, ...tasksToAdd];
-
-      // 4. Save new ones to Firestore
-      if (tasksToAdd.length > 0) {
-        await Promise.all(
-          tasksToAdd.map(task =>
-            setDoc(doc(db, "users", userId, "tasks", task.id.toString()), task)
-          )
-        );
-      }
-
-      // ✅ Always remove local storage if it had tasks
-      if (localTasks.length > 0) {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      }
-
-      // 5. Set merged state
-      setTasks(mergedTasks);
     };
 
     loadTasks();
   }, [userId]);
 
-
   useEffect(() => {
       localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
     }, [visibleStatuses]);
-
-  const saveTasks = async (updatedTasks: TaskData[]) => {
-    setTasks(updatedTasks);
-    await Promise.all(
-      updatedTasks.map((task) =>
-        setDoc(doc(db, "users", userId, "tasks", task.id.toString()), task)
-      )
-    );
-  };
 
   const toggleCreateActive = () => {
     setIsCreateActive(!isCreateActive)
@@ -141,16 +121,11 @@ const ToDo = ({ userId }: ToDoProps) => {
     setIsFilterActive(!isFilterActive)
   }
 
-  const addNewTask = async () => {
-    const newTask: TaskData = {
-      priority: 0,
-      name: newTaskName,
-      id: Date.now(),
-      status: "active",
-    };
-    const updated = [...tasks, newTask];
-    await saveTasks(updated);
-    clearNewTask();
+  const addNewTask = () => {
+    const updatedTasks = [...tasks, {priority: 0, name: newTaskName, id: Date.now(), status: "active"}];
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+    clearNewTask()
   };
 
   const clearNewTask = () => {
@@ -158,33 +133,39 @@ const ToDo = ({ userId }: ToDoProps) => {
     setNewTaskName("")
   }
 
-  const handleRename = async (id: number, newName: string) => {
-    const updated = tasks.map((task) =>
-      task.id === id ? { ...task, name: newName } : task
-    );
-    await saveTasks(updated);
-  };
+  const handleRename = (id: number, newName: string) => {
+  const updatedTasks = tasks.map((task) =>
+    task.id === id ? { ...task, name: newName } : task
+  );
+  setTasks(updatedTasks);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+};
 
   {/* Handle status change */}
-  const handleStatusChange = async (id: number, newStatus: string) => {
-    const updated = tasks.map((task) =>
-      task.id === id ? { ...task, status: newStatus } : task
-    );
-    await saveTasks(updated);
+  const handleStatusChange = (id: number, newStatus: string) => {
+    const updatedTasks = tasks.map((t) => {
+      if (t.id === id) {
+        return { ...t, status: newStatus };
+      }
+      return t;
+    });
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
   };
 
-  const handlePriorityChange = async (id: number, newPriority: number) => {
-    const updated = tasks.map((task) =>
+  const handlePriorityChange = (id: number, newPriority: number) => {
+    const updatedTasks = tasks.map(task =>
       task.id === id ? { ...task, priority: newPriority } : task
     );
-    await saveTasks(updated);
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
   };
 
-  const deleteTask = async (id: number) => {
-    const updated = tasks.filter((task) => task.id !== id);
-    setTasks(updated);
-    await deleteDoc(doc(db, "users", userId, "tasks", id.toString()));
-  };
+  const deleteTask = (id: number) => {
+    const updatedTasks = tasks.filter((t) => t.id !== id);
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+  }
 
   return (
     <div className="card has-header grow-1">
