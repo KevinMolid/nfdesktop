@@ -136,7 +136,7 @@ const [message, setMessage] = useState("");
       <div className="main-container" style={{ paddingTop: headerHeight - 15 || 120 }}>
         {message && <Message message={message} setMessage={setMessage}/>}
         {widgets[0].active && <Users user={user} />}
-        {widgets[1].active && <Links />}
+        {widgets[1].active && <Links userId={user.id.toString()}/>}
         {widgets[2].active && <Tasklist userId={user.id.toString()}/>}
         {widgets[3].active && <Notes userId={user.id.toString()}/>}
         {widgets[4].active && <Messages username={user.username} />}

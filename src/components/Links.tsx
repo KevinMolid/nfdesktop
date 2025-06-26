@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
+import { collection, getDocs, setDoc, doc } from "firebase/firestore";
+import { db } from "./firebase";
 
 type Link = { name: string; href: string };
 type LinkCategory = { category: string; links: Link[] };
+type LinksProps = { userId: string };
 
 const STATIC_CATEGORIES: LinkCategory[] = [
   {
@@ -60,7 +63,7 @@ const getInitialCustomLinks = (): Link[] => {
   }
 };
 
-const Links = () => {
+const Links = ({ userId }: LinksProps) => {
   const [expandedCategories, setExpandedCategories] = useState(getInitialExpanded);
   const [customLinks, setCustomLinks] = useState<Link[]>(getInitialCustomLinks);
   const [showForm, setShowForm] = useState(false);
@@ -72,8 +75,42 @@ const Links = () => {
   }, [expandedCategories]);
 
   useEffect(() => {
-    localStorage.setItem(CUSTOM_LINKS_KEY, JSON.stringify(customLinks));
-  }, [customLinks]);
+    const loadLinks = async () => {
+      const linksRef = collection(db, "users", userId, "links");
+      const snapshot = await getDocs(linksRef);
+      const linksFromDb: Link[] = snapshot.docs.map(doc => doc.data() as Link);
+
+      let localLinks: Link[] = [];
+      try {
+        const stored = localStorage.getItem(CUSTOM_LINKS_KEY);
+        if (stored) {
+          localLinks = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error("Error parsing local links:", e);
+      }
+
+      const dbLinksSet = new Set(linksFromDb.map(link => link.href));
+      const linksToAdd = localLinks.filter(link => !dbLinksSet.has(link.href));
+      const mergedLinks = [...linksFromDb, ...linksToAdd];
+
+      // Write missing ones to Firestore
+      await Promise.all(
+        linksToAdd.map(link =>
+          setDoc(doc(db, "users", userId, "links", encodeURIComponent(link.href)), link)
+        )
+      );
+
+      // Cleanup localStorage
+      if (linksToAdd.length > 0) {
+        localStorage.removeItem(CUSTOM_LINKS_KEY);
+      }
+
+      setCustomLinks(mergedLinks);
+    };
+
+    loadLinks();
+  }, [userId]);
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({
@@ -82,14 +119,21 @@ const Links = () => {
     }));
   };
 
-  const handleAddLink = () => {
+  const handleAddLink = async () => {
     if (!newLinkName.trim() || !newLinkHref.trim()) return;
     const newLink = { name: newLinkName.trim(), href: newLinkHref.trim() };
-    setCustomLinks(prev => [...prev, newLink]);
+    const updated = [...customLinks, newLink];
+
+    setCustomLinks(updated);
     setExpandedCategories(prev => ({ ...prev, "Mine lenker": true }));
     setNewLinkName("");
     setNewLinkHref("");
     setShowForm(false);
+
+    await setDoc(
+      doc(db, "users", userId, "links", encodeURIComponent(newLink.href)),
+      newLink
+    );
   };
 
   const allCategories: LinkCategory[] = [
