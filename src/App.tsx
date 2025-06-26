@@ -32,7 +32,7 @@ const LOCAL_STORAGE_KEY = "widgets";
 
 function App() {
   type User = {
-    id: number;  
+    id: string;  
     username: string;
     role: string;
 };
