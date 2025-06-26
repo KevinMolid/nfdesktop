@@ -1,24 +1,17 @@
 import { useState, useEffect, useRef } from "react"
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  setDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Task from "./Task";
 
 const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
 
 type TaskData = {
-  id: number;
-  priority: number;
-  name: string;
-  status: string;
-};
+    id: number;
+    priority: number;
+    name: string;
+    status: string;
+    source?: "local" | "db";
+  }
 
 type User = {
   id: string;
@@ -32,19 +25,35 @@ type Props = {
   user: User;
 };
 
+/* Helper function to merge local storage and database */
+function mergeTasks(localTasks: TaskData[], dbTasks: TaskData[]): TaskData[] {
+  const taskMap = new Map<number, TaskData>();
+
+  dbTasks.forEach(task => taskMap.set(task.id, { ...task, source: "db" }));
+  localTasks.forEach(task => taskMap.set(task.id, { ...task, source: "local" }));
+
+  return Array.from(taskMap.values());
+}
+
 const ToDo = ({ user }: Props) => {
-  const [isFilterActive, setIsFilterActive] = useState(false);
-  const [isCreateActive, setIsCreateActive] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
-  const [tasks, setTasks] = useState<TaskData[]>([]);
+  const [isFilterActive, setIsFilterActive] = useState(false)
+  const [isCreateActive, setIsCreateActive] = useState(false)
+  const [newTaskName, setNewTaskName] = useState("")
+  const [tasks, setTasks] = useState<TaskData[]>([])
 
   const [visibleStatuses, setVisibleStatuses] = useState<Record<string, boolean>>(() => {
-    const stored = localStorage.getItem(FILTER_STORAGE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {}
+  const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
+  if (storedFilters) {
+    try {
+      const parsed = JSON.parse(storedFilters);
+      if (parsed && typeof parsed === "object") {
+        return parsed;
+      }
+    } catch (e) {
+      console.error("Error parsing filters from localStorage", e);
     }
+  }
+
     return {
       active: true,
       finished: true,
@@ -74,148 +83,131 @@ const ToDo = ({ user }: Props) => {
   }, [isFilterActive]);
 
   useEffect(() => {
-    const syncAndLoadTasks = async () => {
-      const db = getFirestore();
-      const userTasksRef = collection(db, "users", user.id, "tasks");
-
-      // 1. Load localStorage tasks
+    const loadTasks = async () => {
       const localTasks: TaskData[] = [];
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
+      const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+      if (storedTasks) {
         try {
-          const parsed = JSON.parse(stored);
+          const parsed = JSON.parse(storedTasks);
           if (Array.isArray(parsed)) {
-            parsed.forEach((t: any) => localTasks.push(t));
+            parsed.forEach((t: any) =>
+              localTasks.push({ ...t, source: "local" })
+            );
           }
         } catch (e) {
-          console.error("Failed to parse localStorage tasks", e);
+          console.error("Error parsing local tasks", e);
         }
       }
 
-      // 2. Load DB tasks
+      const db = getFirestore();
       let dbTasks: TaskData[] = [];
-      const snapshot = await getDocs(userTasksRef);
-      const dbTaskIDs = new Set<string>();
-      snapshot.forEach((doc) => {
-        dbTaskIDs.add(doc.id);
-        const data = doc.data();
-        dbTasks.push({
-          id: Number(doc.id),
-          name: data.name,
-          priority: data.priority,
-          status: data.status,
-        });
-      });
 
-      // 3. Upload all local tasks to DB
-      for (const task of localTasks) {
-        const idStr = String(task.id);
-        await setDoc(doc(userTasksRef, idStr), {
-          id: task.id,
-          name: task.name,
-          priority: task.priority,
-          status: task.status,
+      try {
+        const snapshot = await getDocs(collection(db, "users", user.id, "tasks"));
+        dbTasks = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: Number(doc.id),
+            name: data.name,
+            priority: data.priority,
+            status: data.status,
+            source: "db"
+          };
         });
+      } catch (e) {
+        console.error("Error loading tasks from Firestore", e);
       }
 
-      // 4. Clear localStorage after successful upload
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-
-      setTasks(dbTasks); // Only DB tasks shown
+      const combined = mergeTasks(localTasks, dbTasks);
+      setTasks(combined);
     };
 
-    syncAndLoadTasks();
+    loadTasks();
   }, [user.id]);
 
   useEffect(() => {
-    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
-  }, [visibleStatuses]);
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
+    }, [visibleStatuses]);
 
-  const toggleCreateActive = () => setIsCreateActive(!isCreateActive);
-  const toggleFiltering = () => setIsFilterActive(!isFilterActive);
+  /* Helper function */
+  const updateLocalStorageTasks = (updated: TaskData[]) => {
+    const localOnly = updated.filter(task => task.source === "local");
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localOnly));
+  };
 
-  const addNewTask = async () => {
-    const db = getFirestore();
-    const newTask: TaskData = {
-      id: Date.now(),
-      name: newTaskName,
-      priority: 0,
-      status: "active",
-    };
-    await setDoc(doc(db, "users", user.id, "tasks", String(newTask.id)), {
-      name: newTask.name,
-      priority: newTask.priority,
-      status: newTask.status,
-    });
-    setTasks((prev) => [...prev, newTask]);
-    clearNewTask();
+  const toggleCreateActive = () => {
+    setIsCreateActive(!isCreateActive)
+  }
+
+  const toggleFiltering = () => {
+    setIsFilterActive(!isFilterActive)
+  }
+
+  const addNewTask = () => {
+    const updatedTasks = [...tasks, {priority: 0, name: newTaskName, id: Date.now(), status: "active"}];
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+    clearNewTask()
   };
 
   const clearNewTask = () => {
-    setIsCreateActive(false);
-    setNewTaskName("");
+    setIsCreateActive(false)
+    setNewTaskName("")
+  }
+
+  const handleRename = (id: number, newName: string) => {
+  const updatedTasks = tasks.map((task) =>
+    task.id === id ? { ...task, name: newName } : task
+  );
+  setTasks(updatedTasks);
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+};
+
+  {/* Handle status change */}
+  const handleStatusChange = (id: number, newStatus: string) => {
+    const updatedTasks = tasks.map((t) => {
+      if (t.id === id) {
+        return { ...t, status: newStatus };
+      }
+      return t;
+    });
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
   };
 
-  const handleRename = async (id: number, newName: string) => {
-    const db = getFirestore();
-    const taskRef = doc(db, "users", user.id, "tasks", String(id));
-    await updateDoc(taskRef, { name: newName });
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, name: newName } : task))
+  const handlePriorityChange = (id: number, newPriority: number) => {
+    const updatedTasks = tasks.map(task =>
+      task.id === id ? { ...task, priority: newPriority } : task
     );
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
   };
 
-  const handleStatusChange = async (id: number, newStatus: string) => {
-    const db = getFirestore();
-    const taskRef = doc(db, "users", user.id, "tasks", String(id));
-    await updateDoc(taskRef, { status: newStatus });
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, status: newStatus } : task))
-    );
-  };
-
-  const handlePriorityChange = async (id: number, newPriority: number) => {
-    const db = getFirestore();
-    const taskRef = doc(db, "users", user.id, "tasks", String(id));
-    await updateDoc(taskRef, { priority: newPriority });
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, priority: newPriority } : task))
-    );
-  };
-
-  const deleteTask = async (id: number) => {
-    const db = getFirestore();
-    await deleteDoc(doc(db, "users", user.id, "tasks", String(id)));
-    setTasks((prev) => prev.filter((task) => task.id !== id));
-  };
-
-  const sortTasks = (a: TaskData, b: TaskData) => {
-    const order = [1, 2, 3, 0];
-    return order.indexOf(a.priority) - order.indexOf(b.priority);
-  };
+  const deleteTask = (id: number) => {
+    const updatedTasks = tasks.filter((t) => t.id !== id);
+    setTasks(updatedTasks);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTasks));
+  }
 
   return (
     <div className="card has-header grow-1">
-      <div className="card-header">
-        <h3 className="card-title">Oppgaver</h3>
-        {!isCreateActive && (
-          <div className="icon-container">
-            <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
-            <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
-            {isFilterActive && (
-              <div className="filter-dropdown" ref={filterRef}>
+        <div className="card-header">
+            <h3 className="card-title">Oppgaver</h3>
+            {!isCreateActive && <div className="icon-container">
+              <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
+              <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
+              {isFilterActive && <div className="filter-dropdown" ref={filterRef}>
                 {["active", "finished", "onhold", "cancelled"].map((status) => (
                   <div
                     key={status}
-                    className={`filter filter-${status} hover-border ${
-                      visibleStatuses[status] ? "active-selection" : ""
-                    }`}
-                    onClick={() =>
+                    className={`filter filter-${status} hover-border ${visibleStatuses[status] ? "active-selection" : ""}`}
+                    onClick={() => {
                       setVisibleStatuses((prev) => ({
                         ...prev,
                         [status]: !prev[status],
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     {status === "active" && <i className="fa-solid fa-circle lightgrey"></i>}
                     {status === "finished" && <i className="fa-solid fa-check green"></i>}
@@ -223,73 +215,131 @@ const ToDo = ({ user }: Props) => {
                     {status === "cancelled" && <i className="fa-solid fa-xmark red"></i>}
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {isCreateActive && (
-        <div className="create-task-box">
-          Opprett ny oppgave
-          <div className="create-task-input-container">
-            <input
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addNewTask();
-              }}
-            />
-            <div className="button-group">
-              <button className="btn" onClick={addNewTask}>
-                <i className="fa-solid fa-check"></i>
-                <p>Opprett</p>
-              </button>
-              <button onClick={clearNewTask}>
-                <p>Avbryt</p>
-                <i className="fa-solid fa-cancel red"></i>
-              </button>
-            </div>
-          </div>
+              </div>}
+            </div>}
         </div>
-      )}
 
-      {["active", "finished", "onhold", "cancelled"].map((statusKey) =>
-        visibleStatuses[statusKey] ? (
-          <div key={statusKey}>
-            {statusKey !== "active" && (
-              <h4 className="card-title">
-                {statusKey === "finished"
-                  ? "Utførte oppgaver"
-                  : statusKey === "onhold"
-                  ? "Pausede oppgaver"
-                  : "Kansellerte oppgaver"}
-              </h4>
-            )}
-            <ul className="task-list">
-              {tasks
-                .filter((task) => task.status === statusKey)
-                .sort(sortTasks)
-                .map((task, index) => (
-                  <Task
-                    key={task.id}
-                    id={task.id}
-                    priority={task.priority}
-                    name={task.name}
-                    index={index}
-                    status={task.status}
-                    onDelete={() => deleteTask(task.id)}
-                    onStatusChange={handleStatusChange}
-                    onRename={handleRename}
-                    onPriorityChange={handlePriorityChange}
-                  />
-                ))}
-            </ul>
-          </div>
-        ) : null
-      )}
+        {isCreateActive && <div className="create-task-box">
+            Opprett ny oppgave
+            <div className="create-task-input-container">
+              <input
+                value={newTaskName}
+                onChange={e => setNewTaskName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    addNewTask();
+                  }
+                }}
+              />
+              <div className="button-group">
+                <button className="btn" onClick={addNewTask}>
+                  <i className="fa-solid fa-check" ></i>
+                  <p>Opprett</p>
+                </button>
+                <button onClick={clearNewTask}>
+                  <p>Avbryt</p>
+                  <i className="fa-solid fa-cancel red" ></i>
+                </button>
+              </div>
+            </div>
+          </div>}
+
+        {/* Tasklist */}
+        {/* Active tasks */}
+        {visibleStatuses.active && <ul className="task-list">
+          {tasks.filter(task => task.status === "active").sort((a, b) => {
+              const order = [1, 2, 3, 0];
+              return order.indexOf(a.priority) - order.indexOf(b.priority);
+            }).map((task, index) => (
+            <Task 
+              key={task.id}
+              id={task.id} 
+              priority={task.priority}
+              name={task.name} 
+              index={index}
+              status={task.status}
+              onDelete={() => deleteTask(task.id)}
+              onStatusChange={handleStatusChange}
+              onRename={handleRename}  
+              onPriorityChange={handlePriorityChange}
+            />
+          ))}
+        </ul>}
+
+        {/* Finished tasks */}
+        {visibleStatuses.finished && <>
+          <h4 className="card-title">Utførte oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "finished").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                priority={task.priority}
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+                onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
+              />
+            ))}
+          </ul>
+        </>}
+
+        {/* On-hold tasks */}
+        {visibleStatuses.onhold && <>
+          <h4 className="card-title">Pausede oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "onhold").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                priority={task.priority}
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+                onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
+              />
+            ))}
+          </ul>
+        </>}
+
+        {/* Cancelled tasks */}
+        {visibleStatuses.cancelled && <>
+          <h4 className="card-title">Kansellerte oppgaver</h4>
+          <ul className="task-list">
+            {tasks.filter(task => task.status === "cancelled").sort((a, b) => {
+                const order = [1, 2, 3, 0];
+                return order.indexOf(a.priority) - order.indexOf(b.priority);
+              }).map((task, index) => (
+              <Task 
+                key={task.id}
+                id={task.id} 
+                priority={task.priority}
+                name={task.name} 
+                index={index}
+                status={task.status}
+                onDelete={() => deleteTask(task.id)}
+                onStatusChange={handleStatusChange}
+                onRename={handleRename}
+                onPriorityChange={handlePriorityChange}
+              />
+            ))}
+          </ul>
+        </>}
+
     </div>
-  );
-};
+  )
+}
 
-export default ToDo;
+export default ToDo
