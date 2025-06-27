@@ -102,7 +102,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         ) : (
           <ul className="foodorders-list">
             {orders.map((order) => (
-              <li className="foodorders-item" key={order.id} style={{ marginBottom: "1rem" }}>
+              <li className={order.createdBy === user.username ? "foodorders-item-user" : "foodorders-item"} key={order.id} style={{ marginBottom: "1rem" }}>
                 <p className="message-info">
                     <strong className="user">{usersMap[order.createdBy] || order.createdBy}</strong>
                 </p>
