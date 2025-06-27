@@ -33,6 +33,7 @@ type FoodordersListProps = {
 const FoodordersList = ({ user }: FoodordersListProps) => {
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usersMap, setUsersMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "foodorders"), (snapshot) => {
@@ -46,6 +47,23 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     }, (error) => {
       console.error("Error listening to food orders:", error);
       setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  /* Fetch users data */
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const map: Record<string, string> = {};
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const username = data.username;
+        const nickname = data.nickname?.trim();
+        const name = data.name?.trim();
+        map[username] = nickname || name || username; // fallback
+      });
+      setUsersMap(map);
     });
 
     return () => unsubscribe();
@@ -86,7 +104,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
             {orders.map((order) => (
               <li className="foodorders-item" key={order.id} style={{ marginBottom: "1rem" }}>
                 <p className="message-info">
-                    <strong className="user">{order.createdBy}</strong>
+                    <strong className="user">{usersMap[order.createdBy] || order.createdBy}</strong>
                 </p>
                 <ul style={{ paddingLeft: "rem" }}>
                   {order.order.map((item, index) => {
