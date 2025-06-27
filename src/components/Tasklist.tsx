@@ -4,14 +4,24 @@ import Task from "./Task";
 const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
 
-const ToDo = () => {
-  type TaskData = {
-        id: number;
-        priority: number;
-        name: string;
-        status: string;
-    }
-  
+type User = {
+  id: string;
+  username: string;
+  role: string;
+};
+
+type TasklistProps = {
+  user: User;
+};
+
+type TaskData = {
+      id: number;
+      priority: number;
+      name: string;
+      status: string;
+  }
+
+const ToDo = ({user}: TasklistProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false)
   const [isCreateActive, setIsCreateActive] = useState(false)
   const [newTaskName, setNewTaskName] = useState("")
