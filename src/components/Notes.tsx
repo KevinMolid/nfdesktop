@@ -1,72 +1,108 @@
 import Sticker from "./Sticker";
 import { useState, useEffect } from "react";
+import { db } from "./firebase";
+import {
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  deleteDoc,
+  getDoc
+} from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = "stickers";
 
-const Notes = () => {
-    type StickerData = {
-        id: number;
-        color: string;
-        content: string;
-    }
-    
+const Notes = ({ user }: { user: { id: string } }) => {
+  type StickerData = {
+    id: number;
+    color: string;
+    content: string;
+  };
+
   const [stickers, setStickers] = useState<StickerData[]>([]);
 
-  // Load from localStorage once on mount
   useEffect(() => {
-    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setStickers(parsed);
+    const loadStickers = async () => {
+      const userDocRef = doc(db, "users", user.id);
+      const userDocSnap = await getDoc(userDocRef);
+      const notesMoved = userDocSnap.exists() && userDocSnap.data().notesMoved;
+
+      let localStickers: StickerData[] = [];
+      if (!notesMoved) {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              localStickers = parsed;
+            }
+          } catch (e) {
+            console.error("Error parsing localStorage", e);
+          }
         }
-      } catch (e) {
-        console.error("Error parsing localStorage", e);
       }
-    }
-  }, []);
 
-  {/* Handle order change */}
+      let dbStickers: StickerData[] = [];
+      try {
+        const snapshot = await getDocs(collection(db, "users", user.id, "notes"));
+        dbStickers = snapshot.docs.map(doc => doc.data() as StickerData);
+      } catch (e) {
+        console.warn("No DB notes found or failed to fetch", e);
+      }
 
-  {/* Handle color change */}
-  const handleColorChange = (id: number) => {
+      if (localStickers.length > 0 && !notesMoved) {
+        await Promise.all(
+          localStickers.map(note =>
+            setDoc(doc(db, "users", user.id, "notes", note.id.toString()), note)
+          )
+        );
+        await setDoc(userDocRef, { notesMoved: true }, { merge: true });
+        setStickers([...dbStickers, ...localStickers]);
+      } else {
+        setStickers(dbStickers);
+      }
+    };
+
+    loadStickers();
+  }, [user]);
+
+  const handleColorChange = async (id: number) => {
     const updated = stickers.map((s) => {
-        if (s.id === id){
-            const newColor = 
-            s.color === "yellow" ? "blue" :
-            s.color === "blue" ? "red" :
-            s.color === "red" ? "green" :
-            "yellow";
-            return { ...s, color: newColor}
-        } else {
-            return s
-        }
+      if (s.id === id) {
+        const newColor =
+          s.color === "yellow" ? "blue" :
+          s.color === "blue" ? "red" :
+          s.color === "red" ? "green" :
+          "yellow";
+        return { ...s, color: newColor };
+      } else {
+        return s;
+      }
     });
-    setStickers(updated)
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-  }
+    setStickers(updated);
+    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
+  };
 
-  {/* Handle Content change */}
-    const handleContentChange = (id: number, newContent: string) => {
+  const handleContentChange = async (id: number, newContent: string) => {
     const updated = stickers.map((s) =>
       s.id === id ? { ...s, content: newContent } : s
     );
     setStickers(updated);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
   };
 
-  const deleteSticker = (sticker: StickerData) => {
+  const deleteSticker = async (sticker: StickerData) => {
     const updatedStickers = stickers.filter((s) => s.id !== sticker.id);
     setStickers(updatedStickers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedStickers));
-  }
+    await deleteDoc(doc(db, "users", user.id, "notes", sticker.id.toString()));
+  };
 
-const addSticker = () => {
-    const updatedStickers = [...stickers, {content: "...", color: "yellow", id:Date.now()}];
+  const addSticker = async () => {
+    const newSticker = { content: "...", color: "yellow", id: Date.now() };
+    const updatedStickers = [...stickers, newSticker];
     setStickers(updatedStickers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedStickers));
-    };
+    await setDoc(doc(db, "users", user.id, "notes", newSticker.id.toString()), newSticker);
+  };
 
   return (
     <div className="card has-header grow-1">
@@ -79,12 +115,15 @@ const addSticker = () => {
       </div>
       <div className="stickerboard">
         {stickers.map((sticker) => (
-          <Sticker content={sticker.content} 
+          <Sticker
+            content={sticker.content}
             color={sticker.color}
             onDelete={() => deleteSticker(sticker)}
-            onColorChange={() => handleColorChange(sticker.id)} 
+            onColorChange={() => handleColorChange(sticker.id)}
             onContentChange={(newContent) => handleContentChange(sticker.id, newContent)}
-            id={sticker.id} key={sticker.id} />
+            id={sticker.id}
+            key={sticker.id}
+          />
         ))}
       </div>
     </div>
