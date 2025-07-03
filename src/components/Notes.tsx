@@ -6,11 +6,11 @@ import {
   getDocs,
   setDoc,
   doc,
-  deleteDoc,
-  getDoc
+  deleteDoc
 } from "firebase/firestore";
 
 const LOCAL_STORAGE_KEY = "stickers";
+const NOTES_MOVED_KEY = "notesMoved";
 
 const Notes = ({ user }: { user: { id: string } }) => {
   type StickerData = {
@@ -23,9 +23,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
 
   useEffect(() => {
     const loadStickers = async () => {
-      const userDocRef = doc(db, "users", user.id);
-      const userDocSnap = await getDoc(userDocRef);
-      const notesMoved = userDocSnap.exists() && userDocSnap.data().notesMoved;
+      const notesMoved = localStorage.getItem(NOTES_MOVED_KEY) === "true";
 
       let localStickers: StickerData[] = [];
       if (!notesMoved) {
@@ -56,7 +54,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
             setDoc(doc(db, "users", user.id, "notes", note.id.toString()), note)
           )
         );
-        await setDoc(userDocRef, { notesMoved: true }, { merge: true });
+        localStorage.setItem(NOTES_MOVED_KEY, "true");
         setStickers([...dbStickers, ...localStickers]);
       } else {
         setStickers(dbStickers);
