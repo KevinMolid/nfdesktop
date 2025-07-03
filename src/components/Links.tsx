@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import {
   collection,
   getDocs,
   setDoc,
   doc,
+  deleteDoc,
 } from "firebase/firestore";
 
 type Link = { id: string; name: string; href: string };
@@ -67,6 +68,10 @@ const Links = ({ user }: { user: { id: string } }) => {
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkHref, setNewLinkHref] = useState("");
 
+  // Track which dropdown is open (link ID) or null for none
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     localStorage.setItem(EXPANDED_KEY, JSON.stringify(expandedCategories));
   }, [expandedCategories]);
@@ -75,7 +80,6 @@ const Links = ({ user }: { user: { id: string } }) => {
     const loadLinks = async () => {
       const linksMoved = localStorage.getItem(LINKS_MOVED_KEY);
 
-      // Step 1: Load local links from localStorage only if not moved yet
       let localLinks: Omit<Link, "id">[] = [];
       if (!linksMoved) {
         const local = localStorage.getItem(CUSTOM_LINKS_KEY);
@@ -91,19 +95,16 @@ const Links = ({ user }: { user: { id: string } }) => {
         }
       }
 
-      // Step 2: If we have local links and not moved yet, copy them to DB with unique IDs
       if (localLinks.length > 0 && !linksMoved) {
         await Promise.all(
           localLinks.map(link => {
             const randomId = crypto.randomUUID();
-            // Save with an 'id' same as Firestore doc id so we can keep it consistent
             return setDoc(doc(db, "users", user.id, "links", randomId), link);
           })
         );
         localStorage.setItem(LINKS_MOVED_KEY, "true");
       }
 
-      // Step 3: Fetch all links from Firestore AFTER moving
       let dbLinks: Link[] = [];
       try {
         const snapshot = await getDocs(collection(db, "users", user.id, "links"));
@@ -120,6 +121,20 @@ const Links = ({ user }: { user: { id: string } }) => {
     loadLinks();
   }, [user]);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdownId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({
       ...prev,
@@ -131,19 +146,30 @@ const Links = ({ user }: { user: { id: string } }) => {
     if (!newLinkName.trim() || !newLinkHref.trim()) return;
     const newLinkData = { name: newLinkName.trim(), href: newLinkHref.trim() };
 
-    // Generate a unique id for Firestore doc and also for React keys
     const randomId = crypto.randomUUID();
     const newLink: Link = { id: randomId, ...newLinkData };
 
-    // Save to Firestore
     await setDoc(doc(db, "users", user.id, "links", randomId), newLinkData);
 
-    // Update state with the new link
     setCustomLinks(prev => [...prev, newLink]);
     setExpandedCategories(prev => ({ ...prev, "Mine lenker": true }));
     setNewLinkName("");
     setNewLinkHref("");
     setShowForm(false);
+  };
+
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "users", user.id, "links", id));
+      setCustomLinks(prev => prev.filter(link => link.id !== id));
+      setOpenDropdownId(null);
+    } catch (error) {
+      console.error("Failed to delete link:", error);
+    }
+  };
+
+  const toggleDropdown = (id: string) => {
+    setOpenDropdownId((prev) => (prev === id ? null : id));
   };
 
   const allCategories: LinkCategory[] = [
@@ -207,10 +233,50 @@ const Links = ({ user }: { user: { id: string } }) => {
 
             {isExpanded && (
               <ul>
-                {links.map(link => (
-                  // Use link.id as key to avoid duplication bugs
-                  <li key={link.id}>
-                    <a href={link.href} target="_blank" rel="noopener noreferrer">
+                {links.map((link) => (
+                  <li
+                    key={link.id}
+                    style={{ display: "flex", alignItems: "center", position: "relative" }}
+                  >
+                    {category === "Mine lenker" && (
+                      <div
+                        ref={openDropdownId === link.id ? dropdownRef : null}
+                        style={{ position: "relative" }}
+                      >
+                        <div
+                          className="icon-div hover"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent category toggle
+                            toggleDropdown(link.id);
+                          }}
+                          title="Alternativer"
+                          style={{ marginRight: 8 }}
+                        >
+                          <i className="fa-solid fa-bars"></i>
+                        </div>
+
+                        {openDropdownId === link.id && (
+                          <div className="task-dropdown">
+                            <div
+                              className="dropdown-item default-select hover-border"
+                              onClick={() => handleDeleteLink(link.id)}
+                            >
+                              <div className="dropdown-item-icon-container">
+                                <i className="fa-solid fa-trash red"></i>
+                              </div>
+                              <span style={{ marginLeft: "8px" }}>Slett lenke</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ flex: 1 }}
+                    >
                       {link.name}
                     </a>
                   </li>

@@ -509,6 +509,7 @@ input.task-edit-input {
   grid-template-columns: 18px 1fr;
   padding: 4px 8px;
   border: 1px solid transparent;
+  min-width: max-content;
 }
 
 .dropdown-item-icon-container {
