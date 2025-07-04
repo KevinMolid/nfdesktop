@@ -8,8 +8,8 @@ type FoodItem = {
   options?: {
     remove?: string[];
     extra?: string[];
-    sizes: string;
-    spice: string;
+    sizes?: string;
+    spice?: string;
   };
 };
 
@@ -17,7 +17,10 @@ type FoodOrder = {
   id: string;
   createdBy: string;
   createdAt: Timestamp;
-  order: FoodItem[];
+  // Support both old and new formats:
+  order?: FoodItem[];
+  item?: string;
+  options?: FoodItem["options"];
 };
 
 type User = {
@@ -52,7 +55,6 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     return () => unsubscribe();
   }, []);
 
-  /* Fetch users data */
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const map: Record<string, string> = {};
@@ -61,7 +63,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         const username = data.username;
         const nickname = data.nickname?.trim();
         const name = data.name?.trim();
-        map[username] = nickname || name || username; // fallback
+        map[username] = nickname || name || username;
       });
       setUsersMap(map);
     });
@@ -85,14 +87,38 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     }
   };
 
+  const renderOrder = (item: string, options?: FoodItem["options"]) => {
+    const removeList = options?.remove ?? [];
+    const extraList = options?.extra ?? [];
+    const size = options?.sizes;
+    const spice = options?.spice;
+
+    return (
+      <li style={{ marginBottom: "0.75rem" }}>
+        <div>
+          <strong>{item}{size === "Stor" ? " Stor" : ""}</strong>
+        </div>
+        {spice && spice !== "Medium" && <div>{spice}</div>}
+        {removeList.length > 0 && (
+          <div>Uten {removeList.join(", ")}</div>
+        )}
+        {extraList.map((extra, i) => (
+          <div key={i}>{extra}</div>
+        ))}
+      </li>
+    );
+  };
+
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3>Bestillinger</h3>
-        {user.role === "admin" && orders.length !== 0 && <button className="btn-red small danger" onClick={clearAllOrders}>
-          <i className="fa-solid fa-trash"></i>
-          Slett ordre
-        </button>}
+        {user.role === "admin" && orders.length !== 0 && (
+          <button className="btn-red small danger" onClick={clearAllOrders}>
+            <i className="fa-solid fa-trash"></i>
+            Slett ordre
+          </button>
+        )}
       </div>
       <div className="card-content">
         {loading ? (
@@ -102,34 +128,21 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         ) : (
           <ul className="foodorders-list">
             {orders.map((order) => (
-              <li className={order.createdBy === user.username ? "foodorders-item-user" : "foodorders-item"} key={order.id} style={{ marginBottom: "1rem" }}>
+              <li
+                className={order.createdBy === user.username ? "foodorders-item-user" : "foodorders-item"}
+                key={order.id}
+                style={{ marginBottom: "1rem" }}
+              >
                 <p className="message-info">
-                    <strong className="user">{usersMap[order.createdBy] || order.createdBy}</strong>
+                  <strong className="user">
+                    {usersMap[order.createdBy] || order.createdBy}
+                  </strong>
                 </p>
-                <ul style={{ paddingLeft: "rem" }}>
-                  {order.order.map((item, index) => {
-                    const removeList = item.options?.remove ?? [];
-                    const extraList = item.options?.extra ?? [];
-                    const size = item.options?.sizes;
-                    const spice = item.options?.spice;
-
-                    const showSize = size === "Stor" ? " Stor" : "";
-
-                    return (
-                        <li key={index} style={{ marginBottom: "0.75rem" }}>
-                        <div>
-                            <strong>{item.item}{showSize}</strong>
-                        </div>
-                        {spice && spice !== "Medium" && <div>{spice}</div>}
-                        {removeList.length > 0 && (
-                            <div>Uten {removeList.join(", ")}</div>
-                        )}
-                        {extraList.map((extra, i) => (
-                            <div key={i}>{extra}</div>
-                        ))}
-                        </li>
-                    );
-                    })}
+                <ul>
+                  {order.order?.map((item, index) =>
+                    renderOrder(item.item, item.options)
+                  )}
+                  {order.item && renderOrder(order.item, order.options)}
                 </ul>
               </li>
             ))}
