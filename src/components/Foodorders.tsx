@@ -77,7 +77,7 @@ const Foodorders = ({user, setMessage}: UsersProps) => {
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Pepper"],
-      price: "159"
+      price: "165"
     },
   ];
 
