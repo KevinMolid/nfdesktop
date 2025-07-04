@@ -216,7 +216,7 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
               }
             }}
           >
-            Bestill
+            <i className="fa-solid fa-cart-shopping"></i> Bestill
           </button>
         </div>
       )}
