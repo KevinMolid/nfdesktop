@@ -32,16 +32,13 @@ const Sticker = ({ id, color, content, width = 1, height = 1, onColorChange, onC
     if (onResize) onResize(width, Math.max(1, height - 1));
   };
 
-  const baseSize = 1;
-  const stickerStyle = {
-    gridColumn: `span ${width}`,
-    gridRow: `span ${height}`,
-  };
-
   return (
     <div
       className={`sticker sticker-${color}`}
-      style={stickerStyle}
+      style={{
+        '--w': width || 1,
+        '--h': height || 1,
+      } as React.CSSProperties}
     >
       <div className="sticker-headline">
         <p>{`${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`}</p>
