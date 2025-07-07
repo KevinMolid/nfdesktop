@@ -43,11 +43,6 @@ const Sticker = ({ id, color, content, width = 1, height = 1, onColorChange, onC
       <div className="sticker-headline">
         <p>{`${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`}</p>
         <div className="sticker-icons">
-
-          <i className="fa-solid fa-plus sticker-icon hover" onClick={increaseWidth}></i>
-          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth}></i>
-          <i className="fa-solid fa-plus sticker-icon hover" onClick={increaseHeight}></i>
-          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight}></i>
           <i className="fa-solid fa-palette sticker-icon hover" onClick={onColorChange}></i>
           <i className="fa-solid fa-trash sticker-icon hover" onClick={() => onDelete(id)}></i>
         </div>
@@ -59,6 +54,18 @@ const Sticker = ({ id, color, content, width = 1, height = 1, onColorChange, onC
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
       />
+
+      {/* Width controls on the right */}
+      <div className="resize-controls right">
+          <i className="fa-solid fa-arrows-left-right sticker-icon hover" onClick={increaseWidth}></i>
+          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth}></i>
+      </div>
+
+      {/* Height controls on the bottom */}
+      <div className="resize-controls bottom">
+          <i className="fa-solid fa-arrows-up-down sticker-icon hover" onClick={increaseHeight}></i>
+          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight}></i>
+      </div>
     </div>
   );
 };
