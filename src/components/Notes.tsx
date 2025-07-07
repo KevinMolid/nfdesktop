@@ -17,6 +17,8 @@ const Notes = ({ user }: { user: { id: string } }) => {
     id: number;
     color: string;
     content: string;
+    width?: number; // 1 = normal, 2 = double width
+    height?: number; // 1 = normal, 2 = double height
   };
 
   const [stickers, setStickers] = useState<StickerData[]>([]);
@@ -89,6 +91,14 @@ const Notes = ({ user }: { user: { id: string } }) => {
     await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
   };
 
+  const handleResize = async (id: number, newWidth: number, newHeight: number) => {
+    const updated = stickers.map((s) =>
+      s.id === id ? { ...s, width: newWidth, height: newHeight } : s
+    );
+    setStickers(updated);
+    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
+  };
+
   const deleteSticker = async (sticker: StickerData) => {
     const updatedStickers = stickers.filter((s) => s.id !== sticker.id);
     setStickers(updatedStickers);
@@ -103,7 +113,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
   };
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header full-width">
       <div className="card-header">
         <h3 className="card-title">Notater</h3>
         <i
@@ -119,6 +129,9 @@ const Notes = ({ user }: { user: { id: string } }) => {
             onDelete={() => deleteSticker(sticker)}
             onColorChange={() => handleColorChange(sticker.id)}
             onContentChange={(newContent) => handleContentChange(sticker.id, newContent)}
+            onResize={(w, h) => handleResize(sticker.id, w, h)}
+            width={sticker.width || 1}
+            height={sticker.height || 1}
             id={sticker.id}
             key={sticker.id}
           />
