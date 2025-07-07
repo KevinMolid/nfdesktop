@@ -662,7 +662,6 @@ input.task-edit-input {
 
   .sticker {
     grid-column: span 1 !important;
-    grid-row: auto !important;
     width: 100% !important;
   }
 }
