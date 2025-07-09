@@ -46,12 +46,13 @@ const Notes = ({ user }: { user: { id: string } }) => {
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-    if (boardRef.current) {
-      const boardWidth = boardRef.current.offsetWidth;
-      const newMaxCols = Math.max(1, Math.floor(boardWidth / cellSize));
-      setMaxCols(newMaxCols);
-      setIsMobileView(newMaxCols <= 1); // 💡 treat 1 column or less as mobile layout
-    }
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 1350);
+    };
+
+    handleResize(); // initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -302,14 +303,22 @@ const Notes = ({ user }: { user: { id: string } }) => {
     await setDoc(doc(db, "users", user.id, "notes", newSticker.id.toString()), newSticker);
   };
 
+  // Sorting stickers for mobile
+  const sortedStickers = [...stickers].sort((a, b) => {
+    const ra = a.row ?? 0;
+    const rb = b.row ?? 0;
+    const ca = a.col ?? 0;
+    const cb = b.col ?? 0;
+    return ra !== rb ? ra - rb : ca - cb;
+  });
 
   // Calculate max row occupied by any sticker
-  const maxRow = stickers.reduce((max, s) => {
-    const row = (s.row ?? 0) + (s.height ?? 1);
-    return Math.max(max, row);
-  }, 0);
-
-  const boardHeight = (maxRow + 1) * cellSize; // +1 for extra row
+  const boardHeight = isMobileView
+    ? sortedStickers.reduce((sum, s) => sum + (s.height ?? 1), 0) * cellSize
+    : (stickers.reduce((max, s) => {
+        const row = (s.row ?? 0) + (s.height ?? 1);
+        return Math.max(max, row);
+      }, 0) + 1) * cellSize;
 
   return (
     <div className="card has-header full-width">
@@ -322,7 +331,20 @@ const Notes = ({ user }: { user: { id: string } }) => {
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="stickerboard" style={{ height: boardHeight }}>
-          {stickers.map((sticker) => (
+          {(isMobileView
+            ? (() => {
+                let nextRow = 0;
+                return sortedStickers.map((sticker) => {
+                  const adjusted = {
+                    ...sticker,
+                    row: nextRow,
+                  };
+                  nextRow += sticker.height ?? 1;
+                  return adjusted;
+                });
+              })()
+            : stickers
+          ).map((sticker) => (
             <DragableSticker
               key={sticker.id}
               id={sticker.id}
@@ -335,7 +357,8 @@ const Notes = ({ user }: { user: { id: string } }) => {
               width={sticker.width || 1}
               height={sticker.height || 1}
               row={sticker.row ?? 0}
-              col={sticker.col ?? 0}
+              col={isMobileView ? 0 : sticker.col ?? 0}
+              disableDrag={isMobileView}
             />
           ))}
         </div>
