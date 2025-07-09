@@ -1,11 +1,11 @@
 import { useRef } from "react";
+import { onSnapshot } from "firebase/firestore";
 
 import DragableSticker from "./DragableSticker";
 import { useState, useEffect } from "react";
 import { db } from "./firebase";
 import {
   collection,
-  getDocs,
   setDoc,
   doc,
   deleteDoc
@@ -72,7 +72,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
   }, []);
 
   useEffect(() => {
-    const loadStickers = async () => {
+    const unsubscribe = onSnapshot(collection(db, "users", user.id, "notes"), async (snapshot) => {
       const notesMoved = localStorage.getItem(NOTES_MOVED_KEY) === "true";
 
       let localStickers: StickerData[] = [];
@@ -90,14 +90,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
         }
       }
 
-      let dbStickers: StickerData[] = [];
-      try {
-        const snapshot = await getDocs(collection(db, "users", user.id, "notes"));
-        dbStickers = snapshot.docs.map(doc => doc.data() as StickerData);
-      } catch (e) {
-        console.warn("No DB notes found or failed to fetch", e);
-      }
-
+      let dbStickers: StickerData[] = snapshot.docs.map((doc) => doc.data() as StickerData);
       const combinedStickers = [...dbStickers, ...localStickers];
 
       const stickersWithPlacement: StickerData[] = [];
@@ -134,10 +127,10 @@ const Notes = ({ user }: { user: { id: string } }) => {
       if (localStickers.length > 0 && !notesMoved) {
         localStorage.setItem(NOTES_MOVED_KEY, "true");
       }
-    };
+    });
 
-    loadStickers();
-  }, [user, maxCols]); // <- include maxCols here in case it changes on resize
+    return () => unsubscribe();
+  }, [user.id, maxCols]);
 
 
   const isGridSpaceFree = (
