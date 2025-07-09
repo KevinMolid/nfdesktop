@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 
 type StickerProps = {
   id: number;
@@ -6,13 +6,27 @@ type StickerProps = {
   content: string;
   width?: number;
   height?: number;
+  row: number;
+  col: number;
   onColorChange: () => void;
   onContentChange: (content: string) => void;
   onDelete: (id: number) => void;
   onResize?: (width: number, height: number) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
 };
 
-const Sticker = ({ id, color, content, width = 1, height = 1, onColorChange, onContentChange, onDelete, onResize }: StickerProps) => {
+const Sticker = ({
+  id,
+  color,
+  content,
+  width = 1,
+  height = 1,
+  onColorChange,
+  onContentChange,
+  onDelete,
+  onResize,
+  dragHandleProps
+}: StickerProps) => {
   const date = new Date(id);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,38 +47,34 @@ const Sticker = ({ id, color, content, width = 1, height = 1, onColorChange, onC
   };
 
   return (
-    <div
-      className={`sticker sticker-${color}`}
-      style={{
-        '--w': width || 1,
-        '--h': height || 1,
-      } as React.CSSProperties}
-    >
+    <div className={`sticker-inside sticker-${color}`}>
       <div className="sticker-headline">
-        <p>{`${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`}</p>
+        <div className="drag-handle" {...dragHandleProps}>
+        </div>
         <div className="sticker-icons">
           <i className="fa-solid fa-palette sticker-icon hover" onClick={onColorChange}></i>
           <i className="fa-solid fa-trash sticker-icon hover" onClick={() => onDelete(id)}></i>
         </div>
       </div>
+
       <textarea
         ref={textareaRef}
         className="sticker-textarea"
-        spellCheck="false"
+        spellCheck={false}
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
       />
 
       {/* Width controls on the right */}
       <div className="resize-controls right">
-          <i className="fa-solid fa-arrows-left-right sticker-icon hover" onClick={increaseWidth}></i>
-          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth}></i>
+        <i className="fa-solid fa-arrows-left-right sticker-icon hover" onClick={increaseWidth}></i>
+        <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth}></i>
       </div>
 
       {/* Height controls on the bottom */}
       <div className="resize-controls bottom">
-          <i className="fa-solid fa-arrows-up-down sticker-icon hover" onClick={increaseHeight}></i>
-          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight}></i>
+        <i className="fa-solid fa-arrows-up-down sticker-icon hover" onClick={increaseHeight}></i>
+        <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight}></i>
       </div>
     </div>
   );
