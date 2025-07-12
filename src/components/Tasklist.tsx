@@ -282,11 +282,11 @@ const ToDo = ({ user }: TasklistProps) => {
               <ul className="task-list">
                 {tasks
                   .filter((t) => t.status === status)
-                  .sort(
-                    (a, b) =>
-                      [1, 2, 3, 0].indexOf(a.priority) -
-                      [1, 2, 3, 0].indexOf(b.priority)
-                  )
+                  .sort((a, b) => {
+                    const getIndex = (p?: number) =>
+                      [1, 2, 3, 0].indexOf(p ?? 0);
+                    return getIndex(a.priority) - getIndex(b.priority);
+                  })
                   .map((task, index) => (
                     <Task
                       key={task.id}
