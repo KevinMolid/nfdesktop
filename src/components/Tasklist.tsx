@@ -1,7 +1,16 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react";
 import Task from "./Task";
 import { db } from "./firebase";
-import { collection, getDocs, setDoc, doc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+
+import { TaskData } from "../types";
+import { isValidTask } from "../utils/validators";
 
 const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
@@ -17,20 +26,15 @@ type TasklistProps = {
   user: User;
 };
 
-type TaskData = {
-  id: number;
-  priority: number;
-  name: string;
-  status: string;
-};
-
 const ToDo = ({ user }: TasklistProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCreateActive, setIsCreateActive] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
   const [tasks, setTasks] = useState<TaskData[]>([]);
 
-  const [visibleStatuses, setVisibleStatuses] = useState<Record<string, boolean>>(() => {
+  const [visibleStatuses, setVisibleStatuses] = useState<
+    Record<string, boolean>
+  >(() => {
     const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
     if (storedFilters) {
       try {
@@ -54,7 +58,10 @@ const ToDo = ({ user }: TasklistProps) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
         setIsFilterActive(false);
       }
     };
@@ -81,7 +88,7 @@ const ToDo = ({ user }: TasklistProps) => {
           try {
             const parsed = JSON.parse(local);
             if (Array.isArray(parsed)) {
-              localTasks = parsed;
+              localTasks = parsed.filter(isValidTask);
             }
           } catch (e) {
             console.error("Error parsing tasks from localStorage", e);
@@ -91,15 +98,17 @@ const ToDo = ({ user }: TasklistProps) => {
 
       let dbTasks: TaskData[] = [];
       try {
-        const snapshot = await getDocs(collection(db, "users", user.id, "tasks"));
-        dbTasks = snapshot.docs.map(doc => doc.data() as TaskData);
+        const snapshot = await getDocs(
+          collection(db, "users", user.id, "tasks")
+        );
+        dbTasks = snapshot.docs.map((doc) => doc.data()).filter(isValidTask);
       } catch (e) {
         console.warn("No DB tasks found or failed to fetch", e);
       }
 
       if (localTasks.length > 0 && !tasksMoved) {
         await Promise.all(
-          localTasks.map(task =>
+          localTasks.map((task) =>
             setDoc(doc(db, "users", user.id, "tasks", task.id.toString()), task)
           )
         );
@@ -136,29 +145,47 @@ const ToDo = ({ user }: TasklistProps) => {
     setTasks(updatedTasks);
     setNewTaskName("");
     setIsCreateActive(false);
-    await setDoc(doc(db, "users", user.id, "tasks", newTask.id.toString()), newTask);
+    await setDoc(
+      doc(db, "users", user.id, "tasks", newTask.id.toString()),
+      newTask
+    );
   };
 
   const handleRename = async (id: number, newName: string) => {
-    const updatedTasks = tasks.map(task => task.id === id ? { ...task, name: newName } : task);
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, name: newName } : task
+    );
     setTasks(updatedTasks);
-    await setDoc(doc(db, "users", user.id, "tasks", id.toString()), updatedTasks.find(t => t.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "tasks", id.toString()),
+      updatedTasks.find((t) => t.id === id)!
+    );
   };
 
   const handleStatusChange = async (id: number, newStatus: string) => {
-    const updatedTasks = tasks.map(t => t.id === id ? { ...t, status: newStatus } : t);
+    const updatedTasks = tasks.map((t) =>
+      t.id === id ? { ...t, status: newStatus } : t
+    );
     setTasks(updatedTasks);
-    await setDoc(doc(db, "users", user.id, "tasks", id.toString()), updatedTasks.find(t => t.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "tasks", id.toString()),
+      updatedTasks.find((t) => t.id === id)!
+    );
   };
 
   const handlePriorityChange = async (id: number, newPriority: number) => {
-    const updatedTasks = tasks.map(task => task.id === id ? { ...task, priority: newPriority } : task);
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, priority: newPriority } : task
+    );
     setTasks(updatedTasks);
-    await setDoc(doc(db, "users", user.id, "tasks", id.toString()), updatedTasks.find(t => t.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "tasks", id.toString()),
+      updatedTasks.find((t) => t.id === id)!
+    );
   };
 
   const deleteTask = async (id: number) => {
-    const updatedTasks = tasks.filter(t => t.id !== id);
+    const updatedTasks = tasks.filter((t) => t.id !== id);
     setTasks(updatedTasks);
     await deleteDoc(doc(db, "users", user.id, "tasks", id.toString()));
   };
@@ -169,20 +196,41 @@ const ToDo = ({ user }: TasklistProps) => {
         <h3 className="card-title">Oppgaver</h3>
         {!isCreateActive && (
           <div className="icon-container">
-            <i className="fa-solid fa-filter blue icon-md hover" onClick={toggleFiltering}></i>
-            <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
+            <i
+              className="fa-solid fa-filter blue icon-md hover"
+              onClick={toggleFiltering}
+            ></i>
+            <i
+              className="fa-solid fa-plus blue icon-md hover"
+              onClick={toggleCreateActive}
+            ></i>
             {isFilterActive && (
               <div className="filter-dropdown" ref={filterRef}>
-                {["active", "finished", "onhold", "cancelled"].map(status => (
+                {["active", "finished", "onhold", "cancelled"].map((status) => (
                   <div
                     key={status}
-                    className={`filter filter-${status} hover-border ${visibleStatuses[status] ? "active-selection" : ""}`}
-                    onClick={() => setVisibleStatuses(prev => ({ ...prev, [status]: !prev[status] }))}
+                    className={`filter filter-${status} hover-border ${
+                      visibleStatuses[status] ? "active-selection" : ""
+                    }`}
+                    onClick={() =>
+                      setVisibleStatuses((prev) => ({
+                        ...prev,
+                        [status]: !prev[status],
+                      }))
+                    }
                   >
-                    {status === "active" && <i className="fa-solid fa-circle lightgrey"></i>}
-                    {status === "finished" && <i className="fa-solid fa-check green"></i>}
-                    {status === "onhold" && <i className="fa-solid fa-pause yellow"></i>}
-                    {status === "cancelled" && <i className="fa-solid fa-xmark red"></i>}
+                    {status === "active" && (
+                      <i className="fa-solid fa-circle lightgrey"></i>
+                    )}
+                    {status === "finished" && (
+                      <i className="fa-solid fa-check green"></i>
+                    )}
+                    {status === "onhold" && (
+                      <i className="fa-solid fa-pause yellow"></i>
+                    )}
+                    {status === "cancelled" && (
+                      <i className="fa-solid fa-xmark red"></i>
+                    )}
                   </div>
                 ))}
               </div>
@@ -197,8 +245,8 @@ const ToDo = ({ user }: TasklistProps) => {
           <div className="create-task-input-container">
             <input
               value={newTaskName}
-              onChange={e => setNewTaskName(e.target.value)}
-              onKeyDown={e => {
+              onChange={(e) => setNewTaskName(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === "Enter") addNewTask();
               }}
             />
@@ -216,29 +264,44 @@ const ToDo = ({ user }: TasklistProps) => {
         </div>
       )}
 
-      {Object.entries(visibleStatuses).map(([status, visible]) => (
-        visible && tasks.some(t => t.status === status) && (
-          <div key={status}>
-            {status !== "active" && <h4 className="card-title">{status === "finished" ? "Utførte" : status === "onhold" ? "Pausede" : "Kansellerte"} oppgaver</h4>}
-            <ul className="task-list">
-              {tasks
-                .filter(t => t.status === status)
-                .sort((a, b) => [1, 2, 3, 0].indexOf(a.priority) - [1, 2, 3, 0].indexOf(b.priority))
-                .map((task, index) => (
-                  <Task
-                    key={task.id}
-                    {...task}
-                    index={index}
-                    onDelete={() => deleteTask(task.id)}
-                    onStatusChange={handleStatusChange}
-                    onRename={handleRename}
-                    onPriorityChange={handlePriorityChange}
-                  />
-                ))}
-            </ul>
-          </div>
-        )
-      ))}
+      {Object.entries(visibleStatuses).map(
+        ([status, visible]) =>
+          visible &&
+          tasks.some((t) => t.status === status) && (
+            <div key={status}>
+              {status !== "active" && (
+                <h4 className="card-title">
+                  {status === "finished"
+                    ? "Utførte"
+                    : status === "onhold"
+                    ? "Pausede"
+                    : "Kansellerte"}{" "}
+                  oppgaver
+                </h4>
+              )}
+              <ul className="task-list">
+                {tasks
+                  .filter((t) => t.status === status)
+                  .sort(
+                    (a, b) =>
+                      [1, 2, 3, 0].indexOf(a.priority) -
+                      [1, 2, 3, 0].indexOf(b.priority)
+                  )
+                  .map((task, index) => (
+                    <Task
+                      key={task.id}
+                      {...task}
+                      index={index}
+                      onDelete={() => deleteTask(task.id)}
+                      onStatusChange={handleStatusChange}
+                      onRename={handleRename}
+                      onPriorityChange={handlePriorityChange}
+                    />
+                  ))}
+              </ul>
+            </div>
+          )
+      )}
     </div>
   );
 };

@@ -9,7 +9,7 @@ export type StickerData = {
   row?: number;
 };
 
-export type Task = {
+export type TaskData = {
   id: number;
   name: string;
   status: string;
