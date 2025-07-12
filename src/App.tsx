@@ -20,8 +20,6 @@ import "./App.css";
 
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 
-console.log("test");
-
 const DEFAULT_WIDGETS = [
   { name: "Brukere", active: true },
   { name: "Lenker", active: true },

@@ -1,26 +1,35 @@
-// components/SafeWrapper.tsx
-import { useState, useEffect } from "react";
+import { Component, ReactNode } from "react";
 
-type Props = {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+type SafeWrapperProps = {
+  children: ReactNode;
+  fallback?: ReactNode;
 };
 
-const SafeWrapper = ({ children, fallback = null }: Props) => {
-  const [hasError, setHasError] = useState(false);
+type SafeWrapperState = {
+  hasError: boolean;
+};
 
-  useEffect(() => {
-    setHasError(false); // Reset error when remounting
-  }, [children]);
-
-  try {
-    if (hasError) return fallback;
-    return <>{children}</>;
-  } catch (e) {
-    console.error("Component crashed:", e);
-    setHasError(true);
-    return fallback;
+class SafeWrapper extends Component<SafeWrapperProps, SafeWrapperState> {
+  constructor(props: SafeWrapperProps) {
+    super(props);
+    this.state = { hasError: false };
   }
-};
+
+  static getDerivedStateFromError(): SafeWrapperState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown, errorInfo: unknown) {
+    console.error("Caught error in SafeWrapper:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? null;
+    }
+
+    return this.props.children;
+  }
+}
 
 export default SafeWrapper;
