@@ -283,9 +283,17 @@ const ToDo = ({ user }: TasklistProps) => {
                 {tasks
                   .filter((t) => t.status === status)
                   .sort((a, b) => {
-                    const getIndex = (p?: number) =>
-                      [1, 2, 3, 0].indexOf(p ?? 0);
-                    return getIndex(a.priority) - getIndex(b.priority);
+                    const priorities = [1, 2, 3, 0];
+                    const aPriority = priorities.includes(a.priority)
+                      ? a.priority
+                      : 0;
+                    const bPriority = priorities.includes(b.priority)
+                      ? b.priority
+                      : 0;
+                    return (
+                      priorities.indexOf(aPriority) -
+                      priorities.indexOf(bPriority)
+                    );
                   })
                   .map((task, index) => (
                     <Task
