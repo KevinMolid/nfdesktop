@@ -57,6 +57,12 @@ const ToDo = ({ user }: TasklistProps) => {
   const filterRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (typeof user?.id !== "string" || user.id.includes("//")) {
+      console.error("❌ Invalid user ID detected:", user?.id);
+    }
+  }, [user]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         filterRef.current &&
@@ -153,6 +159,14 @@ const ToDo = ({ user }: TasklistProps) => {
     setTasks(updatedTasks);
     setNewTaskName("");
     setIsCreateActive(false);
+    const taskPath = `users/${user.id}/tasks/${newTask.id}`;
+    if (taskPath.includes("//")) {
+      console.warn(
+        "🔥 Invalid Firestore path in addNewTask:",
+        taskPath,
+        newTask
+      );
+    }
     await setDoc(
       doc(db, "users", user.id, "tasks", newTask.id.toString()),
       newTask
@@ -164,6 +178,10 @@ const ToDo = ({ user }: TasklistProps) => {
       task.id === id ? { ...task, name: newName } : task
     );
     setTasks(updatedTasks);
+    const renamePath = `users/${user.id}/tasks/${id}`;
+    if (renamePath.includes("//")) {
+      console.warn("🔥 Invalid Firestore path in handleRename:", renamePath);
+    }
     await setDoc(
       doc(db, "users", user.id, "tasks", id.toString()),
       updatedTasks.find((t) => t.id === id)!
@@ -175,6 +193,13 @@ const ToDo = ({ user }: TasklistProps) => {
       t.id === id ? { ...t, status: newStatus } : t
     );
     setTasks(updatedTasks);
+    const statusPath = `users/${user.id}/tasks/${id}`;
+    if (statusPath.includes("//")) {
+      console.warn(
+        "🔥 Invalid Firestore path in handleStatusChange:",
+        statusPath
+      );
+    }
     await setDoc(
       doc(db, "users", user.id, "tasks", id.toString()),
       updatedTasks.find((t) => t.id === id)!
@@ -186,6 +211,13 @@ const ToDo = ({ user }: TasklistProps) => {
       task.id === id ? { ...task, priority: newPriority } : task
     );
     setTasks(updatedTasks);
+    const priorityPath = `users/${user.id}/tasks/${id}`;
+    if (priorityPath.includes("//")) {
+      console.warn(
+        "🔥 Invalid Firestore path in handlePriorityChange:",
+        priorityPath
+      );
+    }
     await setDoc(
       doc(db, "users", user.id, "tasks", id.toString()),
       updatedTasks.find((t) => t.id === id)!
@@ -195,6 +227,10 @@ const ToDo = ({ user }: TasklistProps) => {
   const deleteTask = async (id: number) => {
     const updatedTasks = tasks.filter((t) => t.id !== id);
     setTasks(updatedTasks);
+    const deletePath = `users/${user.id}/tasks/${id}`;
+    if (deletePath.includes("//")) {
+      console.warn("🔥 Invalid Firestore path in deleteTask:", deletePath);
+    }
     await deleteDoc(doc(db, "users", user.id, "tasks", id.toString()));
   };
 
