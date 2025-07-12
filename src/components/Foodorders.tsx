@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import ToggleSwitch from "./ToggleSwitch";
 import StageSlider from "./StageSlider";
+import { AnimatedButton } from "./AnimatedButton";
 
 import { db } from "./firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
@@ -11,8 +12,8 @@ type UsersProps = {
   user: {
     username: string;
     role: string;
-  },
-  setMessage: (msg: string) => void
+  };
+  setMessage: (msg: string) => void;
 };
 
 const Foodorders = ({ user, setMessage }: UsersProps) => {
@@ -22,54 +23,90 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
       img: "https://www.gilde.no/assets/images/_heroimage/3456020/Gilde_Kebabkjott_kebab_i_pita_miljobilde_no034179_Foto_Stian_Broch.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "100/135"
+      price: "100/135",
     },
     {
       name: "Kebab i Rull",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "100/135"
+      price: "100/135",
     },
     {
       name: "Döner i Pita",
       img: "https://oppdagoslo.no/wp-content/uploads/2024/08/Kebab-Oslo.png",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "129/165"
+      price: "129/165",
     },
     {
       name: "Döner i Rull",
       img: "https://imageproxy.wolt.com/menu/menu-images/shared/8c5f553c-a72c-11ee-80cb-2e89079b6b30_doner_i_rull.jpg",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "129/165"
+      price: "129/165",
     },
     {
       name: "Shawarma i Pita",
       img: "https://smakfullpbk.com/wp-content/uploads/2021/10/Syrisk-Shawarma-Kylling-Rull-i-Norge.jpg",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "???"
+      price: "???",
     },
     {
       name: "Shawarma i Rull",
       img: "https://ministryofcurry.com/wp-content/uploads/2021/05/chicken-shawarma-6.jpg",
       sizes: ["Liten", "Stor"],
       spice: ["Mild", "Medium", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Pommes Frittes oppi", "Ekstra pita"],
+      extra: [
+        "Ekstra dressing",
+        "Pepper",
+        "Jalapeños",
+        "Pommes Frittes oppi",
+        "Ekstra pita",
+      ],
       remove: ["Løk", "Pepper"],
-      price: "???"
+      price: "???",
     },
     {
       name: "Kebab Tallerken",
@@ -77,7 +114,7 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
       spice: ["Mild", "Medium", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Pepper"],
-      price: "165"
+      price: "165",
     },
   ];
 
@@ -88,12 +125,16 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
   const handleSelectFood = (foodName: string) => {
     const selected = menu.find((item) => item.name === foodName);
     const initialSize = selected?.sizes?.[0];
-    const defaultSpice = selected?.spice?.includes("Medium") ? "Medium" : selected?.spice?.[0];
+    const defaultSpice = selected?.spice?.includes("Medium")
+      ? "Medium"
+      : selected?.spice?.[0];
 
     setSelectedFood(foodName);
     setOrderOptions({
       ...(initialSize ? { sizes: initialSize } : {}),
       ...(defaultSpice ? { spice: defaultSpice } : {}),
+      extra: [],
+      remove: [],
     });
   };
 
@@ -103,7 +144,9 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
         return { ...prev, [type]: value };
       } else {
         const currentSet = new Set(prev[type] || []);
-        currentSet.has(value) ? currentSet.delete(value) : currentSet.add(value);
+        currentSet.has(value)
+          ? currentSet.delete(value)
+          : currentSet.add(value);
         return { ...prev, [type]: Array.from(currentSet) };
       }
     });
@@ -113,7 +156,7 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
         left: direction === "left" ? -200 : 200,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   };
@@ -134,7 +177,9 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
           {menu.map((food) => (
             <div
               key={food.name}
-              className={`food-card ${selectedFood === food.name ? "selected" : ""}`}
+              className={`food-card ${
+                selectedFood === food.name ? "selected" : ""
+              }`}
               onClick={() => handleSelectFood(food.name)}
             >
               {food.img ? (
@@ -159,7 +204,16 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
           {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
             selectedItem[type]?.length ? (
               <div key={type}>
-                <h4>{type === "sizes" ? "Størrelse" : type === "spice" ? "Styrke" : type === "extra" ? "Ekstra" : "Uten"}:</h4>
+                <h4>
+                  {type === "sizes"
+                    ? "Størrelse"
+                    : type === "spice"
+                    ? "Styrke"
+                    : type === "extra"
+                    ? "Ekstra"
+                    : "Uten"}
+                  :
+                </h4>
                 {type === "sizes" && selectedItem.sizes?.length === 2 ? (
                   (() => {
                     const [size1, size2] = selectedItem.sizes!;
@@ -184,7 +238,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
                         <input
                           type="checkbox"
                           name={type}
-                          checked={orderOptions[type]?.includes(val)}
+                          checked={
+                            Array.isArray(orderOptions[type]) &&
+                            orderOptions[type].includes(val)
+                          }
                           onChange={() => handleChange(type, val)}
                         />
                         {val}
@@ -195,29 +252,30 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
               </div>
             ) : null
           )}
-          <button
-            className="add-btn"
-            onClick={async () => {
-              if (selectedFood) {
-                try {
-                  await addDoc(collection(db, "foodorders"), {
-                    item: selectedFood,
-                    options: orderOptions,
-                    createdAt: Timestamp.now(),
-                    createdBy: user.username,
-                  });
-                  setMessage(`Bestilte ${selectedFood}`);
-                  setSelectedFood(null);
-                  setOrderOptions({});
-                } catch (error) {
-                  console.error("Feil ved bestilling:", error);
-                  setMessage("Noe gikk galt med bestillingen.");
+          <div className="order-btn-container">
+            <AnimatedButton
+              onClick={async () => {
+                if (selectedFood) {
+                  try {
+                    await addDoc(collection(db, "foodorders"), {
+                      item: selectedFood,
+                      options: orderOptions,
+                      createdAt: Timestamp.now(),
+                      createdBy: user.username,
+                    });
+                    setMessage(`Bestilte ${selectedFood}`);
+                    setSelectedFood(null);
+                    setOrderOptions({});
+                  } catch (error) {
+                    console.error("Feil ved bestilling:", error);
+                    setMessage("Noe gikk galt med bestillingen.");
+                  }
                 }
-              }
-            }}
-          >
-            <i className="fa-solid fa-cart-shopping"></i> Bestill
-          </button>
+              }}
+            >
+              <i className="fa-solid fa-cart-shopping"></i> Bestill
+            </AnimatedButton>
+          </div>
         </div>
       )}
     </div>
