@@ -113,6 +113,14 @@ const ToDo = ({ user }: TasklistProps) => {
           )
         );
         localStorage.setItem(TASKS_MOVED_KEY, "true");
+        console.log("Loaded tasks:", [...dbTasks, ...localTasks]);
+        [...dbTasks, ...localTasks].forEach((task) => {
+          if (typeof task.priority !== "number") {
+            console.warn("Suspicious priority type:", task);
+          } else if (![0, 1, 2, 3].includes(task.priority)) {
+            console.warn("Unexpected priority value:", task);
+          }
+        });
         setTasks([...dbTasks, ...localTasks]);
       } else {
         setTasks(dbTasks);
@@ -284,16 +292,29 @@ const ToDo = ({ user }: TasklistProps) => {
                   .filter((t) => t.status === status)
                   .sort((a, b) => {
                     const priorities = [1, 2, 3, 0];
-                    const aPriority = priorities.includes(a.priority)
-                      ? a.priority
-                      : 0;
-                    const bPriority = priorities.includes(b.priority)
-                      ? b.priority
-                      : 0;
-                    return (
-                      priorities.indexOf(aPriority) -
-                      priorities.indexOf(bPriority)
-                    );
+
+                    const getPriorityIndex = (task: TaskData) => {
+                      if (typeof task.priority !== "number") {
+                        console.warn("Task has non-number priority:", task);
+                        return priorities.length; // send to end of list
+                      }
+
+                      const index = priorities.indexOf(task.priority);
+                      if (index === -1) {
+                        console.warn(
+                          "Task has unexpected priority value:",
+                          task
+                        );
+                        return priorities.length; // send to end of list
+                      }
+
+                      return index;
+                    };
+
+                    const aIndex = getPriorityIndex(a);
+                    const bIndex = getPriorityIndex(b);
+
+                    return aIndex - bIndex;
                   })
                   .map((task, index) => (
                     <Task
