@@ -1,15 +1,13 @@
 import { useRef } from "react";
 import { onSnapshot } from "firebase/firestore";
 
+import { StickerData } from "../types";
+import { isValidSticker } from "../utils/validators";
+
 import DragableSticker from "./DragableSticker";
 import { useState, useEffect } from "react";
 import { db } from "./firebase";
-import {
-  collection,
-  setDoc,
-  doc,
-  deleteDoc
-} from "firebase/firestore";
+import { collection, setDoc, doc, deleteDoc } from "firebase/firestore";
 
 import {
   DndContext,
@@ -26,17 +24,6 @@ const NOTES_MOVED_KEY = "notesMoved";
 const cellSize = 252; // px
 
 const Notes = ({ user }: { user: { id: string } }) => {
-  type StickerData = {
-    id: number;
-    color: string;
-    content: string;
-    width?: number;
-    height?: number;
-    index: number;
-    col?: number;
-    row?: number;
-  };
-
   const [stickers, setStickers] = useState<StickerData[]>([]);
   const [maxCols, setMaxCols] = useState(3); // default
   const [isMobileView, setIsMobileView] = useState(false);
@@ -73,66 +60,83 @@ const Notes = ({ user }: { user: { id: string } }) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "users", user.id, "notes"), async (snapshot) => {
-      const notesMoved = localStorage.getItem(NOTES_MOVED_KEY) === "true";
+    const unsubscribe = onSnapshot(
+      collection(db, "users", user.id, "notes"),
+      async (snapshot) => {
+        const notesMoved = localStorage.getItem(NOTES_MOVED_KEY) === "true";
 
-      let localStickers: StickerData[] = [];
-      if (!notesMoved) {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-              localStickers = parsed.map((s, i) => ({ ...s, index: i }));
+        let localStickers: StickerData[] = [];
+        if (!notesMoved) {
+          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (Array.isArray(parsed)) {
+                localStickers = parsed
+                  .filter(isValidSticker)
+                  .map((s, i) => ({ ...s, index: i }));
+              }
+            } catch (e) {
+              console.error("Error parsing localStorage", e);
             }
-          } catch (e) {
-            console.error("Error parsing localStorage", e);
           }
         }
-      }
 
-      let dbStickers: StickerData[] = snapshot.docs.map((doc) => doc.data() as StickerData);
-      const combinedStickers = [...dbStickers, ...localStickers];
+        let dbStickers: StickerData[] = snapshot.docs
+          .map((doc) => doc.data())
+          .filter(isValidSticker);
+        const combinedStickers = [...dbStickers, ...localStickers];
 
-      const stickersWithPlacement: StickerData[] = [];
+        const stickersWithPlacement: StickerData[] = [];
 
-      for (const sticker of combinedStickers) {
-        if (sticker.row !== undefined && sticker.col !== undefined) {
-          stickersWithPlacement.push(sticker);
-        } else {
-          const width = sticker.width ?? 1;
-          const height = sticker.height ?? 1;
+        for (const sticker of combinedStickers) {
+          if (sticker.row !== undefined && sticker.col !== undefined) {
+            stickersWithPlacement.push(sticker);
+          } else {
+            const width = sticker.width ?? 1;
+            const height = sticker.height ?? 1;
 
-          let placed = false;
-          for (let row = 0; !placed && row < 1000; row++) {
-            for (let col = 0; col < maxCols; col++) {
-              if (col + width > maxCols) continue;
-              if (isGridSpaceFree(row, col, width, height, stickersWithPlacement)) {
-                sticker.row = row;
-                sticker.col = col;
-                stickersWithPlacement.push(sticker);
-                placed = true;
-                await setDoc(doc(db, "users", user.id, "notes", sticker.id.toString()), sticker);
-                break;
+            let placed = false;
+            for (let row = 0; !placed && row < 1000; row++) {
+              for (let col = 0; col < maxCols; col++) {
+                if (col + width > maxCols) continue;
+                if (
+                  isGridSpaceFree(
+                    row,
+                    col,
+                    width,
+                    height,
+                    stickersWithPlacement
+                  )
+                ) {
+                  sticker.row = row;
+                  sticker.col = col;
+                  stickersWithPlacement.push(sticker);
+                  placed = true;
+                  await setDoc(
+                    doc(db, "users", user.id, "notes", sticker.id.toString()),
+                    sticker
+                  );
+                  break;
+                }
               }
             }
-          }
-          if (!placed) {
-            console.warn("Couldn't place sticker", sticker);
+            if (!placed) {
+              console.warn("Couldn't place sticker", sticker);
+            }
           }
         }
-      }
 
-      setStickers(stickersWithPlacement);
+        setStickers(stickersWithPlacement);
 
-      if (localStickers.length > 0 && !notesMoved) {
-        localStorage.setItem(NOTES_MOVED_KEY, "true");
+        if (localStickers.length > 0 && !notesMoved) {
+          localStorage.setItem(NOTES_MOVED_KEY, "true");
+        }
       }
-    });
+    );
 
     return () => unsubscribe();
   }, [user.id, maxCols]);
-
 
   const isGridSpaceFree = (
     row: number,
@@ -149,12 +153,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
 
       for (let i = row; i < row + height; i++) {
         for (let j = col; j < col + width; j++) {
-          if (
-            i >= r &&
-            i < r + h &&
-            j >= c &&
-            j < c + w
-          ) {
+          if (i >= r && i < r + h && j >= c && j < c + w) {
             return false;
           }
         }
@@ -163,22 +162,27 @@ const Notes = ({ user }: { user: { id: string } }) => {
     return true;
   };
 
-
   const handleColorChange = async (id: number) => {
     const updated = stickers.map((s) => {
       if (s.id === id) {
         const newColor =
-          s.color === "yellow" ? "blue" :
-          s.color === "blue" ? "red" :
-          s.color === "red" ? "green" :
-          "yellow";
+          s.color === "yellow"
+            ? "blue"
+            : s.color === "blue"
+            ? "red"
+            : s.color === "red"
+            ? "green"
+            : "yellow";
         return { ...s, color: newColor };
       } else {
         return s;
       }
     });
     setStickers(updated);
-    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "notes", id.toString()),
+      updated.find((s) => s.id === id)!
+    );
   };
 
   const handleContentChange = async (id: number, newContent: string) => {
@@ -186,22 +190,32 @@ const Notes = ({ user }: { user: { id: string } }) => {
       s.id === id ? { ...s, content: newContent } : s
     );
     setStickers(updated);
-    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "notes", id.toString()),
+      updated.find((s) => s.id === id)!
+    );
   };
 
-  const handleResize = async (id: number, newWidth: number, newHeight: number) => {
+  const handleResize = async (
+    id: number,
+    newWidth: number,
+    newHeight: number
+  ) => {
     const updated = stickers.map((s) =>
       s.id === id ? { ...s, width: newWidth, height: newHeight } : s
     );
     setStickers(updated);
-    await setDoc(doc(db, "users", user.id, "notes", id.toString()), updated.find(s => s.id === id)!);
+    await setDoc(
+      doc(db, "users", user.id, "notes", id.toString()),
+      updated.find((s) => s.id === id)!
+    );
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, delta } = event;
     const id = Number(active.id);
 
-    const sticker = stickers.find(s => s.id === id);
+    const sticker = stickers.find((s) => s.id === id);
     if (!sticker) return;
 
     const width = sticker.width || 1;
@@ -217,7 +231,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
     if (newCol < 0 || newRow < 0) return;
 
     // Check for space availability
-    const isOccupied = stickers.some(s => {
+    const isOccupied = stickers.some((s) => {
       if (s.id === id) return false;
 
       const sw = s.width ?? 1;
@@ -236,7 +250,7 @@ const Notes = ({ user }: { user: { id: string } }) => {
     if (isOccupied) return;
 
     // Save new position
-    const updated = stickers.map(s =>
+    const updated = stickers.map((s) =>
       s.id === id ? { ...s, row: newRow, col: newCol } : s
     );
 
@@ -250,8 +264,11 @@ const Notes = ({ user }: { user: { id: string } }) => {
   };
 
   const deleteSticker = async (sticker: StickerData) => {
-    const preview = sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
-    const confirmed = window.confirm(`Are you sure you want to delete note "${preview}"?`);
+    const preview =
+      sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
+    const confirmed = window.confirm(
+      `Are you sure you want to delete note "${preview}"?`
+    );
 
     if (!confirmed) return;
 
@@ -300,7 +317,10 @@ const Notes = ({ user }: { user: { id: string } }) => {
 
     const updatedStickers = [...stickers, newSticker];
     setStickers(updatedStickers);
-    await setDoc(doc(db, "users", user.id, "notes", newSticker.id.toString()), newSticker);
+    await setDoc(
+      doc(db, "users", user.id, "notes", newSticker.id.toString()),
+      newSticker
+    );
   };
 
   // Sorting stickers for mobile
@@ -318,7 +338,9 @@ const Notes = ({ user }: { user: { id: string } }) => {
     : (stickers.reduce((max, s) => {
         const row = (s.row ?? 0) + (s.height ?? 1);
         return Math.max(max, row);
-      }, 0) + 1) * cellSize;
+      }, 0) +
+        1) *
+      cellSize;
 
   return (
     <div className="card has-header full-width">
@@ -329,7 +351,11 @@ const Notes = ({ user }: { user: { id: string } }) => {
           onClick={addSticker}
         ></i>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <div className="stickerboard" style={{ height: boardHeight }}>
           {(isMobileView
             ? (() => {
@@ -352,7 +378,9 @@ const Notes = ({ user }: { user: { id: string } }) => {
               color={sticker.color}
               onDelete={() => deleteSticker(sticker)}
               onColorChange={() => handleColorChange(sticker.id)}
-              onContentChange={(newContent) => handleContentChange(sticker.id, newContent)}
+              onContentChange={(newContent) =>
+                handleContentChange(sticker.id, newContent)
+              }
               onResize={(w, h) => handleResize(sticker.id, w, h)}
               width={sticker.width || 1}
               height={sticker.height || 1}
