@@ -24,8 +24,7 @@ const STATIC_CATEGORIES: LinkCategory[] = [
   {
     category: "Leverandører",
     links: [
-      { id: "static-5", name: "Avial (Boeing)", href: "https://shop.boeing.com/aviation-supply/" },
-      { id: "static-6", name: "Boeing", href: "https://www.boeingdistribution.com/index.jsp" },
+      { id: "static-5", name: "Boeing", href: "https://shop.boeing.com/aviation-supply/" },
       { id: "static-7", name: "Collins", href: "https://www.customers.utcaerospacesystems.com/ngp-my-account" },
       { id: "static-8", name: "Hartzell", href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html" },
       { id: "static-9", name: "Skygeek", href: "https://skygeek.com/" },
