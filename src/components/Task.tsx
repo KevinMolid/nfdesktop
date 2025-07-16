@@ -134,7 +134,7 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
           <i className="fa-solid fa-bars"></i>
         </div>
 
-<       div className={`task-priority priority-${priority}`} ref={priorityDropdownRef}>
+        <div className={`task-priority priority-${priority}`} ref={priorityDropdownRef}>
             <span className="task-priority-number" onClick={() => setIsEditingPriority(!isEditingPriority)}>{priority ? priority : "0"}</span>
             {isEditingPriority && 
               <div>
