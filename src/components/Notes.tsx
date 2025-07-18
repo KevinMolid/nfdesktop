@@ -23,7 +23,17 @@ const NOTES_MOVED_KEY = "notesMoved";
 
 const cellSize = 252; // px
 
-const Notes = ({ user }: { user: { id: string } }) => {
+type NotesProps = {
+  user: {
+    id: string;
+    username: string;
+    name?: string;
+    role: string;
+  };
+  toggleActive: (name: string) => void;
+};
+
+const Notes = ({ user, toggleActive }: NotesProps) => {
   const [stickers, setStickers] = useState<StickerData[]>([]);
   const [maxCols, setMaxCols] = useState(3); // default
   const [isMobileView, setIsMobileView] = useState(false);
@@ -345,11 +355,19 @@ const Notes = ({ user }: { user: { id: string } }) => {
   return (
     <div className="card has-header full-width">
       <div className="card-header">
-        <h3 className="card-title">Notater</h3>
-        <i
-          className="fa-solid fa-plus blue icon-md hover"
-          onClick={addSticker}
-        ></i>
+        <h3 className="card-title">Notes</h3>
+        <div className="card-header-right">
+          <button onClick={addSticker}>
+            <i className="fa-solid fa-plus blue icon-md hover"></i>
+            <p>New Note</p>
+          </button>
+          <button
+            className="close-widget-btn"
+            onClick={() => toggleActive("Notes")}
+          >
+            <i className="fa-solid fa-x icon-md hover" />
+          </button>
+        </div>
       </div>
       <DndContext
         sensors={sensors}

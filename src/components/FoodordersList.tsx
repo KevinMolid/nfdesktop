@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { onSnapshot, collection, Timestamp, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  onSnapshot,
+  collection,
+  Timestamp,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "./firebase";
 import "./Foodorders.css";
 
@@ -39,18 +46,22 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "foodorders"), (snapshot) => {
-      const updatedOrders = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as unknown as FoodOrder[];
+    const unsubscribe = onSnapshot(
+      collection(db, "foodorders"),
+      (snapshot) => {
+        const updatedOrders = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as unknown as FoodOrder[];
 
-      setOrders(updatedOrders);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error listening to food orders:", error);
-      setLoading(false);
-    });
+        setOrders(updatedOrders);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error listening to food orders:", error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -72,7 +83,9 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   }, []);
 
   const clearAllOrders = async () => {
-    const confirm = window.confirm("Er du sikker på at du vil slette alle bestillinger?");
+    const confirm = window.confirm(
+      "Er du sikker på at du vil slette alle bestillinger?"
+    );
     if (!confirm) return;
 
     try {
@@ -96,12 +109,13 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     return (
       <li style={{ marginBottom: "0.75rem" }}>
         <div>
-          <strong>{item}{size === "Stor" ? " Stor" : ""}</strong>
+          <strong>
+            {item}
+            {size === "Stor" ? " Stor" : ""}
+          </strong>
         </div>
         {spice && spice !== "Medium" && <div>{spice}</div>}
-        {removeList.length > 0 && (
-          <div>Uten {removeList.join(", ")}</div>
-        )}
+        {removeList.length > 0 && <div>Uten {removeList.join(", ")}</div>}
         {extraList.map((extra, i) => (
           <div key={i}>{extra}</div>
         ))}
@@ -112,24 +126,28 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3>Bestillinger</h3>
+        <h3>Orders</h3>
         {user.role === "admin" && orders.length !== 0 && (
           <button className="btn-red small danger" onClick={clearAllOrders}>
             <i className="fa-solid fa-trash"></i>
-            Slett ordre
+            Delete orders
           </button>
         )}
       </div>
       <div className="card-content">
         {loading ? (
-          <p>Laster bestillinger...</p>
+          <p>Loading orders...</p>
         ) : orders.length === 0 ? (
-          <p>Det finnes ingen bestillinger.</p>
+          <p>There are currently no orders.</p>
         ) : (
           <ul className="foodorders-list">
             {orders.map((order) => (
               <li
-                className={order.createdBy === user.username ? "foodorders-item-user" : "foodorders-item"}
+                className={
+                  order.createdBy === user.username
+                    ? "foodorders-item-user"
+                    : "foodorders-item"
+                }
                 key={order.id}
                 style={{ marginBottom: "1rem" }}
               >

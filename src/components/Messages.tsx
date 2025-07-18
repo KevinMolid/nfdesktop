@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
-import { query, collection, onSnapshot, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  query,
+  collection,
+  onSnapshot,
+  orderBy,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "./firebase";
-import { differenceInHours, isYesterday, format, formatDistanceToNow } from "date-fns";
-import { nb as originalNb } from "date-fns/locale";
-
+import {
+  differenceInHours,
+  isYesterday,
+  format,
+  formatDistanceToNow,
+} from "date-fns";
 
 type MessagesProps = {
   username: string;
-};
-
-// Clone and override formatDistance
-const nbWithoutAbout = {
-  ...originalNb,
-  formatDistance: (token: string, count: number, options: any): string => {
-    const original = (originalNb.formatDistance as Function)(token, count, options);
-    return original.replace(/^omtrent\s+/i, "").replace(/^ca.\s+/i, "");
-  },
+  toggleActive: (name: string) => void;
 };
 
 const formatTimestamp = (date: Date) => {
@@ -23,23 +25,27 @@ const formatTimestamp = (date: Date) => {
   const hoursAgo = differenceInHours(now, date);
 
   if (hoursAgo < 24) {
-    return formatDistanceToNow(date, { locale: nbWithoutAbout, addSuffix: true }); // "2 minutter siden"
+    return formatDistanceToNow(date, {
+      addSuffix: true, // uses default (English)
+    });
   }
 
   if (isYesterday(date)) {
-    return format(date, "'I går' HH:mm", { locale: nbWithoutAbout }); // "I går 16:45"
+    return format(date, "'Yesterday' HH:mm");
   }
 
   const daysAgo = Math.floor(hoursAgo / 24);
 
   if (daysAgo < 30) {
-    return formatDistanceToNow(date, { locale: nbWithoutAbout, addSuffix: true }); // "12 dager siden"
+    return formatDistanceToNow(date, {
+      addSuffix: true,
+    }); // "12 dager siden"
   }
 
-  return format(date, "d. MMM yyyy, HH:mm", { locale: nbWithoutAbout }); // "4. mai 2025, 14:25"
+  return format(date, "d. MMMM yyyy - HH:mm");
 };
 
-const Messages = ({ username }: MessagesProps) => {
+const Messages = ({ username, toggleActive }: MessagesProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
@@ -51,15 +57,19 @@ const Messages = ({ username }: MessagesProps) => {
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMessages(data);
-    }, (error) => {
-      console.error("Error with real-time listener:", error);
-    });
+    const unsubscribe = onSnapshot(
+      messagesQuery,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMessages(data);
+      },
+      (error) => {
+        console.error("Error with real-time listener:", error);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -100,7 +110,13 @@ const Messages = ({ username }: MessagesProps) => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Meldinger</h3>
+        <h3 className="card-title">Chat</h3>
+        <button
+          className="close-widget-btn"
+          onClick={() => toggleActive("Chat")}
+        >
+          <i className="fa-solid fa-x icon-md hover" />
+        </button>
       </div>
 
       <div className="messages-container">
@@ -109,9 +125,17 @@ const Messages = ({ username }: MessagesProps) => {
 
           return (
             <div key={msg.id}>
-              <div className={`message ${msg.sender === username ? "user-msg" : ""}`}>
+              <div
+                className={`message ${
+                  msg.sender === username ? "user-msg" : ""
+                }`}
+              >
                 <p className="message-info">
-                  {msg.sender !== username && <strong className="user">{usersMap[msg.sender] || msg.sender}</strong>}
+                  {msg.sender !== username && (
+                    <strong className="user">
+                      {usersMap[msg.sender] || msg.sender}
+                    </strong>
+                  )}
                   <small className="message-timestamp">
                     {date ? formatTimestamp(date) : "Sender..."}
                   </small>
@@ -119,7 +143,8 @@ const Messages = ({ username }: MessagesProps) => {
                 <p>{msg.content}</p>
               </div>
             </div>
-        )})}
+          );
+        })}
       </div>
 
       <div className="message-input-container">

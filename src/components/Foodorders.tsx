@@ -14,15 +14,17 @@ type UsersProps = {
     role: string;
   };
   setMessage: (msg: string) => void;
+  toggleActive: (name: string) => void;
 };
 
-const Foodorders = ({ user, setMessage }: UsersProps) => {
+const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   const menu = [
     {
       name: "Kebab i Pita",
+      description: "Lammekjøtt / Oksekjøtt i pitabrød.",
       img: "https://www.gilde.no/assets/images/_heroimage/3456020/Gilde_Kebabkjott_kebab_i_pita_miljobilde_no034179_Foto_Stian_Broch.png",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -35,9 +37,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Kebab i Rull",
+      description: "Lammekjøtt / Oksekjøtt i hvete-tortilla.",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -50,9 +53,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Döner i Pita",
+      description: "Oksekjøtt i pitabrød.",
       img: "https://oppdagoslo.no/wp-content/uploads/2024/08/Kebab-Oslo.png",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -65,9 +69,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Döner i Rull",
+      description: "Oksekjøtt i hvete-tortilla.",
       img: "https://imageproxy.wolt.com/menu/menu-images/shared/8c5f553c-a72c-11ee-80cb-2e89079b6b30_doner_i_rull.jpg",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -80,9 +85,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Shawarma i Pita",
+      description: "Kylling i pitabrød.",
       img: "https://smakfullpbk.com/wp-content/uploads/2021/10/Syrisk-Shawarma-Kylling-Rull-i-Norge.jpg",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -95,9 +101,10 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Shawarma i Rull",
+      description: "Kylling i hvete-tortilla",
       img: "https://ministryofcurry.com/wp-content/uploads/2021/05/chicken-shawarma-6.jpg",
-      sizes: ["Liten", "Stor"],
-      spice: ["Mild", "Medium", "Sterk"],
+      sizes: ["Normal", "Large"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -110,8 +117,9 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
     },
     {
       name: "Kebab Tallerken",
+      description: "Lammekjøtt / Oksekjøtt med grønnsaker ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
-      spice: ["Mild", "Medium", "Sterk"],
+      spice: ["Mild", "Medium", "Spicy"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Pepper"],
       price: "165",
@@ -166,7 +174,13 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3>Bestille Kebab</h3>
+        <h3>Order Kebab</h3>
+        <button
+          className="close-widget-btn"
+          onClick={() => toggleActive("Kebab")}
+        >
+          <i className="fa-solid fa-x icon-md hover" />
+        </button>
       </div>
 
       <div className="scroll-wrapper">
@@ -191,6 +205,9 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
                 <h3>{food.name}</h3>
                 <p>{food.price} NOK</p>
               </div>
+              <div className="food-description">
+                <p>{food.description}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -200,81 +217,84 @@ const Foodorders = ({ user, setMessage }: UsersProps) => {
       </div>
 
       {selectedItem && (
-        <div className="food-options">
-          {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
-            selectedItem[type]?.length ? (
-              <div key={type}>
-                <h4>
-                  {type === "sizes"
-                    ? "Størrelse"
-                    : type === "spice"
-                    ? "Styrke"
-                    : type === "extra"
-                    ? "Ekstra"
-                    : "Uten"}
-                  :
-                </h4>
-                {type === "sizes" && selectedItem.sizes?.length === 2 ? (
-                  (() => {
-                    const [size1, size2] = selectedItem.sizes!;
-                    return (
-                      <ToggleSwitch
-                        value={orderOptions.sizes}
-                        onChange={(val) => handleChange("sizes", val, true)}
-                        labels={[size1, size2]}
-                      />
-                    );
-                  })()
-                ) : type === "spice" ? (
-                  <StageSlider
-                    value={orderOptions.spice || selectedItem.spice[0]}
-                    onChange={(val) => handleChange("spice", val, true)}
-                    labels={selectedItem.spice}
-                  />
-                ) : (
-                  selectedItem[type].map((val: string) => (
-                    <div className="options" key={val}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name={type}
-                          checked={
-                            Array.isArray(orderOptions[type]) &&
-                            orderOptions[type].includes(val)
-                          }
-                          onChange={() => handleChange(type, val)}
+        <div className="food-container">
+          <h2>{selectedItem.name}</h2>
+          <div className="food-options">
+            {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
+              selectedItem[type]?.length ? (
+                <div key={type}>
+                  <h4>
+                    {type === "sizes"
+                      ? "Size"
+                      : type === "spice"
+                      ? "Spice"
+                      : type === "extra"
+                      ? "Extras"
+                      : "Without"}
+                    :
+                  </h4>
+                  {type === "sizes" && selectedItem.sizes?.length === 2 ? (
+                    (() => {
+                      const [size1, size2] = selectedItem.sizes!;
+                      return (
+                        <ToggleSwitch
+                          value={orderOptions.sizes}
+                          onChange={(val) => handleChange("sizes", val, true)}
+                          labels={[size1, size2]}
                         />
-                        {val}
-                      </label>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : null
-          )}
-          <div className="order-btn-container">
-            <AnimatedButton
-              onClick={async () => {
-                if (selectedFood) {
-                  try {
-                    await addDoc(collection(db, "foodorders"), {
-                      item: selectedFood,
-                      options: orderOptions,
-                      createdAt: Timestamp.now(),
-                      createdBy: user.username,
-                    });
-                    setMessage(`Bestilte ${selectedFood}`);
-                    setSelectedFood(null);
-                    setOrderOptions({});
-                  } catch (error) {
-                    console.error("Feil ved bestilling:", error);
-                    setMessage("Noe gikk galt med bestillingen.");
+                      );
+                    })()
+                  ) : type === "spice" ? (
+                    <StageSlider
+                      value={orderOptions.spice || selectedItem.spice[0]}
+                      onChange={(val) => handleChange("spice", val, true)}
+                      labels={selectedItem.spice}
+                    />
+                  ) : (
+                    selectedItem[type].map((val: string) => (
+                      <div className="options" key={val}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            name={type}
+                            checked={
+                              Array.isArray(orderOptions[type]) &&
+                              orderOptions[type].includes(val)
+                            }
+                            onChange={() => handleChange(type, val)}
+                          />
+                          {val}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : null
+            )}
+            <div className="order-btn-container">
+              <AnimatedButton
+                onClick={async () => {
+                  if (selectedFood) {
+                    try {
+                      await addDoc(collection(db, "foodorders"), {
+                        item: selectedFood,
+                        options: orderOptions,
+                        createdAt: Timestamp.now(),
+                        createdBy: user.username,
+                      });
+                      setMessage(`You have ordered ${selectedFood}.`);
+                      setSelectedFood(null);
+                      setOrderOptions({});
+                    } catch (error) {
+                      console.error("Feil ved bestilling:", error);
+                      setMessage("Noe gikk galt med bestillingen.");
+                    }
                   }
-                }
-              }}
-            >
-              <i className="fa-solid fa-cart-shopping"></i> Bestill
-            </AnimatedButton>
+                }}
+              >
+                <i className="fa-solid fa-cart-shopping"></i> Bestill
+              </AnimatedButton>
+            </div>
           </div>
         </div>
       )}

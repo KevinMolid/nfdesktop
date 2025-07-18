@@ -162,20 +162,28 @@ function App() {
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste notater</div>}>
-          {widgets[3].active && <Notes user={user} />}
+          {widgets[3].active && (
+            <Notes user={user} toggleActive={toggleActive} />
+          )}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
-          {widgets[4].active && <Messages username={user.username} />}
+          {widgets[4].active && (
+            <Messages username={user.username} toggleActive={toggleActive} />
+          )}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste Nato-alfabet</div>}>
-          {widgets[5].active && <NatoAlphabet />}
+          {widgets[5].active && <NatoAlphabet toggleActive={toggleActive} />}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
           {widgets[6].active && (
-            <Foodorders user={user} setMessage={setMessage} />
+            <Foodorders
+              user={user}
+              setMessage={setMessage}
+              toggleActive={toggleActive}
+            />
           )}
         </SafeWrapper>
 
