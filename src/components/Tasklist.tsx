@@ -242,11 +242,8 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
         <div className="card-header-right">
           {!isCreateActive && (
             <div className="icon-container">
-              <button onClick={toggleCreateActive}>
-                <i
-                  className="fa-solid fa-filter blue icon-md hover"
-                  onClick={toggleFiltering}
-                ></i>
+              <button onClick={toggleFiltering}>
+                <i className="fa-solid fa-filter blue icon-md hover"></i>
                 <p>Filter</p>
               </button>
               <button onClick={toggleCreateActive}>

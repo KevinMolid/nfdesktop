@@ -234,12 +234,19 @@ ul {
 
 /* Menu bar */
 .menu-bar {
-  padding: 0 20px;
+  padding: 0;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1290px;
+  margin-inline: 32px;
+}
+
+@media (max-width: 500px) {
+  .menu-bar {
+      margin-inline: 20px;
+  }
 }
 
 .menu-bar-left {
@@ -290,7 +297,6 @@ ul {
 @media (max-width: 500px) {
   .card {
       border-radius: 0;
-      padding: 0;
   }
 }
 
@@ -355,6 +361,13 @@ ul {
   font-size: 0.8rem;
   text-align: center;
   padding-bottom: 4px;
+}
+
+@media (max-width: 500px) {
+ .task-list,
+ .tasklist-header {
+  margin-inline: -20px;
+ }
 }
 
 .create-task-box {
