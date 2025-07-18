@@ -21,13 +21,13 @@ import "./App.css";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 
 const DEFAULT_WIDGETS = [
-  { name: "Brukere", active: true },
-  { name: "Lenker", active: true },
-  { name: "Oppgaver", active: true },
-  { name: "Notater", active: true },
-  { name: "Meldinger", active: true },
-  { name: "Nato-alfabet", active: false },
-  { name: "Bestille Kebab", active: false },
+  { name: "Users", active: true },
+  { name: "Links", active: true },
+  { name: "Tasks", active: true },
+  { name: "Notes", active: true },
+  { name: "Chat", active: true },
+  { name: "Nato", active: false },
+  { name: "Kebab", active: false },
 ];
 
 const LOCAL_STORAGE_KEY = "widgets";
@@ -144,15 +144,21 @@ function App() {
         {message && <Message message={message} setMessage={setMessage} />}
 
         <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-          {widgets[0].active && <Users user={user} />}
+          {widgets[0].active && (
+            <Users user={user} toggleActive={toggleActive} />
+          )}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste lenker</div>}>
-          {widgets[1].active && <Links user={user} />}
+          {widgets[1].active && (
+            <Links user={user} toggleActive={toggleActive} />
+          )}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste oppgaver</div>}>
-          {widgets[2].active && <Tasklist user={user} />}
+          {widgets[2].active && (
+            <Tasklist user={user} toggleActive={toggleActive} />
+          )}
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Kunne ikke laste notater</div>}>

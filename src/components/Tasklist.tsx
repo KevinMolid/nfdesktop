@@ -24,9 +24,10 @@ type User = {
 
 type TasklistProps = {
   user: User;
+  toggleActive: (name: string) => void;
 };
 
-const ToDo = ({ user }: TasklistProps) => {
+const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCreateActive, setIsCreateActive] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
@@ -237,55 +238,68 @@ const ToDo = ({ user }: TasklistProps) => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Oppgaver</h3>
-        {!isCreateActive && (
-          <div className="icon-container">
-            <i
-              className="fa-solid fa-filter blue icon-md hover"
-              onClick={toggleFiltering}
-            ></i>
-            <i
-              className="fa-solid fa-plus blue icon-md hover"
-              onClick={toggleCreateActive}
-            ></i>
-            {isFilterActive && (
-              <div className="filter-dropdown" ref={filterRef}>
-                {["active", "finished", "onhold", "cancelled"].map((status) => (
-                  <div
-                    key={status}
-                    className={`filter filter-${status} hover-border ${
-                      visibleStatuses[status] ? "active-selection" : ""
-                    }`}
-                    onClick={() =>
-                      setVisibleStatuses((prev) => ({
-                        ...prev,
-                        [status]: !prev[status],
-                      }))
-                    }
-                  >
-                    {status === "active" && (
-                      <i className="fa-solid fa-circle lightgrey"></i>
-                    )}
-                    {status === "finished" && (
-                      <i className="fa-solid fa-check green"></i>
-                    )}
-                    {status === "onhold" && (
-                      <i className="fa-solid fa-pause yellow"></i>
-                    )}
-                    {status === "cancelled" && (
-                      <i className="fa-solid fa-xmark red"></i>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <h3 className="card-title">Tasks</h3>
+        <div className="card-header-right">
+          {!isCreateActive && (
+            <div className="icon-container">
+              <button onClick={toggleCreateActive}>
+                <i
+                  className="fa-solid fa-filter blue icon-md hover"
+                  onClick={toggleFiltering}
+                ></i>
+                <p>Filter</p>
+              </button>
+              <button onClick={toggleCreateActive}>
+                <i className="fa-solid fa-plus blue icon-md hover"></i>
+                <p>Add task</p>
+              </button>
+              {isFilterActive && (
+                <div className="filter-dropdown" ref={filterRef}>
+                  {["active", "finished", "onhold", "cancelled"].map(
+                    (status) => (
+                      <div
+                        key={status}
+                        className={`filter filter-${status} hover-border ${
+                          visibleStatuses[status] ? "active-selection" : ""
+                        }`}
+                        onClick={() =>
+                          setVisibleStatuses((prev) => ({
+                            ...prev,
+                            [status]: !prev[status],
+                          }))
+                        }
+                      >
+                        {status === "active" && (
+                          <i className="fa-solid fa-circle lightgrey"></i>
+                        )}
+                        {status === "finished" && (
+                          <i className="fa-solid fa-check green"></i>
+                        )}
+                        {status === "onhold" && (
+                          <i className="fa-solid fa-pause yellow"></i>
+                        )}
+                        {status === "cancelled" && (
+                          <i className="fa-solid fa-xmark red"></i>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            className="close-widget-btn"
+            onClick={() => toggleActive("Tasks")}
+          >
+            <i className="fa-solid fa-x icon-md hover" />
+          </button>
+        </div>
       </div>
 
       {isCreateActive && (
         <div className="create-task-box">
-          Opprett ny oppgave
+          Create task
           <div className="create-task-input-container">
             <input
               value={newTaskName}
@@ -297,16 +311,27 @@ const ToDo = ({ user }: TasklistProps) => {
             <div className="button-group">
               <button className="btn" onClick={addNewTask}>
                 <i className="fa-solid fa-check"></i>
-                <p>Opprett</p>
+                <p>Confirm</p>
               </button>
               <button onClick={() => setIsCreateActive(false)}>
-                <p>Avbryt</p>
                 <i className="fa-solid fa-cancel red"></i>
+                <p>Cancel</p>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Tasklist */}
+      {/* Header */}
+      <div>
+        <ul className="tasklist-header">
+          <li>Action</li>
+          <li>Priority</li>
+          <li>Task</li>
+          <li>Status</li>
+        </ul>
+      </div>
 
       {Object.entries(visibleStatuses).map(
         ([status, visible]) =>
@@ -316,11 +341,11 @@ const ToDo = ({ user }: TasklistProps) => {
               {status !== "active" && (
                 <h4 className="card-title">
                   {status === "finished"
-                    ? "Utførte"
+                    ? "Finished"
                     : status === "onhold"
-                    ? "Pausede"
-                    : "Kansellerte"}{" "}
-                  oppgaver
+                    ? "Paused"
+                    : "Calcelled"}{" "}
+                  tasks
                 </h4>
               )}
               <ul className="task-list">

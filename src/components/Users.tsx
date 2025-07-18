@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import bcrypt from "bcryptjs";
-import { doc, updateDoc, collection, addDoc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  collection,
+  addDoc,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "./firebase";
 
 type UsersProps = {
@@ -9,9 +15,10 @@ type UsersProps = {
     name?: string;
     role: string;
   };
+  toggleActive: (name: string) => void;
 };
 
-const Users = ({ user }: UsersProps) => {
+const Users = ({ user, toggleActive }: UsersProps) => {
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -47,7 +54,9 @@ const Users = ({ user }: UsersProps) => {
 
   const registerUser = async (username: string, pin: string) => {
     if (username.length !== 3 || pin.length !== 4) {
-      setError("Brukernavn må inneholde 3 bokstaver og PIN må bestå av 4 siffer.");
+      setError(
+        "Username must consist of 3 letters and PIN must consist of 4 digits."
+      );
       return;
     }
 
@@ -75,51 +84,63 @@ const Users = ({ user }: UsersProps) => {
   const handleSaveName = async () => {
     if (!selectedUser) return;
     const ref = doc(db, "users", selectedUser.id);
-    await updateDoc(ref, {     
+    await updateDoc(ref, {
       name: editName,
       nickname: editNickname,
-     });
+    });
     setSelectedUser(null);
   };
 
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Brukere</h3>
-        {!isCreateActive && user.role === "admin" && (
-          <div className="icon-container">
-            <i className="fa-solid fa-plus blue icon-md hover" onClick={toggleCreateActive}></i>
-          </div>
-        )}
+        <h3 className="card-title">Users</h3>
+        <div className="card-header-right">
+          {!isCreateActive && user.role === "admin" && (
+            <button onClick={toggleCreateActive}>
+              <i className="fa-solid fa-plus blue icon-md hover"></i>
+              Add user
+            </button>
+          )}
+          <button
+            className="close-widget-btn"
+            onClick={() => toggleActive("Users")}
+          >
+            <i className="fa-solid fa-x icon-md hover" />
+          </button>
+        </div>
       </div>
 
       <div className="card-body">
         {isCreateActive && (
           <div className="create-task-box">
-            Opprett ny bruker
+            Create new user
             <div className="create-task-input-container">
               <input
                 type="text"
-                placeholder="Brukernavn"
+                placeholder="Username"
                 value={username}
                 maxLength={3}
                 onChange={(e) => setUsername(e.target.value.toUpperCase())}
               />
               <input
                 type="password"
-                placeholder="PIN-kode"
+                placeholder="PIN-code"
                 value={pin}
                 maxLength={4}
                 onChange={(e) => setPin(e.target.value)}
               />
               <div className="button-group">
-                <button className="btn" onClick={() => registerUser(username, pin)}>
+                <button
+                  className="btn"
+                  onClick={() => registerUser(username, pin)}
+                >
                   <i className="fa-solid fa-check"></i>
-                  <p>Opprett</p>
+                  <p>Confirm</p>
                 </button>
                 <button onClick={toggleCreateActive}>
                   <i className="fa-solid fa-cancel red"></i>
-                  <p>Avbryt</p>
+                  <p>Cancel</p>
                 </button>
               </div>
             </div>
@@ -131,9 +152,9 @@ const Users = ({ user }: UsersProps) => {
 
         <ul>
           <li className="userlist">
-            <h4>Kode</h4>
-            <h4>Navn</h4>
-            <h4>Status</h4>
+            <h4>Code</h4>
+            <h4>Name</h4>
+            <h4>Role</h4>
           </li>
           {users.map((u) => (
             <li key={u.id} className="userlist">
@@ -142,7 +163,9 @@ const Users = ({ user }: UsersProps) => {
               </p>
               <p>
                 <span
-                  style={{ cursor: user.role === "admin" ? "pointer" : "default" }}
+                  style={{
+                    cursor: user.role === "admin" ? "pointer" : "default",
+                  }}
                   onClick={() => {
                     if (user.role === "admin") {
                       setSelectedUser(u);
@@ -151,10 +174,10 @@ const Users = ({ user }: UsersProps) => {
                     }
                   }}
                 >
-                  {u.name || <em>(ingen navn)</em>}
+                  {u.name || <em>(No name)</em>}
                 </span>
               </p>
-              <p>{u.role === "admin" ? "Admin" : "Bruker"}</p>
+              <p>{u.role === "admin" ? "Admin" : "User"}</p>
             </li>
           ))}
         </ul>
@@ -164,11 +187,13 @@ const Users = ({ user }: UsersProps) => {
       {selectedUser && (
         <div className="modal-backdrop">
           <div className="modal">
-            <h3>Rediger bruker</h3>
-            <p><strong>Brukernavn:</strong> {selectedUser.username}</p>
+            <h3>Edit user</h3>
+            <p>
+              <strong>Username:</strong> {selectedUser.username}
+            </p>
 
             <label>
-              Navn:
+              Name:
               <input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
@@ -176,7 +201,7 @@ const Users = ({ user }: UsersProps) => {
             </label>
 
             <label>
-              Kallenavn:
+              Nickname:
               <input
                 value={editNickname}
                 onChange={(e) => setEditNickname(e.target.value)}
@@ -186,10 +211,11 @@ const Users = ({ user }: UsersProps) => {
             <div className="button-group" style={{ marginTop: "1rem" }}>
               <button className="btn" onClick={handleSaveName}>
                 <i className="fa-solid fa-check"></i>
-                Lagre
+                Save
               </button>
               <button className="btn-red" onClick={() => setSelectedUser(null)}>
-                Avbryt
+                <i className="fa-solid fa-cancel"></i>
+                Cancel
               </button>
             </div>
           </div>

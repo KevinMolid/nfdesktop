@@ -13,36 +13,82 @@ type LinkCategory = { category: string; links: Link[] };
 
 const STATIC_CATEGORIES: LinkCategory[] = [
   {
-    category: "Internt",
+    category: "Norrønafly",
     links: [
-      { id: "static-1", name: "Avvik - Fossum IT", href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview" },
-      { id: "static-2", name: "Eco Online", href: "https://app.ecoonline.com/login/" },
-      { id: "static-3", name: "Toll - Emma EDOC", href: "https://emmaedoc.no/" },
-      { id: "static-4", name: "Tripletex", href: "https://tripletex.no/execute/login?site=no" },
+      {
+        id: "static-1",
+        name: "Reports - Fossum IT",
+        href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview",
+      },
+      {
+        id: "static-2",
+        name: "Eco Online",
+        href: "https://app.ecoonline.com/login/",
+      },
+      {
+        id: "static-3",
+        name: "Customs - Emma EDOC",
+        href: "https://emmaedoc.no/",
+      },
+      {
+        id: "static-4",
+        name: "Tripletex",
+        href: "https://tripletex.no/execute/login?site=no",
+      },
     ],
   },
   {
-    category: "Leverandører",
+    category: "Vendors",
     links: [
-      { id: "static-5", name: "Boeing", href: "https://shop.boeing.com/aviation-supply/" },
-      { id: "static-7", name: "Collins", href: "https://www.customers.utcaerospacesystems.com/ngp-my-account" },
-      { id: "static-8", name: "Hartzell", href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html" },
+      {
+        id: "static-5",
+        name: "Boeing",
+        href: "https://shop.boeing.com/aviation-supply/",
+      },
+      {
+        id: "static-7",
+        name: "Collins",
+        href: "https://www.customers.utcaerospacesystems.com/ngp-my-account",
+      },
+      {
+        id: "static-8",
+        name: "Hartzell",
+        href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html",
+      },
       { id: "static-9", name: "Skygeek", href: "https://skygeek.com/" },
       { id: "static-10", name: "Textron", href: "https://ww2.txtav.com/" },
     ],
   },
   {
-    category: "Verktøy",
-    links: [{ id: "static-11", name: "Kiwa", href: "https://labservices.kiwa.com/eCal_NO/Login.aspx?nochk=-1&lng=EN" }],
+    category: "Tool Calibration",
+    links: [
+      {
+        id: "static-11",
+        name: "Kiwa",
+        href: "https://labservices.kiwa.com/eCal_NO/Login.aspx?nochk=-1&lng=EN",
+      },
+    ],
   },
   {
-    category: "Transport",
+    category: "Freight",
     links: [
-      { id: "static-12", name: "Bring", href: "https://www.mybring.com/frontpage/index.html" },
-      { id: "static-13", name: "DHL", href: "https://mydhl.express.dhl/no/en/home.html#/createNewShipmentTab" },
+      {
+        id: "static-12",
+        name: "Bring",
+        href: "https://www.mybring.com/frontpage/index.html",
+      },
+      {
+        id: "static-13",
+        name: "DHL",
+        href: "https://mydhl.express.dhl/no/en/home.html#/createNewShipmentTab",
+      },
       { id: "static-14", name: "FedEx", href: "https://www.fedex.com" },
       { id: "static-15", name: "Rajapack", href: "https://www.rajapack.no/" },
-      { id: "static-16", name: "TNT", href: "https://mytnt.tnt.com/?locale=no_NO#/sign-in" },
+      {
+        id: "static-16",
+        name: "TNT",
+        href: "https://mytnt.tnt.com/?locale=no_NO#/sign-in",
+      },
       { id: "static-17", name: "UPS", href: "https://www.ups.com/no/no/home" },
     ],
   },
@@ -60,8 +106,14 @@ const getInitialExpanded = (): Record<string, boolean> => {
   }
 };
 
-const Links = ({ user }: { user: { id: string } }) => {
-  const [expandedCategories, setExpandedCategories] = useState(getInitialExpanded);
+type LinksProps = {
+  user: { id: string };
+  toggleActive: (name: string) => void;
+};
+
+const Links = ({ user, toggleActive }: LinksProps) => {
+  const [expandedCategories, setExpandedCategories] =
+    useState(getInitialExpanded);
   const [customLinks, setCustomLinks] = useState<Link[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [newLinkName, setNewLinkName] = useState("");
@@ -96,7 +148,7 @@ const Links = ({ user }: { user: { id: string } }) => {
 
       if (localLinks.length > 0 && !linksMoved) {
         await Promise.all(
-          localLinks.map(link => {
+          localLinks.map((link) => {
             const randomId = crypto.randomUUID();
             return setDoc(doc(db, "users", user.id, "links", randomId), link);
           })
@@ -106,8 +158,10 @@ const Links = ({ user }: { user: { id: string } }) => {
 
       let dbLinks: Link[] = [];
       try {
-        const snapshot = await getDocs(collection(db, "users", user.id, "links"));
-        dbLinks = snapshot.docs.map(doc => {
+        const snapshot = await getDocs(
+          collection(db, "users", user.id, "links")
+        );
+        dbLinks = snapshot.docs.map((doc) => {
           return { id: doc.id, ...(doc.data() as Omit<Link, "id">) };
         });
       } catch (e) {
@@ -135,7 +189,7 @@ const Links = ({ user }: { user: { id: string } }) => {
   }, []);
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({
+    setExpandedCategories((prev) => ({
       ...prev,
       [category]: !prev[category],
     }));
@@ -150,8 +204,8 @@ const Links = ({ user }: { user: { id: string } }) => {
 
     await setDoc(doc(db, "users", user.id, "links", randomId), newLinkData);
 
-    setCustomLinks(prev => [...prev, newLink]);
-    setExpandedCategories(prev => ({ ...prev, "Mine lenker": true }));
+    setCustomLinks((prev) => [...prev, newLink]);
+    setExpandedCategories((prev) => ({ ...prev, "My Links": true }));
     setNewLinkName("");
     setNewLinkHref("");
     setShowForm(false);
@@ -160,7 +214,7 @@ const Links = ({ user }: { user: { id: string } }) => {
   const handleDeleteLink = async (id: string) => {
     try {
       await deleteDoc(doc(db, "users", user.id, "links", id));
-      setCustomLinks(prev => prev.filter(link => link.id !== id));
+      setCustomLinks((prev) => prev.filter((link) => link.id !== id));
       setOpenDropdownId(null);
     } catch (error) {
       console.error("Failed to delete link:", error);
@@ -173,35 +227,44 @@ const Links = ({ user }: { user: { id: string } }) => {
 
   const allCategories: LinkCategory[] = [
     ...STATIC_CATEGORIES,
-    ...(customLinks.length > 0 ? [{ category: "Mine lenker", links: customLinks }] : []),
+    ...(customLinks.length > 0
+      ? [{ category: "My Links", links: customLinks }]
+      : []),
   ];
 
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Lenker</h3>
-        {!showForm && (
-          <i
-            className="fa-solid fa-plus blue icon-md hover"
-            onClick={() => setShowForm(prev => !prev)}
-          />
-        )}
+        <h3 className="card-title">Links</h3>
+        <div className="card-header-right">
+          {!showForm && (
+            <button onClick={() => setShowForm((prev) => !prev)}>
+              <i className="fa-solid fa-plus blue icon-md hover" /> Add link
+            </button>
+          )}
+          <button
+            className="close-widget-btn"
+            onClick={() => toggleActive("Links")}
+          >
+            <i className="fa-solid fa-x icon-md hover" />
+          </button>
+        </div>
       </div>
 
       {showForm && (
         <div className="create-task-box">
-          Opprett ny lenke
+          Add new link
           <div className="create-task-input-container">
             <input
               type="text"
-              placeholder="Navn"
+              placeholder="Link name"
               value={newLinkName}
               onChange={(e) => setNewLinkName(e.target.value)}
               className="input m-b-1"
             />
             <input
               type="text"
-              placeholder="https://..."
+              placeholder="URL (https://...)"
               value={newLinkHref}
               onChange={(e) => setNewLinkHref(e.target.value)}
               className="input m-b-1"
@@ -209,11 +272,11 @@ const Links = ({ user }: { user: { id: string } }) => {
             <div className="button-group">
               <button className="btn" onClick={handleAddLink}>
                 <i className="fa-solid fa-check" />
-                <p>Opprett</p>
+                <p>Confirm</p>
               </button>
               <button onClick={() => setShowForm(false)}>
-                <p>Avbryt</p>
                 <i className="fa-solid fa-cancel red" />
+                <p>Cancel</p>
               </button>
             </div>
           </div>
@@ -225,9 +288,16 @@ const Links = ({ user }: { user: { id: string } }) => {
 
         return (
           <div key={category}>
-            <div className="ul-heading" onClick={() => toggleCategory(category)}>
+            <div
+              className="ul-heading"
+              onClick={() => toggleCategory(category)}
+            >
               <p className="list-p">{category}</p>
-              <i className={`fa-solid fa-caret-${isExpanded ? "up" : "down"} lightgrey`} />
+              <i
+                className={`fa-solid fa-caret-${
+                  isExpanded ? "up" : "down"
+                } lightgrey`}
+              />
             </div>
 
             {isExpanded && (
@@ -235,7 +305,11 @@ const Links = ({ user }: { user: { id: string } }) => {
                 {links.map((link) => (
                   <li
                     key={link.id}
-                    style={{ display: "flex", alignItems: "center", position: "relative" }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      position: "relative",
+                    }}
                   >
                     {category === "Mine lenker" && (
                       <div
@@ -263,7 +337,9 @@ const Links = ({ user }: { user: { id: string } }) => {
                               <div className="dropdown-item-icon-container">
                                 <i className="fa-solid fa-trash red"></i>
                               </div>
-                              <span style={{ marginLeft: "8px" }}>Slett lenke</span>
+                              <span style={{ marginLeft: "8px" }}>
+                                Slett lenke
+                              </span>
                             </div>
                           </div>
                         )}

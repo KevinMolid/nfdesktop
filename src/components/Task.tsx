@@ -20,7 +20,17 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "kansellert",
 };
 
-const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onRename, onPriorityChange }: TaskProps) => {
+const Task = ({
+  id,
+  priority,
+  name,
+  status,
+  index,
+  onStatusChange,
+  onDelete,
+  onRename,
+  onPriorityChange,
+}: TaskProps) => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [isStatusDropdownActive, setIsStatusDropdownActive] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +45,10 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
   /* Handle click outside dropdown */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownActive(false);
       }
     };
@@ -46,7 +59,10 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
   /* Handle click outside status dropdown */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsStatusDropdownActive(false);
       }
     };
@@ -100,13 +116,33 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
   const getStatusIcon = () => {
     switch (status) {
       case "active":
-        return <i className="fa-solid fa-circle lightgrey hover" onClick={toggleStatusDropdown}></i>;
+        return (
+          <i
+            className="fa-solid fa-circle lightgrey hover"
+            onClick={toggleStatusDropdown}
+          ></i>
+        );
       case "finished":
-        return <i className="fa-solid fa-check green hover" onClick={toggleStatusDropdown}></i>;
+        return (
+          <i
+            className="fa-solid fa-check green hover"
+            onClick={toggleStatusDropdown}
+          ></i>
+        );
       case "onhold":
-        return <i className="fa-solid fa-pause yellow hover" onClick={toggleStatusDropdown}></i>;
+        return (
+          <i
+            className="fa-solid fa-pause yellow hover"
+            onClick={toggleStatusDropdown}
+          ></i>
+        );
       case "cancelled":
-        return <i className="fa-solid fa-xmark red hover" onClick={toggleStatusDropdown}></i>;
+        return (
+          <i
+            className="fa-solid fa-xmark red hover"
+            onClick={toggleStatusDropdown}
+          ></i>
+        );
       default:
         return null;
     }
@@ -130,28 +166,40 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
   return (
     <li className={`task task-${status}`} key={"task" + index}>
       <div className="task-info">
-        <div onClick={toggleDropdown} className="icon-div hover">
+        <div onClick={toggleDropdown} className="icon-div task-action hover">
           <i className="fa-solid fa-bars"></i>
         </div>
 
-        <div className={`task-priority priority-${priority}`} ref={priorityDropdownRef}>
-            <span className="task-priority-number" onClick={() => setIsEditingPriority(!isEditingPriority)}>{priority ? priority : "0"}</span>
-            {isEditingPriority && 
-              <div>
-                <ul className="priority-dropdown">
-                  {[0, 1, 2, 3].map((num) => {
-                    return <li 
-                    className={`priority-${num}`} key={num}
-                    onClick={() => {
-                      setIsEditingPriority(false);
-                      if (onPriorityChange) onPriorityChange(id, num);
-                    }}>
+        <div
+          className={`task-priority priority-${priority}`}
+          ref={priorityDropdownRef}
+        >
+          <span
+            className="task-priority-number"
+            onClick={() => setIsEditingPriority(!isEditingPriority)}
+          >
+            {priority ? priority : "0"}
+          </span>
+          {isEditingPriority && (
+            <div>
+              <ul className="priority-dropdown">
+                {[0, 1, 2, 3].map((num) => {
+                  return (
+                    <li
+                      className={`priority-${num}`}
+                      key={num}
+                      onClick={() => {
+                        setIsEditingPriority(false);
+                        if (onPriorityChange) onPriorityChange(id, num);
+                      }}
+                    >
                       {num}
                     </li>
-                  })}
-                </ul>
-              </div>
-            }
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
 
         {isEditing ? (
@@ -175,7 +223,7 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
         )}
       </div>
 
-      <div className="task-status" style={{ position: "relative" }} ref={statusDropdownRef}>
+      <div className="task-status icon-div" ref={statusDropdownRef}>
         {getStatusIcon()}
 
         {isStatusDropdownActive && (
@@ -189,8 +237,14 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
                   setIsStatusDropdownActive(false);
                 }}
               >
-                <div className="dropdown-item-icon-container">{getStatusIconForOption(option)}</div>
-                <span style={{ marginLeft: "8px", textTransform: "capitalize" }}>{STATUS_LABELS[option]}</span>
+                <div className="dropdown-item-icon-container">
+                  {getStatusIconForOption(option)}
+                </div>
+                <span
+                  style={{ marginLeft: "8px", textTransform: "capitalize" }}
+                >
+                  {STATUS_LABELS[option]}
+                </span>
               </div>
             ))}
           </div>
@@ -199,7 +253,10 @@ const Task = ({ id, priority, name, status, index, onStatusChange, onDelete, onR
 
       {isDropdownActive && (
         <div className="task-dropdown" ref={dropdownRef}>
-          <div className="dropdown-item default-select hover-border" onClick={() => onDelete(id)}>
+          <div
+            className="dropdown-item default-select hover-border"
+            onClick={() => onDelete(id)}
+          >
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-trash red"></i>
             </div>
