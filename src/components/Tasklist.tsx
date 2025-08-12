@@ -12,9 +12,7 @@ import {
 import { TaskData } from "../types";
 import { isValidTask } from "../utils/validators";
 
-const LOCAL_STORAGE_KEY = "tasks";
 const FILTER_STORAGE_KEY = "visibleStatuses";
-const TASKS_MOVED_KEY = "tasksMoved";
 
 type User = {
   id: string;
@@ -86,51 +84,21 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const tasksMoved = localStorage.getItem(TASKS_MOVED_KEY);
-      let localTasks: TaskData[] = [];
-
-      if (!tasksMoved) {
-        const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (local) {
-          try {
-            const parsed = JSON.parse(local);
-            if (Array.isArray(parsed)) {
-              localTasks = parsed.filter(isValidTask);
-            }
-          } catch (e) {
-            console.error("Error parsing tasks from localStorage", e);
-          }
-        }
+      if (!user?.id) {
+        console.error("❌ No valid user ID");
+        return;
       }
 
-      let dbTasks: TaskData[] = [];
       try {
         const snapshot = await getDocs(
           collection(db, "users", user.id, "tasks")
         );
-        dbTasks = snapshot.docs.map((doc) => doc.data()).filter(isValidTask);
-      } catch (e) {
-        console.warn("No DB tasks found or failed to fetch", e);
-      }
-
-      if (localTasks.length > 0 && !tasksMoved) {
-        await Promise.all(
-          localTasks.map((task) =>
-            setDoc(doc(db, "users", user.id, "tasks", task.id.toString()), task)
-          )
-        );
-        localStorage.setItem(TASKS_MOVED_KEY, "true");
-        console.log("Loaded tasks:", [...dbTasks, ...localTasks]);
-        [...dbTasks, ...localTasks].forEach((task) => {
-          if (typeof task.priority !== "number") {
-            console.warn("Suspicious priority type:", task);
-          } else if (![0, 1, 2, 3].includes(task.priority)) {
-            console.warn("Unexpected priority value:", task);
-          }
-        });
-        setTasks([...dbTasks, ...localTasks]);
-      } else {
+        const dbTasks = snapshot.docs
+          .map((doc) => doc.data())
+          .filter(isValidTask);
         setTasks(dbTasks);
+      } catch (e) {
+        console.error("❌ Failed to fetch tasks from DB:", e);
       }
     };
 

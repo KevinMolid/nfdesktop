@@ -18,9 +18,6 @@ import {
 } from "@dnd-kit/core";
 import { DragEndEvent } from "@dnd-kit/core";
 
-const LOCAL_STORAGE_KEY = "stickers";
-const NOTES_MOVED_KEY = "notesMoved";
-
 const cellSize = 252; // px
 
 type NotesProps = {
@@ -73,33 +70,13 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     const unsubscribe = onSnapshot(
       collection(db, "users", user.id, "notes"),
       async (snapshot) => {
-        const notesMoved = localStorage.getItem(NOTES_MOVED_KEY) === "true";
-
-        let localStickers: StickerData[] = [];
-        if (!notesMoved) {
-          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              if (Array.isArray(parsed)) {
-                localStickers = parsed
-                  .filter(isValidSticker)
-                  .map((s, i) => ({ ...s, index: i }));
-              }
-            } catch (e) {
-              console.error("Error parsing localStorage", e);
-            }
-          }
-        }
-
         let dbStickers: StickerData[] = snapshot.docs
           .map((doc) => doc.data())
           .filter(isValidSticker);
-        const combinedStickers = [...dbStickers, ...localStickers];
 
         const stickersWithPlacement: StickerData[] = [];
 
-        for (const sticker of combinedStickers) {
+        for (const sticker of dbStickers) {
           if (sticker.row !== undefined && sticker.col !== undefined) {
             stickersWithPlacement.push(sticker);
           } else {
@@ -122,26 +99,19 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                   sticker.row = row;
                   sticker.col = col;
                   stickersWithPlacement.push(sticker);
-                  placed = true;
                   await setDoc(
                     doc(db, "users", user.id, "notes", sticker.id.toString()),
                     sticker
                   );
+                  placed = true;
                   break;
                 }
               }
-            }
-            if (!placed) {
-              console.warn("Couldn't place sticker", sticker);
             }
           }
         }
 
         setStickers(stickersWithPlacement);
-
-        if (localStickers.length > 0 && !notesMoved) {
-          localStorage.setItem(NOTES_MOVED_KEY, "true");
-        }
       }
     );
 

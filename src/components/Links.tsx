@@ -95,8 +95,6 @@ const STATIC_CATEGORIES: LinkCategory[] = [
 ];
 
 const EXPANDED_KEY = "expandedCategories";
-const CUSTOM_LINKS_KEY = "customLinks";
-const LINKS_MOVED_KEY = "linksMoved";
 
 const getInitialExpanded = (): Record<string, boolean> => {
   try {
@@ -129,33 +127,6 @@ const Links = ({ user, toggleActive }: LinksProps) => {
 
   useEffect(() => {
     const loadLinks = async () => {
-      const linksMoved = localStorage.getItem(LINKS_MOVED_KEY);
-
-      let localLinks: Omit<Link, "id">[] = [];
-      if (!linksMoved) {
-        const local = localStorage.getItem(CUSTOM_LINKS_KEY);
-        if (local) {
-          try {
-            const parsed = JSON.parse(local);
-            if (Array.isArray(parsed)) {
-              localLinks = parsed;
-            }
-          } catch (e) {
-            console.error("Error parsing localStorage links", e);
-          }
-        }
-      }
-
-      if (localLinks.length > 0 && !linksMoved) {
-        await Promise.all(
-          localLinks.map((link) => {
-            const randomId = crypto.randomUUID();
-            return setDoc(doc(db, "users", user.id, "links", randomId), link);
-          })
-        );
-        localStorage.setItem(LINKS_MOVED_KEY, "true");
-      }
-
       let dbLinks: Link[] = [];
       try {
         const snapshot = await getDocs(
@@ -172,7 +143,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
     };
 
     loadLinks();
-  }, [user]);
+  }, [user.id]);
 
   // Close dropdown on outside click
   useEffect(() => {
