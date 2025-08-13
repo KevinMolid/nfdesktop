@@ -28,6 +28,12 @@
   --border-color: #ccc;
   --active-selection-color: rgba(0, 0, 0, 0.5);
   --selection-hover-color: rgba(0, 0, 0, 0.5);
+  --green-text-color:#006b2d;
+  --green-background-color: #b1ffc7;
+  --yellow-text-color:#5a4b00;
+  --yellow-background-color: #FFF9b1;
+  --red-text-color:#6b0000;
+  --red-background-color: #fec5c5;
 }
 
 [data-theme='dark'] {
@@ -45,7 +51,12 @@
   --border-color: #555;
   --active-selection-color: rgba(255, 255, 255, 0.5);
   --selection-hover-color: rgba(255, 255, 255, 0.5);
-
+  --green-text-color:#c6ebd1;
+  --green-background-color: #304639;
+  --yellow-text-color:#e2dfbc;
+  --yellow-background-color: #5c5433;
+  --red-text-color:#e4c4c4;
+  --red-background-color: #4b2b2b;
 }
 
 html, body {
@@ -541,25 +552,26 @@ input.task-edit-input {
 
 .task-finished,
 .task-finished input {
-  color:#006b2d;
-  background-color: #b1ffc7;
+  color:var(--green-text-color);
+  background-color: var(--green-background-color);
 }
 
 .task-onhold,
 .task-onhold input {
-  color:#5a4b00;
-  background-color: #FFF9b1;
+  color: var(--yellow-text-color);
+  background-color: var(--yellow-background-color);
 }
 
 .task-cancelled,
 .task-cancelled input {
-  color:#6b0000;
-  background-color: #fec5c5;
+  color:var(--red-text-color);
+  background-color: var(--red-background-color);
 }
 
 .status-dropdown {
   position: absolute;
-  right: 0;
+  top: 0;
+  right: 48px;
   width: max-content;
   display: flex;
   flex-direction: column;

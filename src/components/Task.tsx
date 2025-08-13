@@ -14,10 +14,10 @@ type TaskProps = {
 
 const STATUS_OPTIONS = ["active", "finished", "onhold", "cancelled"];
 const STATUS_LABELS: Record<string, string> = {
-  active: "aktiv",
-  finished: "ferdig",
-  onhold: "pause",
-  cancelled: "kansellert",
+  active: "active",
+  finished: "finished",
+  onhold: "on hold",
+  cancelled: "cancelled",
 };
 
 const Task = ({
