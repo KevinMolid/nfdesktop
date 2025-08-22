@@ -1,6 +1,7 @@
 :root {
   --main-bg-color: #faf9f6;
   --usermsg-bg-color: #e2f0fa;
+  --bg-color-2: #f0eee9;
   --text-color: #000;
   --text2-color: #333;
   --text3-color: #666;
@@ -24,6 +25,7 @@
 [data-theme='dark'] {
   --main-bg-color: #121212;
   --usermsg-bg-color: #243d50;
+  --bg-color-2: #333;
   --text-color: #f0f0f0;
   --text2-color: #b9c8d8;
   --text3-color: #8194a8;
@@ -79,17 +81,7 @@
 }
 
 .food-card.selected {
-  color: white;
-  background-color: #007bff;
-}
-
-.food-card.selected .food-info h3 {
-  color: white;
-}
-
-.food-card.selected .food-info p,
-.food-card.selected .food-description p {
-  color: white;
+  background-color: var(--bg-color-2);
 }
 
 .food-card img {

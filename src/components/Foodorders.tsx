@@ -117,12 +117,32 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     },
     {
       name: "Kebab Tallerken",
-      description: "Lammekjøtt / Oksekjøtt med grønnsaker ved siden av.",
+      description: "Lammekjøtt / Oksekjøtt med grønnsaker og pommes frittes ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Tomat", "Pepper"],
       price: "165",
+    },
+    {
+      name: "Hamburger",
+      sizes: ["130g", "160g", "255g"],
+      description: "Hamburger.",
+      img: "https://assets.biggreenegg.eu/app/uploads/2019/03/28145521/topimage-classic-hamburger-2019m04-800x534.jpg",
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      remove: ["Løk", "Tomat", "Pepper"],
+      price: "???",
+    },
+    {
+      name: "Burger Tallerken",
+      sizes: ["130g", "160g", "255g"],
+      description: "Hamburger med grønnsaker og pommes frittes ved siden av.",
+      img: "https://gulsetgrillen.no/wp-content/uploads/2022/02/burgertallerkenbasic.png",
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
+      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      remove: ["Løk", "Tomat", "Pepper"],
+      price: "???",
     },
   ];
 
