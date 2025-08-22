@@ -24,7 +24,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Lammekjøtt / Oksekjøtt i pitabrød.",
       img: "https://www.gilde.no/assets/images/_heroimage/3456020/Gilde_Kebabkjott_kebab_i_pita_miljobilde_no034179_Foto_Stian_Broch.png",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -32,7 +32,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "100/135",
     },
     {
@@ -40,7 +40,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Lammekjøtt / Oksekjøtt i hvete-tortilla.",
       img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -48,7 +48,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "100/135",
     },
     {
@@ -56,7 +56,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Oksekjøtt i pitabrød.",
       img: "https://oppdagoslo.no/wp-content/uploads/2024/08/Kebab-Oslo.png",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -64,7 +64,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "129/165",
     },
     {
@@ -72,7 +72,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Oksekjøtt i hvete-tortilla.",
       img: "https://imageproxy.wolt.com/menu/menu-images/shared/8c5f553c-a72c-11ee-80cb-2e89079b6b30_doner_i_rull.jpg",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -80,7 +80,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "129/165",
     },
     {
@@ -88,7 +88,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Kylling i pitabrød.",
       img: "https://smakfullpbk.com/wp-content/uploads/2021/10/Syrisk-Shawarma-Kylling-Rull-i-Norge.jpg",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -96,7 +96,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "???",
     },
     {
@@ -104,7 +104,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Kylling i hvete-tortilla",
       img: "https://ministryofcurry.com/wp-content/uploads/2021/05/chicken-shawarma-6.jpg",
       sizes: ["Normal", "Large"],
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         "Ekstra dressing",
         "Pepper",
@@ -112,16 +112,16 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Pommes Frittes oppi",
         "Ekstra pita",
       ],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "???",
     },
     {
       name: "Kebab Tallerken",
       description: "Lammekjøtt / Oksekjøtt med grønnsaker ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
-      spice: ["Mild", "Medium", "Spicy"],
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
-      remove: ["Løk", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper"],
       price: "165",
     },
   ];
