@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import ToggleSwitch from "./ToggleSwitch";
+import RadioButton from "./RadioButton";
 import StageSlider from "./StageSlider";
 import { AnimatedButton } from "./AnimatedButton";
 
@@ -261,6 +262,17 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                           value={orderOptions.sizes}
                           onChange={(val) => handleChange("sizes", val, true)}
                           labels={[size1, size2]}
+                        />
+                      );
+                    })()
+                  ) : type === "sizes" && selectedItem.sizes?.length === 3 ? (
+                    (() => {
+                      const [size1, size2, size3] = selectedItem.sizes!;
+                      return (
+                        <RadioButton
+                          value={orderOptions.sizes}
+                          onChange={(val) => handleChange("sizes", val, true)}
+                          labels={[size1, size2, size3]}
                         />
                       );
                     })()
