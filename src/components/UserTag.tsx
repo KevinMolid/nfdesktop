@@ -101,7 +101,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-asterisk grey m-l-1"></i>
             </div>
-            <div className="dropdown-item-text-container">Endre PIN</div>
+            <div className="dropdown-item-text-container">Change PIN</div>
           </div>
           <div
             className="dropdown-item default-select hover-border"
@@ -110,7 +110,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-sign-out grey m-l-1"></i>
             </div>
-            <div className="dropdown-item-text-container">Logg ut</div>
+            <div className="dropdown-item-text-container">Sign out</div>
           </div>
         </div>
       )}
