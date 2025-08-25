@@ -111,12 +111,6 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Chat</h3>
-        <button
-          className="close-widget-btn"
-          onClick={() => toggleActive("Chat")}
-        >
-          <i className="fa-solid fa-x icon-md hover" />
-        </button>
       </div>
 
       <div className="messages-container">

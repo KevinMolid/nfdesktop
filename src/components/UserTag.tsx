@@ -7,7 +7,7 @@ import {
   where,
   getDocs,
   updateDoc,
-  doc
+  doc,
 } from "firebase/firestore";
 import bcrypt from "bcryptjs";
 
@@ -57,7 +57,10 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
     try {
       const db = getFirestore();
       const usersRef = collection(db, "users");
-      const q = query(usersRef, where("username", "==", username.toUpperCase()));
+      const q = query(
+        usersRef,
+        where("username", "==", username.toUpperCase())
+      );
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
@@ -82,9 +85,6 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
   return (
     <div className="usertag-container" ref={containerRef}>
       <div className="user-tag" onClick={toggleDropdown}>
-        <p>
-          <strong className="user">{username}</strong>
-        </p>
         <img src={avatar} alt="" className="avatar" />
       </div>
 
@@ -101,9 +101,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-asterisk grey m-l-1"></i>
             </div>
-            <div className="dropdown-item-text-container">
-              Endre PIN
-            </div>
+            <div className="dropdown-item-text-container">Endre PIN</div>
           </div>
           <div
             className="dropdown-item default-select hover-border"
@@ -112,9 +110,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-sign-out grey m-l-1"></i>
             </div>
-            <div className="dropdown-item-text-container">
-              Logg ut
-            </div>
+            <div className="dropdown-item-text-container">Logg ut</div>
           </div>
         </div>
       )}
@@ -122,7 +118,8 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
       {showPinForm && (
         <div className="pin-form">
           <h2>Endre PIN-kode</h2>
-          <input className="pin-input"
+          <input
+            className="pin-input"
             type="password"
             placeholder="Ny PIN"
             value={newPin}
@@ -133,8 +130,15 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
             }}
           />
           <div className="button-group">
-            <button className="pin-btn pin-btn-green" onClick={handlePinUpdate}>Lagre</button>
-            <button className="pin-btn pin-btn-red" onClick={() => setShowPinForm(false)}>Avbryt</button>
+            <button className="pin-btn pin-btn-green" onClick={handlePinUpdate}>
+              Lagre
+            </button>
+            <button
+              className="pin-btn pin-btn-red"
+              onClick={() => setShowPinForm(false)}
+            >
+              Avbryt
+            </button>
           </div>
           {feedback && <p className="feedback-message">{feedback}</p>}
         </div>

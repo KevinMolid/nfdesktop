@@ -325,11 +325,11 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   return (
     <div className="card has-header full-width">
       <div className="card-header">
-        <h3 className="card-title">Notes</h3>
+        <h3 className="card-title">Noticeboard</h3>
         <div className="card-header-right">
           <button onClick={addSticker}>
-            <i className="fa-solid fa-plus blue icon-md hover"></i>
-            <p>New Note</p>
+            <i className="fa-solid fa-plus grey icon-md hover"></i>
+            <p>Add</p>
           </button>
           <button
             className="close-widget-btn"

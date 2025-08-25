@@ -2,18 +2,16 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Burgermenu from "./Burgermenu";
 import UserTag from "./UserTag";
 
-import logoB from "../assets/logo-b.png";
-import logoBW from "../assets/logo-bw.png";
+import logo from "../assets/nflogo.png";
 
 type MenuProps = {
   username: string;
   widgets: { name: string; active: boolean }[];
   toggleActive: (name: string) => void;
   onLogout: () => void;
-  onHeightChange: (height: number) => void;
 };
 
-const Header = ({ username, widgets, toggleActive, onLogout, onHeightChange }: MenuProps) => {
+const Header = ({ username, widgets, toggleActive, onLogout }: MenuProps) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
@@ -21,26 +19,10 @@ const Header = ({ username, widgets, toggleActive, onLogout, onHeightChange }: M
 
   const headerWrapperRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const updateHeight = () => {
-      if (headerWrapperRef.current) {
-        onHeightChange(headerWrapperRef.current.offsetHeight);
-      }
-    };
-
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    if (headerWrapperRef.current) {
-      observer.observe(headerWrapperRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [onHeightChange]);
-
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const isDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
       setIsDarkMode(isDark);
     });
 
@@ -70,16 +52,9 @@ const Header = ({ username, widgets, toggleActive, onLogout, onHeightChange }: M
       )}
       <div className="bottom-header">
         <div className="menu-bar">
-          <div className="menu-bar-left">
-            <Burgermenu widgets={widgets} toggleActive={toggleActive} />
-          </div>
           <div className="logo">
             <a href="https://www.norronafly.com/" target="_blank">
-              <img
-                src={isDarkMode ? logoBW : logoB}
-                alt="Norrønafly logo"
-                className="nflogo"
-              />
+              <img src={logo} alt="Norrønafly logo" className="nflogo" />
             </a>
           </div>
           <div className="menu-bar-right">

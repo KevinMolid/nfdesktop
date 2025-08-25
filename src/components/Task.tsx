@@ -260,7 +260,7 @@ const Task = ({
             <div className="dropdown-item-icon-container">
               <i className="fa-solid fa-trash red"></i>
             </div>
-            <span style={{ marginLeft: "8px" }}>Slett oppgave</span>
+            <span style={{ marginLeft: "8px" }}>Delete</span>
           </div>
         </div>
       )}

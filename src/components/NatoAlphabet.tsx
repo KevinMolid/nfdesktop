@@ -36,12 +36,6 @@ const NatoAlphabet = ({ toggleActive }: NatoProps) => {
     <div className="card has-header grow-1">
       <div className="card-header">
         <h3 className="card-title">Nato alphabet</h3>
-        <button
-          className="close-widget-btn"
-          onClick={() => toggleActive("Nato")}
-        >
-          <i className="fa-solid fa-x icon-md hover" />
-        </button>
       </div>
       <div className="nato-alphabet-container">
         {alphabet.map((i) => {

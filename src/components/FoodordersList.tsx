@@ -128,7 +128,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
       <div className="card-header">
         <h3>Orders</h3>
         {user.role === "admin" && orders.length !== 0 && (
-          <button className="btn-red small danger" onClick={clearAllOrders}>
+          <button className="btn-red" onClick={clearAllOrders}>
             <i className="fa-solid fa-trash"></i>
             Delete orders
           </button>

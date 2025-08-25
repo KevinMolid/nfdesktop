@@ -210,7 +210,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
         <div className="card-header-right">
           {!showForm && (
             <button onClick={() => setShowForm((prev) => !prev)}>
-              <i className="fa-solid fa-plus blue icon-md hover" /> Add link
+              <i className="fa-solid fa-plus grey icon-md hover" /> Add
             </button>
           )}
           <button

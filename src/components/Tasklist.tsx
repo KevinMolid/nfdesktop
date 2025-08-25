@@ -206,17 +206,17 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-        <h3 className="card-title">Tasks</h3>
+        <h3 className="card-title">Tasklist</h3>
         <div className="card-header-right">
           {!isCreateActive && (
             <div className="icon-container">
               <button onClick={toggleFiltering}>
-                <i className="fa-solid fa-filter blue icon-md hover"></i>
+                <i className="fa-solid fa-filter grey icon-md hover"></i>
                 <p>Filter</p>
               </button>
               <button onClick={toggleCreateActive}>
-                <i className="fa-solid fa-plus blue icon-md hover"></i>
-                <p>New task</p>
+                <i className="fa-solid fa-plus grey icon-md hover"></i>
+                <p>Add</p>
               </button>
               {isFilterActive && (
                 <div className="filter-dropdown" ref={filterRef}>

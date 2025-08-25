@@ -98,16 +98,10 @@ const Users = ({ user, toggleActive }: UsersProps) => {
         <div className="card-header-right">
           {!isCreateActive && user.role === "admin" && (
             <button onClick={toggleCreateActive}>
-              <i className="fa-solid fa-plus blue icon-md hover"></i>
-              Add user
+              <i className="fa-solid fa-plus grey icon-md hover"></i>
+              Add
             </button>
           )}
-          <button
-            className="close-widget-btn"
-            onClick={() => toggleActive("Users")}
-          >
-            <i className="fa-solid fa-x icon-md hover" />
-          </button>
         </div>
       </div>
 

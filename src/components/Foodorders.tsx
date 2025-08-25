@@ -4,6 +4,10 @@ import RadioButton from "./RadioButton";
 import StageSlider from "./StageSlider";
 import { AnimatedButton } from "./AnimatedButton";
 
+import FoodordersList from "./FoodordersList";
+
+import SafeWrapper from "./SafeWrapper";
+
 import { db } from "./firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 
@@ -13,6 +17,7 @@ type UsersProps = {
   user: {
     username: string;
     role: string;
+    id: string;
   };
   setMessage: (msg: string) => void;
   toggleActive: (name: string) => void;
@@ -118,7 +123,8 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     },
     {
       name: "Kebab Tallerken",
-      description: "Lammekjøtt / Oksekjøtt med grønnsaker og pommes frittes ved siden av.",
+      description:
+        "Lammekjøtt / Oksekjøtt med grønnsaker og pommes frittes ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
@@ -193,143 +199,160 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   const selectedItem = menu.find((item) => item.name === selectedFood);
 
   return (
-    <div className="card has-header grow-1">
-      <div className="card-header">
-        <h3>Order Kebab</h3>
-        <button
-          className="close-widget-btn"
-          onClick={() => toggleActive("Kebab")}
-        >
-          <i className="fa-solid fa-x icon-md hover" />
-        </button>
+    <div className="container">
+      <div className="page-header">
+        <h1>Food orders</h1>
       </div>
-
-      <div className="scroll-wrapper">
-        <button className="scroll-button left" onClick={() => scroll("left")}>
-          <i className="fa-solid fa-chevron-left"></i>
-        </button>
-        <div className="food-scroll" ref={scrollRef}>
-          {menu.map((food) => (
-            <div
-              key={food.name}
-              className={`food-card ${
-                selectedFood === food.name ? "selected" : ""
-              }`}
-              onClick={() => handleSelectFood(food.name)}
-            >
-              {food.img ? (
-                <img src={food.img} alt={food.name} />
-              ) : (
-                <div className="placeholder" />
-              )}
-              <div className="food-info">
-                <h3>{food.name}</h3>
-                <p>{food.price} NOK</p>
-              </div>
-              <div className="food-description">
-                <p>{food.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className="scroll-button right" onClick={() => scroll("right")}>
-          <i className="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
-
-      {selectedItem && (
-        <div className="food-container">
-          <h2>{selectedItem.name}</h2>
-          <div className="food-options">
-            {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
-              selectedItem[type]?.length ? (
-                <div key={type}>
-                  <h4>
-                    {type === "sizes"
-                      ? "Size"
-                      : type === "spice"
-                      ? "Spice"
-                      : type === "extra"
-                      ? "Extras"
-                      : "Without"}
-                    :
-                  </h4>
-                  {type === "sizes" && selectedItem.sizes?.length === 2 ? (
-                    (() => {
-                      const [size1, size2] = selectedItem.sizes!;
-                      return (
-                        <ToggleSwitch
-                          value={orderOptions.sizes}
-                          onChange={(val) => handleChange("sizes", val, true)}
-                          labels={[size1, size2]}
-                        />
-                      );
-                    })()
-                  ) : type === "sizes" && selectedItem.sizes?.length === 3 ? (
-                    (() => {
-                      const [size1, size2, size3] = selectedItem.sizes!;
-                      return (
-                        <RadioButton
-                          value={orderOptions.sizes}
-                          onChange={(val) => handleChange("sizes", val, true)}
-                          labels={[size1, size2, size3]}
-                        />
-                      );
-                    })()
-                  ) : type === "spice" ? (
-                    <StageSlider
-                      value={orderOptions.spice || selectedItem.spice[0]}
-                      onChange={(val) => handleChange("spice", val, true)}
-                      labels={selectedItem.spice}
-                    />
-                  ) : (
-                    selectedItem[type].map((val: string) => (
-                      <div className="options" key={val}>
-                        <label>
-                          <input
-                            type="checkbox"
-                            name={type}
-                            checked={
-                              Array.isArray(orderOptions[type]) &&
-                              orderOptions[type].includes(val)
-                            }
-                            onChange={() => handleChange(type, val)}
-                          />
-                          {val}
-                        </label>
-                      </div>
-                    ))
-                  )}
-                </div>
-              ) : null
-            )}
-            <div className="order-btn-container">
-              <AnimatedButton
-                onClick={async () => {
-                  if (selectedFood) {
-                    try {
-                      await addDoc(collection(db, "foodorders"), {
-                        item: selectedFood,
-                        options: orderOptions,
-                        createdAt: Timestamp.now(),
-                        createdBy: user.username,
-                      });
-                      setMessage(`You have ordered ${selectedFood}.`);
-                      setSelectedFood(null);
-                      setOrderOptions({});
-                    } catch (error) {
-                      console.error("Feil ved bestilling:", error);
-                      setMessage("Noe gikk galt med bestillingen.");
-                    }
-                  }
-                }}
-              >
-                <i className="fa-solid fa-cart-shopping"></i> Bestill
-              </AnimatedButton>
-            </div>
+      <div className="widget-container">
+        {/* Order food */}
+        <div className="card has-header grow-1">
+          <div className="card-header">
+            <h3>Order food</h3>
           </div>
+
+          <div className="scroll-wrapper">
+            <button
+              className="scroll-button left"
+              onClick={() => scroll("left")}
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+            <div className="food-scroll" ref={scrollRef}>
+              {menu.map((food) => (
+                <div
+                  key={food.name}
+                  className={`food-card ${
+                    selectedFood === food.name ? "selected" : ""
+                  }`}
+                  onClick={() => handleSelectFood(food.name)}
+                >
+                  {food.img ? (
+                    <img src={food.img} alt={food.name} />
+                  ) : (
+                    <div className="placeholder" />
+                  )}
+                  <div className="food-info">
+                    <h3>{food.name}</h3>
+                    <p>{food.price} NOK</p>
+                  </div>
+                  <div className="food-description">
+                    <p>{food.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              className="scroll-button right"
+              onClick={() => scroll("right")}
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
+          {selectedItem && (
+            <div className="food-container">
+              <h2>{selectedItem.name}</h2>
+              <div className="food-options">
+                {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
+                  selectedItem[type]?.length ? (
+                    <div key={type}>
+                      <h4>
+                        {type === "sizes"
+                          ? "Size"
+                          : type === "spice"
+                          ? "Spice"
+                          : type === "extra"
+                          ? "Extras"
+                          : "Without"}
+                        :
+                      </h4>
+                      {type === "sizes" && selectedItem.sizes?.length === 2 ? (
+                        (() => {
+                          const [size1, size2] = selectedItem.sizes!;
+                          return (
+                            <ToggleSwitch
+                              value={orderOptions.sizes}
+                              onChange={(val) =>
+                                handleChange("sizes", val, true)
+                              }
+                              labels={[size1, size2]}
+                            />
+                          );
+                        })()
+                      ) : type === "sizes" &&
+                        selectedItem.sizes?.length === 3 ? (
+                        (() => {
+                          const [size1, size2, size3] = selectedItem.sizes!;
+                          return (
+                            <RadioButton
+                              value={orderOptions.sizes}
+                              onChange={(val) =>
+                                handleChange("sizes", val, true)
+                              }
+                              labels={[size1, size2, size3]}
+                            />
+                          );
+                        })()
+                      ) : type === "spice" ? (
+                        <StageSlider
+                          value={orderOptions.spice || selectedItem.spice[0]}
+                          onChange={(val) => handleChange("spice", val, true)}
+                          labels={selectedItem.spice}
+                        />
+                      ) : (
+                        selectedItem[type].map((val: string) => (
+                          <div className="options" key={val}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                name={type}
+                                checked={
+                                  Array.isArray(orderOptions[type]) &&
+                                  orderOptions[type].includes(val)
+                                }
+                                onChange={() => handleChange(type, val)}
+                              />
+                              {val}
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  ) : null
+                )}
+                <div className="order-btn-container">
+                  <AnimatedButton
+                    onClick={async () => {
+                      if (selectedFood) {
+                        try {
+                          await addDoc(collection(db, "foodorders"), {
+                            item: selectedFood,
+                            options: orderOptions,
+                            createdAt: Timestamp.now(),
+                            createdBy: user.username,
+                          });
+                          setMessage(`You ordered ${selectedFood}.`);
+                          setSelectedFood(null);
+                          setOrderOptions({});
+                        } catch (error) {
+                          console.error("Feil ved bestilling:", error);
+                          setMessage("Noe gikk galt med bestillingen.");
+                        }
+                      }
+                    }}
+                  >
+                    <i className="fa-solid fa-cart-shopping"></i> Bestill
+                  </AnimatedButton>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        <SafeWrapper fallback={<div>Kunne ikke vise bestillinger</div>}>
+          <FoodordersList user={user} />
+        </SafeWrapper>
+      </div>
     </div>
   );
 };

@@ -1,33 +1,27 @@
-import Header from "./components/Header";
 import Login from "./components/Login";
-
 import Message from "./components/Message";
 
 import SafeWrapper from "./components/SafeWrapper";
 
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import MobileMenu from "./components/MobileMenu";
+import Dashboard from "./components/Dashboard";
+
 /* Pages */
-import Users from "./components/Users";
-import Links from "./components/Links";
-import Tasklist from "./components/Tasklist";
-import Notes from "./components/Notes";
 import Messages from "./components/Messages";
 import NatoAlphabet from "./components/NatoAlphabet";
 import Foodorders from "./components/Foodorders";
-import FoodordersList from "./components/FoodordersList";
+import Users from "./components/Users";
 
-import Footer from "./components/Footer";
 import "./App.css";
 
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 
 const DEFAULT_WIDGETS = [
-  { name: "Users", active: true },
   { name: "Links", active: true },
   { name: "Tasks", active: true },
   { name: "Notes", active: true },
-  { name: "Chat", active: true },
-  { name: "Nato", active: false },
-  { name: "Kebab", active: false },
 ];
 
 const LOCAL_STORAGE_KEY = "widgets";
@@ -41,31 +35,8 @@ function App() {
 
   const [user, setUser] = useState<User | null>(null);
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [message, setMessage] = useState("");
-
-  useLayoutEffect(() => {
-    if (!headerRef.current) return;
-
-    const updateHeight = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
-      }
-    };
-
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(headerRef.current);
-
-    window.addEventListener("resize", updateHeight);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, []);
+  const [activePage, setActivePage] = useState("Dashboard");
 
   useEffect(() => {
     // Load widgets from local storage and merge with default
@@ -117,81 +88,71 @@ function App() {
 
   return user ? (
     <>
-      {/* Header absolutely positioned and measured with ref */}
-      <div
-        ref={headerRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-        }}
-      >
-        <Header
+      <Header
+        username={user.username}
+        onLogout={handleLogout}
+        widgets={widgets}
+        toggleActive={toggleActive}
+      />
+
+      <MobileMenu
+        username={user.username}
+        onLogout={handleLogout}
+        activePage={activePage}
+        setActivePage={setActivePage}
+      />
+
+      <div className="screen">
+        <Sidebar
           username={user.username}
-          widgets={widgets}
-          toggleActive={toggleActive}
           onLogout={handleLogout}
-          onHeightChange={setHeaderHeight}
+          activePage={activePage}
+          setActivePage={setActivePage}
         />
-      </div>
 
-      {/* Main container pushed down by header height */}
-      <div
-        className="main-container"
-        style={{ paddingTop: headerHeight - 15 || 120 }}
-      >
-        {message && <Message message={message} setMessage={setMessage} />}
+        <div className="main-container">
+          {message && <Message message={message} setMessage={setMessage} />}
 
-        <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-          {widgets[0].active && (
-            <Users user={user} toggleActive={toggleActive} />
-          )}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste lenker</div>}>
-          {widgets[1].active && (
-            <Links user={user} toggleActive={toggleActive} />
-          )}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste oppgaver</div>}>
-          {widgets[2].active && (
-            <Tasklist user={user} toggleActive={toggleActive} />
-          )}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste notater</div>}>
-          {widgets[3].active && (
-            <Notes user={user} toggleActive={toggleActive} />
-          )}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
-          {widgets[4].active && (
-            <Messages username={user.username} toggleActive={toggleActive} />
-          )}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste Nato-alfabet</div>}>
-          {widgets[5].active && <NatoAlphabet toggleActive={toggleActive} />}
-        </SafeWrapper>
-
-        <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
-          {widgets[6].active && (
-            <Foodorders
+          {activePage === "Dashboard" && (
+            <Dashboard
               user={user}
-              setMessage={setMessage}
+              widgets={widgets}
               toggleActive={toggleActive}
             />
           )}
-        </SafeWrapper>
 
-        <SafeWrapper fallback={<div>Kunne ikke vise bestillinger</div>}>
-          {widgets[6].active && <FoodordersList user={user} />}
-        </SafeWrapper>
+          {activePage === "Tools" && (
+            <>
+              <SafeWrapper fallback={<div>Kunne ikke laste Nato-alfabet</div>}>
+                <NatoAlphabet toggleActive={toggleActive} />
+              </SafeWrapper>
+            </>
+          )}
 
-        <Footer />
+          {activePage === "Chat" && (
+            <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
+              <Messages username={user.username} toggleActive={toggleActive} />
+            </SafeWrapper>
+          )}
+
+          {activePage === "Foodorders" && (
+            <>
+              <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
+                <Foodorders
+                  user={user}
+                  setMessage={setMessage}
+                  toggleActive={toggleActive}
+                />
+              </SafeWrapper>
+            </>
+          )}
+
+          {activePage === "Settings" && (
+            <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
+              <Users user={user} toggleActive={toggleActive} />
+            </SafeWrapper>
+          )}
+        </div>
       </div>
     </>
   ) : (
