@@ -73,18 +73,18 @@
   --red-text-color:#e4c4c4;
   --red-background-color: #4b2b2b;
 
-  --pri1-bg-color: #592b2b;
-  --pri1-text-color: #f3e0dc;
-  --pri1-border-color: #7c3c40;
-  --pri2-bg-color: #533216;
-  --pri2-text-color: #f8e4d5;
-  --pri2-border-color: #724620;
-  --pri3-bg-color: #574207;
-  --pri3-text-color: #fef2bf;
-  --pri3-border-color: #755a0d;
-  --pri0-bg-color: #444444;
-  --pri0-text-color: #f0f0f0;
-  --pri0-border-color: #666666;
+  --pri1-bg-color: #e04046bb;
+  --pri1-text-color: #fff;
+  --pri1-border-color: none;
+  --pri2-bg-color: #f6811bcc;
+  --pri2-text-color: #fff;
+  --pri2-border-color: none;
+  --pri3-bg-color: #fcb726cc;
+  --pri3-text-color: #fff;
+  --pri3-border-color: none;
+  --pri0-bg-color: #8c8b8ccc;
+  --pri0-text-color: #fff;
+  --pri0-border-color: none;
 }
 
 html, body {
@@ -207,7 +207,7 @@ header {
   align-items: center;
   width: 70px;
   height: 100vh;
-  padding: 50px 8px;
+  padding: 44px 8px;
   z-index: 20;
 }
 
@@ -607,6 +607,11 @@ ul {
   width: 48px;
   cursor: pointer;
   user-select: none;
+  color: var(--text3-color)
+}
+
+.task-action:hover {
+  color: var(--text2-color)
 }
 
 .task-priority {
@@ -614,9 +619,9 @@ ul {
   display: flex;
   font-size: 1.2rem;
   font-weight: 500;
-  min-width: 40px;
-  width: 40px;
-  height: 40px;
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
   color: white;
   cursor: pointer;
   user-select: none;
