@@ -36,7 +36,13 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
   const [message, setMessage] = useState("");
-  const [activePage, setActivePage] = useState("Dashboard");
+  const [activePage, setActivePage] = useState(
+    () => localStorage.getItem("activePage") || "Dashboard"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("activePage", activePage);
+  }, [activePage]);
 
   useEffect(() => {
     // Load widgets from local storage and merge with default
