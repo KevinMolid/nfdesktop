@@ -217,17 +217,12 @@ header {
   }
 }
 
-.sidebar-menu {
-  font-size: 1.5rem;
-  color: var(--text5-color);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sidebar-menu i:hover {
-  color: var(--text3-color);
+.sidebar-menu li {
   cursor: pointer;
+  color: #999; /* default icon color */
+  font-size: 1.4rem;
+  padding: 10px;
+  text-align: center;
 }
 
 .mobile-menu {
@@ -246,9 +241,24 @@ header {
   border-top: 1px solid var(--bg3-color);
 }
 
-.mobile-menu i:hover {
-  color: var(--text2-color);
+.sidebar-menu li:hover,
+.mobile-menu li:hover {
   cursor: pointer;
+}
+
+.sidebar-menu li.active,
+.mobile-menu li.active {
+  color: #007bff; /* highlighted color (blue example) */
+}
+
+.sidebar-menu li:hover,
+.mobile-menu li:hover {
+  color: var(--text-color); /* hover color */
+}
+
+.sidebar-menu li i:hover,
+.mobile-menu li i:hover {
+  color: var(--text-color); /* hover color */
 }
 
 @media (max-width: 650px) {
