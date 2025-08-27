@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import ToggleSwitch from "./ToggleSwitch";
 import RadioButton from "./RadioButton";
 import StageSlider from "./StageSlider";
 import { AnimatedButton } from "./AnimatedButton";
@@ -197,6 +196,20 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
 
   const selectedItem = menu.find((item) => item.name === selectedFood);
 
+  let selectedPrice = "";
+  if (selectedItem) {
+    if (selectedItem.prices.length === 1) {
+      // Only one price available → use it
+      selectedPrice = selectedItem.prices[0];
+    } else if (selectedItem.sizes && orderOptions.sizes) {
+      // Match the selected size with its corresponding price
+      const sizeIndex = selectedItem.sizes.indexOf(orderOptions.sizes);
+      if (sizeIndex !== -1 && selectedItem.prices[sizeIndex]) {
+        selectedPrice = selectedItem.prices[sizeIndex];
+      }
+    }
+  }
+
   return (
     <div className="container">
       <div className="page-header">
@@ -302,6 +315,10 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                   ) : null
                 )}
                 <div className="order-btn-container">
+                  <div className="order-price-container">
+                    <p>NOK</p>
+                    <p className="order-price">{selectedPrice || "???"},-</p>
+                  </div>
                   <AnimatedButton
                     onClick={async () => {
                       if (selectedFood) {
@@ -322,7 +339,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                       }
                     }}
                   >
-                    <i className="fa-solid fa-cart-shopping"></i> Bestill
+                    <i className="fa-solid fa-cart-shopping"></i> Order
                   </AnimatedButton>
                 </div>
               </div>
@@ -330,7 +347,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
           )}
         </div>
 
-        <SafeWrapper fallback={<div>Kunne ikke vise bestillinger</div>}>
+        <SafeWrapper fallback={<div>Could not load orders</div>}>
           <FoodordersList user={user} />
         </SafeWrapper>
       </div>

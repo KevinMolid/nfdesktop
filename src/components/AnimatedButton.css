@@ -11,9 +11,9 @@
   color: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50px;
-  background: linear-gradient(-45deg, #ffa63d, #ff3d77, #338aff, #3cf0c5);
+  background: linear-gradient(-45deg, #007bff, #3de8ff, #007bff);
   background-size: 600%;
-  animation: anime 8s linear infinite;
+  animation: anime 16s linear infinite;
   cursor: pointer;
   overflow: hidden;
 }
