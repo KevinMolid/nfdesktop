@@ -28,8 +28,10 @@ type TasklistProps = {
 const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCreateActive, setIsCreateActive] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskName, setNewTaskName] = useState("New task");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
   const [tasks, setTasks] = useState<TaskData[]>([]);
+  const [activeTask, setActiveTask] = useState<number | null>(null);
 
   const [visibleStatuses, setVisibleStatuses] = useState<
     Record<string, boolean>
@@ -121,12 +123,13 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     const newTask = {
       priority: 0,
       name: newTaskName,
+      description: newTaskDescription,
       id: Date.now(),
       status: "active",
     };
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
-    setNewTaskName("");
+    setNewTaskName("New task");
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
     if (taskPath.includes("//")) {
@@ -208,51 +211,43 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       <div className="card-header">
         <h3 className="card-title">Tasklist</h3>
         <div className="card-header-right">
-          {!isCreateActive && (
-            <div className="icon-container">
-              <button onClick={toggleFiltering}>
-                <i className="fa-solid fa-filter grey icon-md hover"></i>
-                <p>Filter</p>
-              </button>
-              <button onClick={toggleCreateActive}>
-                <i className="fa-solid fa-plus grey icon-md hover"></i>
-                <p>Add</p>
-              </button>
-              {isFilterActive && (
-                <div className="filter-dropdown" ref={filterRef}>
-                  {["active", "finished", "onhold", "cancelled"].map(
-                    (status) => (
-                      <div
-                        key={status}
-                        className={`filter filter-${status} hover-border ${
-                          visibleStatuses[status] ? "active-selection" : ""
-                        }`}
-                        onClick={() =>
-                          setVisibleStatuses((prev) => ({
-                            ...prev,
-                            [status]: !prev[status],
-                          }))
-                        }
-                      >
-                        {status === "active" && (
-                          <i className="fa-solid fa-circle lightgrey"></i>
-                        )}
-                        {status === "finished" && (
-                          <i className="fa-solid fa-check green"></i>
-                        )}
-                        {status === "onhold" && (
-                          <i className="fa-solid fa-pause yellow"></i>
-                        )}
-                        {status === "cancelled" && (
-                          <i className="fa-solid fa-xmark red"></i>
-                        )}
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="icon-container">
+            <button onClick={toggleFiltering}>
+              <i className="fa-solid fa-filter grey icon-md hover"></i>
+              <p>Filter</p>
+            </button>
+            {isFilterActive && (
+              <div className="filter-dropdown" ref={filterRef}>
+                {["active", "finished", "onhold", "cancelled"].map((status) => (
+                  <div
+                    key={status}
+                    className={`filter filter-${status} hover-border ${
+                      visibleStatuses[status] ? "active-selection" : ""
+                    }`}
+                    onClick={() =>
+                      setVisibleStatuses((prev) => ({
+                        ...prev,
+                        [status]: !prev[status],
+                      }))
+                    }
+                  >
+                    {status === "active" && (
+                      <i className="fa-solid fa-circle lightgrey"></i>
+                    )}
+                    {status === "finished" && (
+                      <i className="fa-solid fa-check green"></i>
+                    )}
+                    {status === "onhold" && (
+                      <i className="fa-solid fa-pause yellow"></i>
+                    )}
+                    {status === "cancelled" && (
+                      <i className="fa-solid fa-xmark red"></i>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             className="close-widget-btn"
             onClick={() => toggleActive("Tasks")}
@@ -262,40 +257,62 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
         </div>
       </div>
 
-      {isCreateActive && (
-        <div className="create-task-box">
-          Create task
-          <div className="create-task-input-container">
-            <input
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addNewTask();
-              }}
-            />
-            <div className="button-group">
-              <button className="btn" onClick={addNewTask}>
-                <i className="fa-solid fa-check"></i>
-                <p>Confirm</p>
-              </button>
-              <button onClick={() => setIsCreateActive(false)}>
-                <i className="fa-solid fa-cancel red"></i>
-                <p>Cancel</p>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Tasklist */}
       {/* Header */}
       <div>
         <ul className="tasklist-header">
           <li>Action</li>
           <li>Priority</li>
-          <li>Task</li>
+          <li>Task description</li>
           <li>Status</li>
         </ul>
+      </div>
+
+      <div
+        className={
+          isCreateActive ? "new-task-element-active" : "new-task-element"
+        }
+        onClick={() => {
+          !isCreateActive && toggleCreateActive();
+        }}
+      >
+        {!isCreateActive && (
+          <p className="new-task-title">
+            <i className="fa-solid fa-plus grey hover"></i> New task
+          </p>
+        )}
+        {isCreateActive && (
+          <>
+            <div className="task-info">
+              <div className="icon-div new-task-action">
+                <i className="fa-solid fa-bars"></i>
+              </div>
+              <div className={`task-priority priority-0`}>
+                <span className="task-priority-number">0</span>
+              </div>
+              <input
+                className="new-task-input"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNewTask();
+                }}
+              />
+            </div>
+
+            <div className="new-task-btn-container">
+              <button onClick={addNewTask} className="save-btn">
+                <i className="fa-solid fa-floppy-disk icon-md"></i>
+                Save
+              </button>
+
+              <button onClick={toggleCreateActive} className="delete-btn">
+                <i className="fa-solid fa-trash icon-md"></i>
+                Discard
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {Object.entries(visibleStatuses).map(
@@ -346,6 +363,8 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                     <Task
                       key={task.id}
                       {...task}
+                      isActive={activeTask === task.id}
+                      onClick={() => setActiveTask(task.id)}
                       index={index}
                       onDelete={() => deleteTask(task.id)}
                       onStatusChange={handleStatusChange}

@@ -562,18 +562,60 @@ ul {
  }
 }
 
-.create-task-box {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
 .create-task-input-container {
   display: flex;
   flex-direction: column;
   align-items: start;
   gap: 4px;
+}
+
+.new-task-element {
+  display: flex;
+  min-height: 48px;
+  background-color: var(--bg2-color);
+  align-items: center;
+  border-radius: 24px;
+  border: 2px dashed var(--border-color);
+  cursor: pointer;
+}
+
+.new-task-element:hover {
+  background-color: var(--bg3-color);
+}
+
+.new-task-element-active {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  line-height: 1.2;
+  min-height: 60px;
+  background-color: var(--bg3-color);
+  max-width: 100%;
+  align-items: center;
+  border-radius: 24px;
+  border: 2px solid var(--border-color);
+}
+
+.new-task-title {
+  width: 100%;
+  font-weight: 500;
+  text-align: center;
+}
+
+.new-task-input {
+  background: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text1-color);
+  font-family: inherit;
+  border: none;
+  outline: none;
+}
+
+.new-task-btn-container {
+  display: flex;
+  gap: 4px;
+  margin-right: 12px;
 }
 
 .task {
@@ -584,10 +626,16 @@ ul {
   line-height: 1.2;
   min-height: 48px;
   max-width: 100%;
-  align-items: stretch;
+  align-items: center;
+  border-radius: 24px;
 }
 
 .task:hover {
+  background-color: var(--bg3-color);
+  cursor: pointer;
+}
+
+.active-task {
   background-color: var(--bg3-color);
 }
 
@@ -598,6 +646,15 @@ ul {
   text-wrap: wrap;
   align-items: center;
   overflow: hidden;
+}
+
+.task-title {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.task-description {
+  font-size: 0.9rem;
 }
 
 .task-dropdown {
@@ -618,6 +675,15 @@ ul {
   cursor: pointer;
   user-select: none;
   color: var(--text3-color)
+}
+
+.new-task-action {
+  display: flex;
+  font-size: 1.2rem;
+  font-weight: 500;
+  min-width: 48px;
+  width: 48px;
+  color: var(--text5-color)
 }
 
 .task-action:hover {
@@ -715,7 +781,6 @@ ul {
   font-size: 1rem;
   line-height: 1.5;
   font-family: inherit;
-  font-weight: inherit;
   padding: 12px 0;
   margin: 0;
   background: none;
@@ -882,7 +947,7 @@ input.task-edit-input {
 
 .drag-handle {
   flex: 1;
-  height: 100%;       /* 👈 take full height of parent */
+  height: 100%;
   display: flex;
   align-items: center;
   cursor: grab;
@@ -983,7 +1048,7 @@ input.task-edit-input {
 
 @media (max-width: 560px) {
   .stickerboard {
-    grid-template-columns: 1fr; /* One column on small screens */
+    grid-template-columns: 1fr;
   }
 
   .sticker {
@@ -1353,6 +1418,24 @@ button:hover {
 
 .close-button-msg:hover {
   background-color: #00000033;
+}
+
+.save-btn {
+  color: white;
+  background-color: #109967;
+}
+
+.save-btn:hover {
+  background-color: #0c8559;
+}
+
+.delete-btn {
+  color: white;
+  background-color: #b83434;
+}
+
+.delete-btn:hover {
+  background-color: #a32b2b;
 }
 
 /* Input */

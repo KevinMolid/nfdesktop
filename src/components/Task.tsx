@@ -2,12 +2,15 @@ import { useState, useRef, useEffect } from "react";
 
 type TaskProps = {
   id: number;
+  isActive: boolean;
   priority: number;
   name: string;
+  description?: string;
   status: string;
   index: number;
   onStatusChange: (id: number, newStatus: string) => void;
   onDelete: (id: number) => void;
+  onClick: () => void;
   onRename?: (id: number, newName: string) => void;
   onPriorityChange?: (id: number, newPriority: number) => void; // NEW
 };
@@ -22,11 +25,14 @@ const STATUS_LABELS: Record<string, string> = {
 
 const Task = ({
   id,
+  isActive,
   priority,
   name,
+  description,
   status,
   index,
   onStatusChange,
+  onClick,
   onDelete,
   onRename,
   onPriorityChange,
@@ -164,7 +170,11 @@ const Task = ({
   };
 
   return (
-    <li className={`task task-${status}`} key={"task" + index}>
+    <li
+      className={`task task-${status} ${isActive ? "active-task" : ""}`}
+      key={"task" + index}
+      onClick={onClick}
+    >
       <div className="task-info">
         <div onClick={toggleDropdown} className="icon-div task-action hover">
           <i className="fa-solid fa-bars"></i>
@@ -202,25 +212,33 @@ const Task = ({
           )}
         </div>
 
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            onBlur={finishEditing}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") finishEditing();
-              if (e.key === "Escape") {
-                setIsEditing(false);
-                setEditedName(name); // revert changes
-              }
-            }}
-            className="task-edit-input"
-          />
-        ) : (
-          <p onDoubleClick={() => setIsEditing(true)}>{name}</p>
-        )}
+        <div>
+          {/* Task title */}
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              onBlur={finishEditing}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") finishEditing();
+                if (e.key === "Escape") {
+                  setIsEditing(false);
+                  setEditedName(name); // revert changes
+                }
+              }}
+              className="task-edit-input"
+            />
+          ) : (
+            <p className="task-title" onDoubleClick={() => setIsEditing(true)}>
+              {name}
+            </p>
+          )}
+
+          {/* Task description */}
+          <p className="task-description">{description}</p>
+        </div>
       </div>
 
       <div className="task-status icon-div" ref={statusDropdownRef}>
