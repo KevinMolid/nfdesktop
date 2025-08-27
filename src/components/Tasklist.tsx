@@ -28,8 +28,9 @@ type TasklistProps = {
 const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCreateActive, setIsCreateActive] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("New task");
-  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskName, setNewTaskName] = useState("Task name");
+  const [newTaskDescription, setNewTaskDescription] =
+    useState("Task description");
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [activeTask, setActiveTask] = useState<number | null>(null);
 
@@ -130,6 +131,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     setNewTaskName("New task");
+    setNewTaskDescription("Task description");
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
     if (taskPath.includes("//")) {
@@ -153,6 +155,27 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     const renamePath = `users/${user.id}/tasks/${id}`;
     if (renamePath.includes("//")) {
       console.warn("🔥 Invalid Firestore path in handleRename:", renamePath);
+    }
+    await setDoc(
+      doc(db, "users", user.id, "tasks", id.toString()),
+      updatedTasks.find((t) => t.id === id)!
+    );
+  };
+
+  const handleDescriptionChange = async (
+    id: number,
+    newDescription: string
+  ) => {
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, description: newDescription } : task
+    );
+    setTasks(updatedTasks);
+    const newDescriptionPath = `users/${user.id}/tasks/${id}`;
+    if (newDescriptionPath.includes("//")) {
+      console.warn(
+        "🔥 Invalid Firestore path in handleDescriptionChange:",
+        newDescriptionPath
+      );
     }
     await setDoc(
       doc(db, "users", user.id, "tasks", id.toString()),
@@ -268,6 +291,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
         </ul>
       </div>
 
+      {/* New task */}
       <div
         className={
           isCreateActive ? "new-task-element-active" : "new-task-element"
@@ -290,14 +314,24 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
               <div className={`task-priority priority-0`}>
                 <span className="task-priority-number">0</span>
               </div>
-              <input
-                className="new-task-input"
-                value={newTaskName}
-                onChange={(e) => setNewTaskName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") addNewTask();
-                }}
-              />
+              <div className="new-task-inputs">
+                <input
+                  className="new-task-input"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addNewTask();
+                  }}
+                />
+                <input
+                  className="new-task-input task-description"
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addNewTask();
+                  }}
+                />
+              </div>
             </div>
 
             <div className="new-task-btn-container">
@@ -369,6 +403,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                       onDelete={() => deleteTask(task.id)}
                       onStatusChange={handleStatusChange}
                       onRename={handleRename}
+                      onDescriptionChange={handleDescriptionChange}
                       onPriorityChange={handlePriorityChange}
                     />
                   ))}

@@ -11,6 +11,7 @@ type TaskProps = {
   onStatusChange: (id: number, newStatus: string) => void;
   onDelete: (id: number) => void;
   onClick: () => void;
+  onDescriptionChange?: (id: number, newDescription: string) => void;
   onRename?: (id: number, newName: string) => void;
   onPriorityChange?: (id: number, newPriority: number) => void; // NEW
 };
@@ -35,18 +36,22 @@ const Task = ({
   onClick,
   onDelete,
   onRename,
+  onDescriptionChange,
   onPriorityChange,
 }: TaskProps) => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [isStatusDropdownActive, setIsStatusDropdownActive] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedName, setEditedName] = useState(name);
+  const [editedDescription, setEditedDescription] = useState(description ?? "");
   const [isEditingPriority, setIsEditingPriority] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
   const priorityDropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLInputElement>(null);
 
   /* Handle click outside dropdown */
   useEffect(() => {
@@ -117,6 +122,23 @@ const Task = ({
     } else {
       setEditedName(name); // Revert if empty or unchanged
     }
+  };
+
+  const finishEditingDescription = () => {
+    setIsEditingDescription(false);
+    const trimmed = editedDescription?.trim() ?? "";
+
+    // Only update if it's different, even if it's empty
+    if (trimmed !== description) {
+      if (onDescriptionChange) {
+        onDescriptionChange(id, trimmed);
+      } else {
+        console.log(`Task ${id} description set to: ${trimmed}`);
+      }
+    }
+
+    // Always sync local state with the final value
+    setEditedDescription(trimmed);
   };
 
   const getStatusIcon = () => {
@@ -225,7 +247,7 @@ const Task = ({
                 if (e.key === "Enter") finishEditing();
                 if (e.key === "Escape") {
                   setIsEditing(false);
-                  setEditedName(name); // revert changes
+                  setEditedName(name);
                 }
               }}
               className="task-edit-input"
@@ -237,7 +259,30 @@ const Task = ({
           )}
 
           {/* Task description */}
-          <p className="task-description">{description}</p>
+          {isEditingDescription ? (
+            <input
+              ref={descriptionRef}
+              type="text"
+              value={editedDescription ?? ""}
+              onChange={(e) => setEditedDescription(e.target.value)}
+              onBlur={finishEditingDescription}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") finishEditingDescription();
+                if (e.key === "Escape") {
+                  setIsEditingDescription(false);
+                  setEditedDescription(description || "");
+                }
+              }}
+              className="task-description-input"
+            />
+          ) : (
+            <p
+              className="task-description"
+              onDoubleClick={() => setIsEditingDescription(true)}
+            >
+              {description || (isActive ? "..." : "")}
+            </p>
+          )}
         </div>
       </div>
 
