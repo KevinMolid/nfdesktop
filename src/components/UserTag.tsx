@@ -23,6 +23,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showPinForm, setShowPinForm] = useState(false);
   const [newPin, setNewPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   const toggleDropdown = () => {
@@ -50,7 +51,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
 
   const handlePinUpdate = async () => {
     if (newPin.length !== 4) {
-      setFeedback("PIN må være 4 siffer.");
+      setFeedback("The code must consist of 4 digits!");
       return;
     }
 
@@ -80,6 +81,13 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
       console.error("Error updating PIN:", error);
       setFeedback("En feil oppstod under oppdatering.");
     }
+  };
+
+  const cancelPINupdate = () => {
+    setShowPinForm(false);
+    setNewPin("");
+    setShowPin(false);
+    setFeedback("");
   };
 
   return (
@@ -116,31 +124,52 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
       )}
 
       {showPinForm && (
-        <div className="pin-form">
-          <h2>Endre PIN-kode</h2>
-          <input
-            className="pin-input"
-            type="password"
-            placeholder="Ny PIN"
-            value={newPin}
-            maxLength={4}
-            onChange={(e) => {
-              const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              setNewPin(numericValue);
-            }}
-          />
-          <div className="button-group">
-            <button className="pin-btn pin-btn-green" onClick={handlePinUpdate}>
-              Lagre
-            </button>
-            <button
-              className="pin-btn pin-btn-red"
-              onClick={() => setShowPinForm(false)}
-            >
-              Avbryt
-            </button>
+        <div className="pin-box">
+          <h3 className="pin-heading">Change PIN code</h3>
+          <div className="pin-form">
+            <label htmlFor="new-pin" className="pin-label">
+              New PIN:
+            </label>
+            <div className="pin-input-container">
+              <input
+                id="new-pin"
+                className="pin-input"
+                type={showPin ? "text " : "password"}
+                placeholder="••••"
+                value={newPin}
+                maxLength={4}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                  setNewPin(numericValue);
+                }}
+              />
+              <div className="pin-input-placeholder">
+                {showPin ? (
+                  <i
+                    className="fa-solid fa-eye"
+                    onClick={() => setShowPin(!showPin)}
+                  ></i>
+                ) : (
+                  <i
+                    className="fa-solid fa-eye-slash"
+                    onClick={() => setShowPin(!showPin)}
+                  ></i>
+                )}
+              </div>
+            </div>
+            <div className="button-group">
+              <button className="pin-btn save-btn" onClick={handlePinUpdate}>
+                <i className="fa-solid fa-floppy-disk"></i> Save
+              </button>
+              <button className="pin-btn pin-btn-red" onClick={cancelPINupdate}>
+                <i className="fa-solid fa-ban"></i> Cancel
+              </button>
+            </div>
           </div>
-          {feedback && <p className="feedback-message">{feedback}</p>}
+
+          <div className="pin-feedback-container">
+            {feedback && <p className="pin-feedback-message">{feedback}</p>}
+          </div>
         </div>
       )}
     </div>

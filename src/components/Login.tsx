@@ -12,10 +12,12 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
+  const [showPin, setShowPin] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const isDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
       setIsDarkMode(isDark);
     });
 
@@ -39,7 +41,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        setError("Feil brukernavn eller PIN.");
+        setError("Incorrect username or PIN");
         return;
       }
 
@@ -51,7 +53,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       if (isMatch) {
         onLogin({ id: userDoc.id, ...userData });
       } else {
-        setError("Feil brukernavn eller PIN.");
+        setError("Incorrect username or PIN.");
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -61,31 +63,59 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
 
   return (
     <form className="login-container" onSubmit={handleLogin}>
-      <div className='logo'>
+      <div className="logo">
         <a href="https://www.norronafly.com/" target="_blank">
-          <img src={isDarkMode ? logoBW : logoB}
-            alt="Norrønafly logo" className='nflogo'/>
+          <img
+            src={isDarkMode ? logoBW : logoB}
+            alt="Norrønafly logo"
+            className="nflogo"
+          />
         </a>
       </div>
+      {/* Username */}
       <input
+        className="login-input"
         type="text"
-        placeholder="Brukernavn"
+        placeholder="USR"
         maxLength={3}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <input
-        type="password"
-        placeholder="PIN-kode"
-        maxLength={4}
-        value={pin}
-        onChange={(e) => {
-              const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              setPin(numericValue);
-            }}
-      />
-      <button type="submit" className="btn login-btn">Logg inn</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {/* PIN */}
+      <div className="pin-input-container">
+        <input
+          className="pin-input"
+          type={showPin ? "text " : "password"}
+          placeholder="••••"
+          maxLength={4}
+          value={pin}
+          onChange={(e) => {
+            const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
+            setPin(numericValue);
+          }}
+        />
+        <div className="pin-input-placeholder">
+          {showPin ? (
+            <i
+              className="fa-solid fa-eye"
+              onClick={() => setShowPin(!showPin)}
+            ></i>
+          ) : (
+            <i
+              className="fa-solid fa-eye-slash"
+              onClick={() => setShowPin(!showPin)}
+            ></i>
+          )}
+        </div>
+      </div>
+
+      <button type="submit" className="btn login-btn">
+        <i className="fa-solid fa-right-to-bracket"></i>
+        Sign in
+      </button>
+      <div className="pin-feedback-container">
+        {error && <p className="login-error">{error}</p>}
+      </div>
     </form>
   );
 };

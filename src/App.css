@@ -416,6 +416,40 @@ ul {
   gap: 4px;
 }
 
+.login-input {
+  background-color: var(--bg2-color);
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  outline: none;
+  border: none;
+  width: 214px;
+  height: 40px;
+  border-radius: 20px;
+  padding: 0;
+}
+
+.login-error {
+  font-size: 0.8rem;
+}
+
+/* Force autofilled inputs to keep your custom styles */
+input.login-input:-webkit-autofill,
+input.pin-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #333 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 9999s ease-in-out 0s; /* trick to keep color */
+}
+
+/* For Firefox */
+input.login-input:-moz-autofill,
+input.pin-input:-moz-autofill {
+  box-shadow: 0 0 0px 1000px #333 inset !important;
+  -moz-text-fill-color: white !important;
+}
+
+
 /* Menu bar */
 .menu-bar {
   padding: 0;
@@ -853,52 +887,81 @@ ul {
 }
 
 /* PIN-form */
-.pin-form {
+.pin-box {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--text-color);
   background-color: var(--main-bg-color);
-  padding: 10px 40px 30px;
+  padding: 10px 40px 20px;
   border-radius: 10px;
   z-index: 20;
   border: 1px solid var(--text4-color);
 }
 
-.pin-input {
-  width: 100px;
-  text-align: center;
-  font-size: 18px;
-  padding: 4px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  border: 1px solid var(--text4-color);
+.pin-form {
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
 }
 
-.pin-btn {
+.pin-heading {
+  margin-bottom: 12px;
+}
+
+.pin-input-container {
+  background-color: var(--bg2-color);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1rem;
-  padding: 8px 16px;
-  color: white;
+  height: 40px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  padding-inline: 8px;
 }
 
-.pin-btn-green {
-  background-color: #009e42;
+.pin-input-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 100%;
 }
 
-.pin-btn-green:hover {
-  background-color: #008b3a;
+.pin-input-container i {
+  color: var(--text5-color);
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
-.pin-btn-red {
-  background-color: #e02323;
+.pin-input-container i:hover {
+  color: var(--text4-color);
 }
 
-.pin-btn-red:hover {
-  background-color: #c51a1a;
+.pin-input {
+  width: 130px;
+  background-color: var(--bg2-color);
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 4px;
+  padding: 4px;
+  padding-left: 32px;
+  outline: none;
+  border: none;
+}
+
+.pin-feedback-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  margin-top: 12px;
+}
+
+.pin-feedback-message {
+  font-size: 0.8rem;
+  color: var(--text2-color);
 }
 
 .button-group {
@@ -1511,12 +1574,12 @@ textarea {
 
 a {
   font-weight: 500;
-  color: #2999f7
+  color: var(--text-color)
 ;
   text-decoration: inherit;
 }
 a:hover {
-  color: #3da8ff;
+  text-decoration: underline;
 }
 
 /* Margin */
