@@ -84,7 +84,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
 
   const clearAllOrders = async () => {
     const confirm = window.confirm(
-      "Er du sikker på at du vil slette alle bestillinger?"
+      "Are you sure you want to delete all orders?"
     );
     if (!confirm) return;
 
@@ -111,7 +111,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         <div>
           <strong>
             {item}
-            {size === "Stor" ? " Stor" : ""}
+            {size === "Normal" ? "" : size === "Large" ? " Stor" : ` ${size}`}
           </strong>
         </div>
         {spice && spice !== "Medium" && <div>{spice}</div>}

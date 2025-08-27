@@ -39,7 +39,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "100/135",
+      prices: ["100", "135"],
     },
     {
       name: "Kebab i Rull",
@@ -55,7 +55,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "100/135",
+      prices: ["100", "135"],
     },
     {
       name: "Döner i Pita",
@@ -71,7 +71,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "129/165",
+      prices: ["129", "165"],
     },
     {
       name: "Döner i Rull",
@@ -87,7 +87,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "129/165",
+      prices: ["129", "165"],
     },
     {
       name: "Shawarma i Pita",
@@ -103,7 +103,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "???",
+      prices: ["???"],
     },
     {
       name: "Shawarma i Rull",
@@ -119,17 +119,16 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         "Ekstra pita",
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "???",
+      prices: ["???"],
     },
     {
       name: "Kebab Tallerken",
-      description:
-        "Lammekjøtt / Oksekjøtt med grønnsaker og pommes frittes ved siden av.",
+      description: "Kebabkjøtt med tilbehør ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "165",
+      prices: ["165"],
     },
     {
       name: "Hamburger",
@@ -139,17 +138,17 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "???",
+      prices: ["???"],
     },
     {
       name: "Burger Tallerken",
       sizes: ["130g", "160g", "255g"],
-      description: "Hamburger med grønnsaker og pommes frittes ved siden av.",
+      description: "Hamburger med pommes frittes ved siden av.",
       img: "https://gulsetgrillen.no/wp-content/uploads/2022/02/burgertallerkenbasic.png",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
       remove: ["Løk", "Tomat", "Pepper"],
-      price: "???",
+      prices: ["???"],
     },
   ];
 
@@ -231,9 +230,12 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                   ) : (
                     <div className="placeholder" />
                   )}
+                  <div className="price-label">
+                    <p>NOK</p>
+                    <p className="price">{food.prices.join(" / ")}</p>
+                  </div>
                   <div className="food-info">
                     <h3>{food.name}</h3>
-                    <p>{food.price} NOK</p>
                   </div>
                   <div className="food-description">
                     <p>{food.description}</p>
@@ -256,43 +258,22 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                 {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
                   selectedItem[type]?.length ? (
                     <div key={type}>
-                      <h4>
+                      <h4 className="food-options-header">
                         {type === "sizes"
                           ? "Size"
                           : type === "spice"
-                          ? "Spice"
+                          ? "Spiciness"
                           : type === "extra"
                           ? "Extras"
                           : "Without"}
                         :
                       </h4>
-                      {type === "sizes" && selectedItem.sizes?.length === 2 ? (
-                        (() => {
-                          const [size1, size2] = selectedItem.sizes!;
-                          return (
-                            <ToggleSwitch
-                              value={orderOptions.sizes}
-                              onChange={(val) =>
-                                handleChange("sizes", val, true)
-                              }
-                              labels={[size1, size2]}
-                            />
-                          );
-                        })()
-                      ) : type === "sizes" &&
-                        selectedItem.sizes?.length === 3 ? (
-                        (() => {
-                          const [size1, size2, size3] = selectedItem.sizes!;
-                          return (
-                            <RadioButton
-                              value={orderOptions.sizes}
-                              onChange={(val) =>
-                                handleChange("sizes", val, true)
-                              }
-                              labels={[size1, size2, size3]}
-                            />
-                          );
-                        })()
+                      {type === "sizes" ? (
+                        <RadioButton
+                          value={orderOptions.sizes}
+                          onChange={(val) => handleChange("sizes", val, true)}
+                          labels={selectedItem.sizes || ["1", "2"]}
+                        />
                       ) : type === "spice" ? (
                         <StageSlider
                           value={orderOptions.spice || selectedItem.spice[0]}

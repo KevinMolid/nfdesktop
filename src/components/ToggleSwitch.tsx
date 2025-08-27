@@ -1,7 +1,7 @@
 const ToggleSwitch = ({
   value,
   onChange,
-  labels
+  labels,
 }: {
   value: string;
   onChange: (newValue: string) => void;

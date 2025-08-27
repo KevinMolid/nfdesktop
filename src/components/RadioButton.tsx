@@ -1,19 +1,26 @@
 import "./RadioButton.css";
 
-const RadioButton = ({
-  value,
-  onChange,
-  labels,
-}: {
+type RadioProps = {
   value: string;
   onChange: (newValue: string) => void;
-  labels: [string, string, string];
-}) => {
+  labels: string[];
+};
+
+const RadioButton = ({ value, onChange, labels }: RadioProps) => {
   return (
     <div className="radiobutton">
-      <div className="label label-left">{labels[0]}</div>
-      <div className="label">{labels[1]}</div>
-      <div className="label label-right">{labels[2]}</div>
+      {labels.map((label, idx) => (
+        <div
+          key={idx}
+          className={`label 
+            ${idx === 0 ? "label-left" : ""} 
+            ${idx === labels.length - 1 ? "label-right" : ""} 
+            ${value === label ? "active" : ""}`}
+          onClick={() => onChange(label)}
+        >
+          {label}
+        </div>
+      ))}
     </div>
   );
 };
