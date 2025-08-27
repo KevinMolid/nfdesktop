@@ -1,10 +1,32 @@
+.radiobutton {
+    display: flex;
+    height: 40px;
+    border-radius: 20px;
+    gap: 2px;
+}
+
 .label {
+    background-color: #333;
+    font-weight: 500;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 60px;
-    height: 30px;
-    background-color: #99999955;
+    height: 100%;
     user-select: none;
     cursor: pointer;
+}
+
+.label-left {
+    padding-left: 4px;
+    border-radius: 20px 0 0 20px;
+}
+
+.label-right {
+    padding-right: 4px;
+    border-radius: 0 20px 20px 0;
+}
+
+.label:hover {
+    background-color: #444;
 }
