@@ -11,12 +11,25 @@ type DashboardProps = {
 };
 
 const Dashboard = ({ user, widgets, toggleActive }: DashboardProps) => {
+  const hasActiveWidgets = widgets.some((w) => w.active);
+
   return (
     <div className="container">
       <div className="page-header">
         <h1>Dashboard</h1>
         <Burgermenu widgets={widgets} toggleActive={toggleActive} />
       </div>
+
+      {!hasActiveWidgets && (
+        <div className="info-text">
+          <p>
+            There are no visible widgets. Click on the eye icon (
+            <i className="fa-solid fa-eye"></i>) in the upper right corner to
+            turn widgets visible.
+          </p>
+        </div>
+      )}
+
       <div className="widget-container">
         <SafeWrapper fallback={<div>Kunne ikke laste lenker</div>}>
           {widgets[0].active && (
@@ -39,5 +52,6 @@ const Dashboard = ({ user, widgets, toggleActive }: DashboardProps) => {
     </div>
   );
 };
+
 
 export default Dashboard;

@@ -116,6 +116,10 @@ p {
   margin: 0;
 }
 
+.info-text {
+  text-align: start;
+}
+
 .list-p {
   font-size: 0.9em;
   margin-top: 0;
@@ -239,8 +243,8 @@ header {
   justify-content: space-around;
   font-size: 1.4rem;
   color: var(--text3-color);
-  z-index: 10;
-  background-color: var(--bg1-color);
+  z-index: 20;
+  background-color: var(--bg2-color);
   padding: 4px 12px 4px 16px;
   border-top: 1px solid var(--bg3-color);
 }

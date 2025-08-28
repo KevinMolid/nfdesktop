@@ -1,5 +1,3 @@
-import "./RadioButton.css";
-
 type RadioProps = {
   value: string;
   onChange: (newValue: string) => void;
