@@ -331,7 +331,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         <div className="card-header-right">
           <button onClick={addSticker}>
             <i className="fa-solid fa-plus grey icon-md hover"></i>
-            <p>Add</p>
+            Add
           </button>
           <button
             className="close-widget-btn"

@@ -126,15 +126,15 @@ const Users = ({ user, toggleActive }: UsersProps) => {
               />
               <div className="button-group">
                 <button
-                  className="btn"
+                  className="save-btn"
                   onClick={() => registerUser(username, pin)}
                 >
                   <i className="fa-solid fa-check"></i>
-                  <p>Confirm</p>
+                  Confirm
                 </button>
-                <button onClick={toggleCreateActive}>
-                  <i className="fa-solid fa-cancel red"></i>
-                  <p>Cancel</p>
+                <button onClick={toggleCreateActive} className="delete-btn">
+                  <i className="fa-solid fa-cancel"></i>
+                  Cancel
                 </button>
               </div>
             </div>
@@ -155,7 +155,7 @@ const Users = ({ user, toggleActive }: UsersProps) => {
               <p>
                 <strong className="user">{u.username}</strong>
               </p>
-              <p>
+              <p className="user-name">
                 <span
                   style={{
                     cursor: user.role === "admin" ? "pointer" : "default",
@@ -179,39 +179,31 @@ const Users = ({ user, toggleActive }: UsersProps) => {
 
       {/* Modal or Popup */}
       {selectedUser && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h3>Edit user</h3>
-            <p>
-              <strong>Username:</strong> {selectedUser.username}
-            </p>
+        <div className="edit-user-container">
+          <h3>Edit user: {selectedUser.username}</h3>
+          <label>Name:</label>
+          <input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+          <label>Nickname:</label>
 
-            <label>
-              Name:
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-              />
-            </label>
-
-            <label>
-              Nickname:
-              <input
-                value={editNickname}
-                onChange={(e) => setEditNickname(e.target.value)}
-              />
-            </label>
-
-            <div className="button-group" style={{ marginTop: "1rem" }}>
-              <button className="btn" onClick={handleSaveName}>
-                <i className="fa-solid fa-check"></i>
-                Save
-              </button>
-              <button className="btn-red" onClick={() => setSelectedUser(null)}>
-                <i className="fa-solid fa-cancel"></i>
-                Cancel
-              </button>
-            </div>
+          <input
+            value={editNickname}
+            onChange={(e) => setEditNickname(e.target.value)}
+          />
+          <div className="edit-user-btn-container">
+            <button className="save-btn" onClick={handleSaveName}>
+              <i className="fa-solid fa-check"></i>
+              Save
+            </button>
+            <button
+              className="delete-btn"
+              onClick={() => setSelectedUser(null)}
+            >
+              <i className="fa-solid fa-cancel"></i>
+              Cancel
+            </button>
           </div>
         </div>
       )}

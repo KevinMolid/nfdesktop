@@ -241,13 +241,13 @@ const Links = ({ user, toggleActive }: LinksProps) => {
               className="input m-b-1"
             />
             <div className="button-group">
-              <button className="btn" onClick={handleAddLink}>
+              <button className="save-btn" onClick={handleAddLink}>
                 <i className="fa-solid fa-check" />
-                <p>Confirm</p>
+                Confirm
               </button>
-              <button onClick={() => setShowForm(false)}>
-                <i className="fa-solid fa-cancel red" />
-                <p>Cancel</p>
+              <button className="delete-btn" onClick={() => setShowForm(false)}>
+                <i className="fa-solid fa-cancel" />
+                Cancel
               </button>
             </div>
           </div>

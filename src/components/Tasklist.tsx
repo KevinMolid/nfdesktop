@@ -237,7 +237,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
           <div className="icon-container">
             <button onClick={toggleFiltering}>
               <i className="fa-solid fa-filter grey icon-md hover"></i>
-              <p>Filter</p>
+              Filter
             </button>
             {isFilterActive && (
               <div className="filter-dropdown" ref={filterRef}>

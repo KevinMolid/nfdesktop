@@ -8,7 +8,6 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import "./Foodorders.css";
 
 type FoodItem = {
   item: string;
@@ -128,7 +127,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
       <div className="card-header">
         <h3>Orders</h3>
         {user.role === "admin" && orders.length !== 0 && (
-          <button className="btn-red" onClick={clearAllOrders}>
+          <button className="delete-btn" onClick={clearAllOrders}>
             <i className="fa-solid fa-trash"></i>
             Delete orders
           </button>

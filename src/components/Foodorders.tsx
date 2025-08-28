@@ -10,8 +10,6 @@ import SafeWrapper from "./SafeWrapper";
 import { db } from "./firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 
-import "./Foodorders.css";
-
 type UsersProps = {
   user: {
     username: string;
