@@ -146,13 +146,15 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     const updated = stickers.map((s) => {
       if (s.id === id) {
         const newColor =
-          s.color === "yellow"
+          s.color === "default"
+            ? "yellow"
+            : s.color === "yellow"
             ? "blue"
             : s.color === "blue"
             ? "red"
             : s.color === "red"
             ? "green"
-            : "yellow";
+            : "default";
         return { ...s, color: newColor };
       } else {
         return s;
