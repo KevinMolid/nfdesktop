@@ -35,7 +35,13 @@ function App() {
 
   const [user, setUser] = useState<User | null>(null);
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info" | "warning" | "";
+  }>({
+    text: "",
+    type: "",
+  });
   const [activePage, setActivePage] = useState(
     () => localStorage.getItem("activePage") || "Dashboard"
   );
@@ -117,7 +123,9 @@ function App() {
         />
 
         <div className="main-container">
-          {message && <Message message={message} setMessage={setMessage} />}
+          {message.text && (
+            <Message message={message} setMessage={setMessage} />
+          )}
 
           {activePage === "Dashboard" && (
             <Dashboard

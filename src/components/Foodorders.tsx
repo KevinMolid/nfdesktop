@@ -10,13 +10,17 @@ import SafeWrapper from "./SafeWrapper";
 import { db } from "./firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 
+type MessageType = "success" | "error" | "info" | "warning" | "";
+
 type UsersProps = {
   user: {
     username: string;
     role: string;
     id: string;
   };
-  setMessage: (msg: string) => void;
+  setMessage: React.Dispatch<
+    React.SetStateAction<{ text: string; type: MessageType }>
+  >;
   toggleActive: (name: string) => void;
 };
 
@@ -149,9 +153,33 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     },
   ];
 
+  const drinks = [
+    {
+      name: "Cola",
+      price: 15,
+    },
+    {
+      name: "Cola Zero",
+      price: 15,
+    },
+    {
+      name: "Solo",
+      price: 15,
+    },
+    {
+      name: "Other",
+      price: "???",
+    },
+    {
+      name: "No drink",
+      price: 0,
+    },
+  ];
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedFood, setSelectedFood] = useState<string | null>(null);
   const [orderOptions, setOrderOptions] = useState<any>({});
+  const [drink, setDrink] = useState<string>("");
 
   const handleSelectFood = (foodName: string) => {
     const selected = menu.find((item) => item.name === foodName);
@@ -205,6 +233,21 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       if (sizeIndex !== -1 && selectedItem.prices[sizeIndex]) {
         selectedPrice = selectedItem.prices[sizeIndex];
       }
+    }
+  }
+
+  let finalPrice = selectedPrice;
+
+  // Check if food or drink is "???"
+  if (selectedItem) {
+    const drinkObj = drinks.find((d) => d.name === drink);
+    if (selectedPrice === "???" || drinkObj?.price === "???") {
+      finalPrice = "???";
+    } else if (selectedPrice && drinkObj) {
+      const foodPrice = parseInt(selectedPrice, 10);
+      const drinkPrice =
+        typeof drinkObj.price === "number" ? drinkObj.price : 0;
+      finalPrice = (foodPrice + drinkPrice).toString();
     }
   }
 
@@ -312,28 +355,53 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                     </div>
                   ) : null
                 )}
+                <div>
+                  <h4>Drink:</h4>
+                  <RadioButton
+                    value={drink}
+                    onChange={(val) => setDrink(val)}
+                    labels={drinks.map((d) => d.name)}
+                  />
+                </div>
                 <div className="order-btn-container">
                   <div className="order-price-container">
                     <p>NOK</p>
-                    <p className="order-price">{selectedPrice || "???"},-</p>
+                    <p className="order-price">{finalPrice || "???"},-</p>
                   </div>
                   <AnimatedButton
                     onClick={async () => {
-                      if (selectedFood) {
-                        try {
-                          await addDoc(collection(db, "foodorders"), {
-                            item: selectedFood,
-                            options: orderOptions,
-                            createdAt: Timestamp.now(),
-                            createdBy: user.username,
-                          });
-                          setMessage(`You ordered ${selectedFood}.`);
-                          setSelectedFood(null);
-                          setOrderOptions({});
-                        } catch (error) {
-                          console.error("Feil ved bestilling:", error);
-                          setMessage("Noe gikk galt med bestillingen.");
-                        }
+                      if (!selectedFood) return;
+
+                      if (!drink) {
+                        setMessage({
+                          text: "Please select a drink before ordering.",
+                          type: "error",
+                        });
+                        return;
+                      }
+
+                      try {
+                        await addDoc(collection(db, "foodorders"), {
+                          item: selectedFood,
+                          options: orderOptions,
+                          drink: drink,
+                          price: finalPrice,
+                          createdAt: Timestamp.now(),
+                          createdBy: user.username,
+                        });
+                        setMessage({
+                          text: `You ordered ${selectedFood} with ${drink}.`,
+                          type: "success",
+                        });
+                        setSelectedFood(null);
+                        setDrink("");
+                        setOrderOptions({});
+                      } catch (error) {
+                        console.error("Feil ved bestilling:", error);
+                        setMessage({
+                          text: "Noe gikk galt med bestillingen.",
+                          type: "error",
+                        });
                       }
                     }}
                   >

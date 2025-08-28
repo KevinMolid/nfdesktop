@@ -27,6 +27,8 @@ type FoodOrder = {
   order?: FoodItem[];
   item?: string;
   options?: FoodItem["options"];
+  drink?: string;
+  price?: string;
 };
 
 type User = {
@@ -99,18 +101,29 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     }
   };
 
-  const renderOrder = (item: string, options?: FoodItem["options"]) => {
+  const renderOrder = (
+    item: string,
+    options?: FoodItem["options"],
+    drink?: string,
+    price?: string
+  ) => {
     const removeList = options?.remove ?? [];
     const extraList = options?.extra ?? [];
     const size = options?.sizes;
     const spice = options?.spice;
 
     return (
-      <li style={{ marginBottom: "0.75rem" }}>
+      <li>
         <div>
           <strong>
             {item}
-            {size === "Normal" ? "" : size === "Large" ? " Stor" : ` ${size}`}
+            {size === "Normal"
+              ? ""
+              : size === "Large"
+              ? " Stor"
+              : size
+              ? ` ${size}`
+              : ""}
           </strong>
         </div>
         {spice && spice !== "Medium" && <div>{spice}</div>}
@@ -118,6 +131,8 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         {extraList.map((extra, i) => (
           <div key={i}>{extra}</div>
         ))}
+        <div>{drink}</div>
+        <div className="foodorders-item-price">{price},-</div>
       </li>
     );
   };
@@ -157,9 +172,20 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
                 </p>
                 <ul>
                   {order.order?.map((item, index) =>
-                    renderOrder(item.item, item.options)
+                    renderOrder(
+                      item.item,
+                      item.options,
+                      order.drink,
+                      order.price
+                    )
                   )}
-                  {order.item && renderOrder(order.item, order.options)}
+                  {order.item &&
+                    renderOrder(
+                      order.item,
+                      order.options,
+                      order.drink,
+                      order.price
+                    )}
                 </ul>
               </li>
             ))}
