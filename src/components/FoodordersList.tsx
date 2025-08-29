@@ -45,6 +45,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
+  const [showOrdersModal, setShowOrdersModal] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -137,16 +138,50 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     );
   };
 
+  const renderPageOrder = (
+    item: string,
+    options?: FoodItem["options"],
+  ) => {
+    const removeList = options?.remove ?? [];
+    const extraList = options?.extra ?? [];
+    const size = options?.sizes;
+    const spice = options?.spice;
+
+    return (
+      <div>
+          <strong>
+            {item}
+            {size === "Normal"
+              ? ""
+              : size === "Large"
+              ? " Stor"
+              : size
+              ? ` ${size}`
+              : ""}
+          </strong>
+        {spice && spice !== "Medium" && <div>{spice}</div>}
+        {removeList.length > 0 && <div>Uten {removeList.join(", ")}</div>}
+        {extraList.map((extra, i) => (
+          <div key={i}>{extra}</div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
+
         <h3>Orders</h3>
-        {user.role === "admin" && orders.length !== 0 && (
+        <div className="card-header-right icon-container">
+          <button onClick={() => setShowOrdersModal(!showOrdersModal)}><i className="fa-solid fa-file"></i> Show Page</button>
+          {user.role === "admin" && orders.length !== 0 && (
           <button className="delete-btn" onClick={clearAllOrders}>
             <i className="fa-solid fa-trash"></i>
             Delete orders
           </button>
         )}
+        </div>
       </div>
       <div className="card-content">
         {loading ? (
@@ -192,6 +227,39 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
           </ul>
         )}
       </div>
+
+        {/* Modal */}
+      {showOrdersModal && <div className="modal">
+        <button onClick={() => setShowOrdersModal(!showOrdersModal)}><i className="fa-solid fa-x"></i> Close</button>
+        <ul className="foodorders-list">
+            {orders.map((order) => (
+              <div
+                className={
+                  order.createdBy === user.username
+                    ? "foodorders-item-user"
+                    : "foodorders-item"
+                }
+                key={order.id}
+                style={{ marginBottom: "1rem" }}
+              >
+                {usersMap[order.createdBy] || order.createdBy}
+                <ul>
+                  {order.order?.map((item, index) =>
+                    renderPageOrder(
+                      item.item,
+                      item.options,
+                    )
+                  )}
+                  {order.item &&
+                    renderPageOrder(
+                      order.item,
+                      order.options,
+                    )}
+                </ul>
+              </div>
+            ))}
+          </ul>
+      </div>}
     </div>
   );
 };
