@@ -33,11 +33,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["100", "135"],
@@ -49,11 +49,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["100", "135"],
@@ -65,11 +65,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["129", "165"],
@@ -81,11 +81,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["129", "165"],
@@ -97,11 +97,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["???"],
@@ -113,11 +113,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
-        "Ekstra dressing",
-        "Pepper",
-        "Jalapeños",
-        "Pommes Frittes",
-        "Ekstra pita",
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Pommes Frittes", price: 20 },
+        { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["???"],
@@ -127,7 +127,12 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Kebabkjøtt med tilbehør ved siden av.",
       img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      extra: [
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Ekstra pita", price: 15 },
+      ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["165"],
     },
@@ -137,7 +142,12 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Hamburger med ost.",
       img: "https://assets.biggreenegg.eu/app/uploads/2019/03/28145521/topimage-classic-hamburger-2019m04-800x534.jpg",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      extra: [
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Ekstra pita", price: 15 },
+      ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["???", "145", "???"],
     },
@@ -147,7 +157,12 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       description: "Cheeseburger med pommes frittes ved siden av.",
       img: "https://gulsetgrillen.no/wp-content/uploads/2022/02/burgertallerkenbasic.png",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
-      extra: ["Ekstra dressing", "Pepper", "Jalapeños", "Ekstra pita"],
+      extra: [
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Ekstra pita", price: 15 },
+      ],
       remove: ["Løk", "Tomat", "Pepper"],
       prices: ["???", "175", "???"],
     },
@@ -211,6 +226,15 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     });
   };
 
+  const handleExtraChange = (name: string) => {
+    setOrderOptions((prev: any) => {
+      const updated = prev.extra?.includes(name)
+        ? prev.extra.filter((e:any) => e !== name) // remove
+        : [...(prev.extra || []), name];       // add
+      return { ...prev, extra: updated };
+    });
+  };
+
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({
@@ -236,20 +260,35 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     }
   }
 
-  let finalPrice = selectedPrice;
+ // --- total price for UI ---
+let finalPrice: string | number = "???";
 
-  // Check if food or drink is "???"
-  if (selectedItem) {
+if (selectedItem) {
+  // base food price
+  if (selectedPrice !== "???") {
+    const foodPrice = parseInt(selectedPrice, 10);
+
+    // extras price (orderOptions.extra holds names)
+    const extrasPrice = (selectedItem.extra || [])
+      .filter((e: any) => orderOptions.extra?.includes(e.name))
+      .reduce((sum: number, e: any) => sum + (e.price || 0), 0);
+
+    // drink price (0 if none selected; ??? only if selected drink is ???)
     const drinkObj = drinks.find((d) => d.name === drink);
-    if (selectedPrice === "???" || drinkObj?.price === "???") {
+    if (drinkObj && drinkObj.price === "???") {
       finalPrice = "???";
-    } else if (selectedPrice && drinkObj) {
-      const foodPrice = parseInt(selectedPrice, 10);
+    } else {
       const drinkPrice =
-        typeof drinkObj.price === "number" ? drinkObj.price : 0;
-      finalPrice = (foodPrice + drinkPrice).toString();
+        drinkObj && typeof drinkObj.price === "number" ? drinkObj.price : 0;
+
+      finalPrice = foodPrice + extrasPrice + drinkPrice;
     }
+  } else {
+    // base price is unknown for this size/item
+    finalPrice = "???";
   }
+}
+
 
   return (
     <div className="container">
@@ -334,24 +373,35 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                           onChange={(val) => handleChange("spice", val, true)}
                           labels={selectedItem.spice}
                         />
-                      ) : (
-                        selectedItem[type].map((val: string) => (
-                          <div className="options" key={val}>
-                            <label>
-                              <input
-                                type="checkbox"
-                                name={type}
-                                checked={
-                                  Array.isArray(orderOptions[type]) &&
-                                  orderOptions[type].includes(val)
-                                }
-                                onChange={() => handleChange(type, val)}
-                              />
-                              {val}
-                            </label>
+                      ) : type === "extra"
+                        ? selectedItem.extra?.map((val: any) => (
+                          <div className="options" key={val.name}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={orderOptions.extra?.includes(val.name) || false}
+                              onChange={() => handleExtraChange(val.name)}
+                            />
+                            {val.name}
+                          </label>
                           </div>
                         ))
-                      )}
+                        : selectedItem[type].map((val: string) => (
+                            <div className="options" key={val+"idk"}>
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  name={type}
+                                  checked={
+                                    Array.isArray(orderOptions[type]) &&
+                                    orderOptions[type].includes(val)
+                                  }
+                                  onChange={() => handleChange(type, val)}
+                                />
+                                {val}
+                              </label>
+                            </div>
+                          ))}
                     </div>
                   ) : null
                 )}
