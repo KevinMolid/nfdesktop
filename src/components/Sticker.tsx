@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type StickerProps = {
   id: number;
@@ -27,8 +27,8 @@ const Sticker = ({
   onResize,
   dragHandleProps
 }: StickerProps) => {
-  const date = new Date(id);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const increaseWidth = () => {
     if (onResize) onResize(width + 1, height);
@@ -46,35 +46,102 @@ const Sticker = ({
     if (onResize) onResize(width, Math.max(1, height - 1));
   };
 
+  /** Parse simple BBCode into HTML */
+  function parseBBCode(text: string): string {
+    return text
+      .replace(/\[b\](.*?)\[\/b\]/gi, "<strong>$1</strong>")
+      .replace(/\[i\](.*?)\[\/i\]/gi, "<em>$1</em>")
+      .replace(/\[u\](.*?)\[\/u\]/gi, "<u>$1</u>")
+      .replace(/\n/g, "<br />"); // preserve line breaks
+  }
+
+  /** Handle keyboard shortcuts inside textarea */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!e.ctrlKey && !e.metaKey) return; // Only trigger with CTRL (or CMD on Mac)
+
+    let tag: string | null = null;
+    if (e.key.toLowerCase() === "b") tag = "b";
+    if (e.key.toLowerCase() === "i") tag = "i";
+    if (e.key.toLowerCase() === "u") tag = "u";
+
+    if (tag && textareaRef.current) {
+      e.preventDefault();
+      const el = textareaRef.current;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const selectedText = content.substring(start, end);
+
+      const before = content.substring(0, start);
+      const after = content.substring(end);
+
+      const newText = `${before}[${tag}]${selectedText}[/${tag}]${after}`;
+      onContentChange(newText);
+
+      // Reselect the wrapped text
+      setTimeout(() => {
+        el.selectionStart = start + tag.length + 2;
+        el.selectionEnd = end + tag.length + 2;
+      }, 0);
+    }
+  };
+
   return (
     <div className={`sticker-inside sticker-${color}`}>
       <div className="sticker-headline">
-        <div className="drag-handle" {...dragHandleProps}>
-        </div>
+        <div className="drag-handle" {...dragHandleProps}></div>
         <div className="sticker-icons">
-          <i className="fa-solid fa-palette sticker-icon hover" onClick={onColorChange}></i>
-          <i className="fa-solid fa-trash sticker-icon hover" onClick={() => onDelete(id)}></i>
+          <i
+            className="fa-solid fa-palette sticker-icon hover"
+            onClick={onColorChange}
+          ></i>
+          <i
+            className="fa-solid fa-trash sticker-icon hover"
+            onClick={() => onDelete(id)}
+          ></i>
         </div>
       </div>
 
-      <textarea
-        ref={textareaRef}
-        className="sticker-textarea"
-        spellCheck={false}
-        value={content}
-        onChange={(e) => onContentChange(e.target.value)}
-      />
+      {isEditing ? (
+        <textarea
+          ref={textareaRef}
+          className="sticker-textarea"
+          spellCheck={false}
+          value={content}
+          onChange={(e) => onContentChange(e.target.value)}
+          onBlur={() => setIsEditing(false)}
+          onKeyDown={handleKeyDown}
+          autoFocus
+        />
+      ) : (
+        <div
+          className="sticker-content"
+          dangerouslySetInnerHTML={{ __html: parseBBCode(content) }}
+          onClick={() => setIsEditing(true)}
+        />
+      )}
 
       {/* Width controls on the right */}
       <div className="resize-controls right">
-        <i className="fa-solid fa-arrows-left-right sticker-icon hover" onClick={increaseWidth}></i>
-        <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth}></i>
+        <i
+          className="fa-solid fa-arrows-left-right sticker-icon hover"
+          onClick={increaseWidth}
+        ></i>
+        <i
+          className="fa-solid fa-minus sticker-icon hover"
+          onClick={decreaseWidth}
+        ></i>
       </div>
 
       {/* Height controls on the bottom */}
       <div className="resize-controls bottom">
-        <i className="fa-solid fa-arrows-up-down sticker-icon hover" onClick={increaseHeight}></i>
-        <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight}></i>
+        <i
+          className="fa-solid fa-arrows-up-down sticker-icon hover"
+          onClick={increaseHeight}
+        ></i>
+        <i
+          className="fa-solid fa-minus sticker-icon hover"
+          onClick={decreaseHeight}
+        ></i>
       </div>
     </div>
   );
