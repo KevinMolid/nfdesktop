@@ -1188,8 +1188,8 @@ input.pin-input:-moz-autofill {
 
 .sticker-textarea {
   color: black;
-  font-family: "Kalam", cursive;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-family: inherit;
   box-sizing: border-box;
   padding: 4px 12px 12px 12px;
   background: none;
