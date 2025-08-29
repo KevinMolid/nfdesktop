@@ -407,11 +407,17 @@ if (selectedItem) {
                 )}
                 <div>
                   <h4>Drink:</h4>
-                  <RadioButton
-                    value={drink}
-                    onChange={(val) => setDrink(val)}
-                    labels={drinks.map((d) => d.name)}
-                  />
+                  <div>
+                    <RadioButton
+                      value={drink}
+                      onChange={(val) => setDrink(val)}
+                      labels={drinks.map((d) => d.name)}
+                    />
+                    {drink === "Other" && <div className="other-drink-container">
+                      <label htmlFor="drink"><h4>Specify drink:</h4></label>
+                      <input id="drink" type="text" />
+                    </div>}
+                  </div>
                 </div>
                 <div className="order-btn-container">
                   <div className="order-price-container">

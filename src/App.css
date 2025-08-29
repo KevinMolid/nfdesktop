@@ -615,10 +615,9 @@ input.pin-input:-moz-autofill {
 
 .message-error {
   background-color: #ad0f0f;
-
 }
 
-.message-container p {
+.message .message-container p {
   font-weight: 500;
   color: white;
   text-align: center;
@@ -1318,8 +1317,7 @@ input.pin-input:-moz-autofill {
 }
 
 .message p {
-  color: var(--text2-color);
-
+  color: var(--text-color);
 }
 
 .user-msg {
@@ -1940,7 +1938,21 @@ a:hover {
   margin-bottom: 8px;
 }
 
+.other-drink-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
 
+.other-drink-container input {
+  font-size: 1.2rem;
+  outline: none;
+  border: none;
+  height: 40px;
+  border-radius: 20px;
+  padding: 0;
+  padding-inline: 16px;
+}
 
 .confirm-btn {
   margin: 1rem 0;
@@ -2001,20 +2013,20 @@ a:hover {
 
 .foodorders-item {
   position: relative;
-  min-width: 132px;
+  width: 132px;
   padding: 12px;
   background-color: var(--bg3-color);
   border-radius: 10px;
-  padding-bottom: 48px;
+  padding-bottom: 40px;
 }
 
 .foodorders-item-user {
   position: relative;
-  min-width: 132px;
+  width: 132px;
   padding: 12px;
   background-color: var(--bg4-color);
   border-radius: 10px;
-  padding-bottom: 48px;
+  padding-bottom: 40px;
 }
 
 .card-content {

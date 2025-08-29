@@ -134,7 +134,7 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
                     {date ? formatTimestamp(date) : "Sender..."}
                   </small>
                 </p>
-                <p>{msg.content}</p>
+                <p className="message-content">{msg.content}</p>
               </div>
             </div>
           );
