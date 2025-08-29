@@ -31,6 +31,9 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [newTaskName, setNewTaskName] = useState("Task name");
   const [newTaskDescription, setNewTaskDescription] =
     useState("Task description");
+  const [newTaskPriority, setNewTaskPriority] = useState(0);
+  const [isEditingNewPriority, setIsEditingNewPriority] = useState(false);
+
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [activeTask, setActiveTask] = useState<number | null>(null);
 
@@ -122,7 +125,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
 
   const addNewTask = async () => {
     const newTask = {
-      priority: 0,
+      priority: newTaskPriority,
       name: newTaskName,
       description: newTaskDescription,
       id: Date.now(),
@@ -311,9 +314,34 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
               <div className="icon-div new-task-action">
                 <i className="fa-solid fa-bars"></i>
               </div>
-              <div className={`task-priority priority-0`}>
-                <span className="task-priority-number">0</span>
+
+              <div className={`task-priority priority-${newTaskPriority}`}>
+                <span
+                  className="task-priority-number"
+                  onClick={() => setIsEditingNewPriority(!isEditingNewPriority)}
+                >
+                  {newTaskPriority}
+                </span>
+                {isEditingNewPriority && (
+                  <div>
+                    <ul className="priority-dropdown">
+                      {[0, 1, 2, 3].map((num) => (
+                        <li
+                          key={num}
+                          className={`priority-${num}`}
+                          onClick={() => {
+                            setNewTaskPriority(num);
+                            setIsEditingNewPriority(false);
+                          }}
+                        >
+                          {num}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
+
               <div className="new-task-inputs">
                 <input
                   className="new-task-input"
