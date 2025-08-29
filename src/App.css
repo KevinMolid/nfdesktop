@@ -1637,6 +1637,12 @@ button:hover {
     gap: 2px;
 }
 
+@media (max-width: 500px) {
+  .radiobutton {
+    font-size: 0.9rem;
+  }
+}
+
 .label {
     background-color: var(--button-bg);
     font-weight: 500;
@@ -1898,6 +1904,15 @@ a:hover {
   margin-left: auto;
 }
 
+@media (max-width: 500px) {
+  .order-btn-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+  }
+}
+
 .btn-content {
   display: flex;
   justify-content: center;
@@ -1912,7 +1927,7 @@ a:hover {
 .food-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 40px;
+  gap: 24px 40px;
 }
 
 .options {
@@ -1922,8 +1937,10 @@ a:hover {
 
 .food-options h4 {
   margin: 0;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
+
+
 
 .confirm-btn {
   margin: 1rem 0;
