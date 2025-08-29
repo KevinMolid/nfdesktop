@@ -617,7 +617,7 @@ input.pin-input:-moz-autofill {
   background-color: #ad0f0f;
 }
 
-.message .message-container p {
+.message-container p {
   font-weight: 500;
   color: white;
   text-align: center;

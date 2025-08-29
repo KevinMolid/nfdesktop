@@ -25,6 +25,12 @@ type UsersProps = {
 };
 
 const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [selectedFood, setSelectedFood] = useState<string | null>(null);
+  const [orderOptions, setOrderOptions] = useState<any>({});
+  const [drink, setDrink] = useState<string>("");
+  const [otherDrink, setOtherDrink] = useState("");
+  
   const menu = [
     {
       name: "Kebab i Pita",
@@ -190,11 +196,6 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
       price: 0,
     },
   ];
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [selectedFood, setSelectedFood] = useState<string | null>(null);
-  const [orderOptions, setOrderOptions] = useState<any>({});
-  const [drink, setDrink] = useState<string>("");
 
   const handleSelectFood = (foodName: string) => {
     const selected = menu.find((item) => item.name === foodName);
@@ -413,10 +414,17 @@ if (selectedItem) {
                       onChange={(val) => setDrink(val)}
                       labels={drinks.map((d) => d.name)}
                     />
-                    {drink === "Other" && <div className="other-drink-container">
-                      <label htmlFor="drink"><h4>Specify drink:</h4></label>
-                      <input id="drink" type="text" />
-                    </div>}
+                    {drink === "Other" && (
+                      <div className="other-drink-container">
+                        <label htmlFor="drink"><h4>Specify drink:</h4></label>
+                        <input
+                          id="drink"
+                          type="text"
+                          value={otherDrink}
+                          onChange={(e) => setOtherDrink(e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="order-btn-container">
@@ -436,21 +444,32 @@ if (selectedItem) {
                         return;
                       }
 
+                      if (drink === "Other" && !otherDrink.trim()) {
+                        setMessage({
+                          text: "Please specify the drink when selecting 'Other'.",
+                          type: "error",
+                        });
+                        return;
+                      }
+
+                      const drinkValue = drink === "Other" ? otherDrink.trim() : drink;
+
                       try {
                         await addDoc(collection(db, "foodorders"), {
                           item: selectedFood,
                           options: orderOptions,
-                          drink: drink,
+                          drink: drinkValue,
                           price: finalPrice,
                           createdAt: Timestamp.now(),
                           createdBy: user.username,
                         });
                         setMessage({
-                          text: `You ordered ${selectedFood} with ${drink}.`,
+                          text: `You ordered ${selectedFood} with ${drinkValue}.`,
                           type: "success",
                         });
                         setSelectedFood(null);
                         setDrink("");
+                        setOtherDrink("");
                         setOrderOptions({});
                       } catch (error) {
                         console.error("Feil ved bestilling:", error);
@@ -463,6 +482,7 @@ if (selectedItem) {
                   >
                     <i className="fa-solid fa-cart-shopping"></i> Order
                   </AnimatedButton>
+
                 </div>
               </div>
             </div>
