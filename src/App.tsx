@@ -39,6 +39,7 @@ function App() {
   };
 
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // NEW
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
   const [message, setMessage] = useState<{
     text: string;
@@ -60,14 +61,23 @@ function App() {
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        // fetch fresh user data from DB by ID
-        fetchUserFromDb(parsedUser.id).then((freshUser) => {
-          setUser(freshUser);
-          localStorage.setItem("authUser", JSON.stringify(freshUser)); // keep it in sync
-        });
+        fetchUserFromDb(parsedUser.id)
+          .then((freshUser) => {
+            setUser(freshUser);
+            localStorage.setItem("authUser", JSON.stringify(freshUser));
+          })
+          .catch(() => {
+            // if user not found in db, clear local storage
+            localStorage.removeItem("authUser");
+            setUser(null);
+          })
+          .finally(() => setLoading(false));
       } catch (e) {
         console.error("Error parsing user from localStorage", e);
+        setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -118,6 +128,10 @@ function App() {
     setWidgets(updatedWidgets);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
 
   return user ? (
     <>
