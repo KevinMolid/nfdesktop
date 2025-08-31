@@ -362,6 +362,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
             : stickers
           ).map((sticker) => (
             <DragableSticker
+              user={user}
               key={sticker.id}
               id={sticker.id}
               content={sticker.content}

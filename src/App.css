@@ -1189,9 +1189,6 @@ input.pin-input:-moz-autofill {
   justify-content: space-between;
   align-items: stretch;
   padding: 0 8px 0 0;
-  color: #474747;
-  font-size: 0.8rem;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 .sticker-icons {
@@ -1210,19 +1207,20 @@ input.pin-input:-moz-autofill {
 
 .sticker-icon {
   font-size: 1rem;
-  color: rgba(0, 0, 0, 0.3)
+  color: #444;
+  cursor: pointer;
 }
 
 .sticker-icon:hover {
-  color: rgba(0, 0, 0, 0.4)
+  color: #333;
 }
 
 .sticker-default .sticker-icon {
-  color: var(--text4-color);
+  color: var(--text3-color);
 }
 
 .sticker-default .sticker-icon:hover {
-  color: var(--text3-color);
+  color: var(--text2-color);
 }
 
 .sticker-textarea {

@@ -1,6 +1,14 @@
 import { useRef, useState } from "react";
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 type StickerProps = {
+  user: {
+    id: string;
+    username: string;
+    name?: string;
+    role: string;
+  };
   id: number;
   color: string;
   content: string;
@@ -17,6 +25,7 @@ type StickerProps = {
 
 const Sticker = ({
   id,
+  user,
   color,
   content,
   width = 1,
@@ -25,7 +34,7 @@ const Sticker = ({
   onContentChange,
   onDelete,
   onResize,
-  dragHandleProps
+  dragHandleProps,
 }: StickerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -85,17 +94,43 @@ const Sticker = ({
     }
   };
 
+  const shareSticker = async () => {
+    try {
+      if (!user) {
+        console.error("User not logged in.");
+        return;
+      }
+
+      await addDoc(collection(db, "notes"), {
+        createdBy: user.id,
+        color,
+        content,
+        width,
+        height,
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("Sticker shared to Firestore!");
+    } catch (err) {
+      console.error("Error sharing sticker:", err);
+    }
+  };
+
   return (
     <div className={`sticker-inside sticker-${color}`}>
       <div className="sticker-headline">
         <div className="drag-handle" {...dragHandleProps}></div>
         <div className="sticker-icons">
           <i
-            className="fa-solid fa-palette sticker-icon hover"
+            className="fa-solid fa-share sticker-icon"
+            onClick={shareSticker}
+          />
+          <i
+            className="fa-solid fa-palette sticker-icon"
             onClick={onColorChange}
           ></i>
           <i
-            className="fa-solid fa-trash sticker-icon hover"
+            className="fa-solid fa-trash sticker-icon"
             onClick={() => onDelete(id)}
           ></i>
         </div>
