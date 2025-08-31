@@ -3,6 +3,7 @@ import UserTag from "./UserTag";
 
 type SidebarProps = {
   username: string;
+  imgurl?: string;
   onLogout: () => void;
   activePage: string;
   setActivePage: (page: string) => void;
@@ -10,6 +11,7 @@ type SidebarProps = {
 
 const Sidebar = ({
   username,
+  imgurl,
   onLogout,
   activePage,
   setActivePage,
@@ -47,6 +49,12 @@ const Sidebar = ({
           <i className="fa-solid fa-burger"></i>
         </li>
         <li
+          className={activePage === "Users" ? "active" : ""}
+          onClick={() => setActivePage("Users")}
+        >
+          <i className="fa-solid fa-users"></i>{" "}
+        </li>
+        <li
           className={activePage === "Settings" ? "active" : ""}
           onClick={() => setActivePage("Settings")}
         >
@@ -54,7 +62,7 @@ const Sidebar = ({
         </li>
       </ul>
       <div className="menu-bar-right">
-        <UserTag username={username} onLogout={onLogout} />
+        <UserTag username={username} imgurl={imgurl} onLogout={onLogout} />
       </div>
     </div>
   );

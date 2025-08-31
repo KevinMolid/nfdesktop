@@ -15,10 +15,11 @@ import DarkModeToggle from "./DarkModeToggle";
 
 type UserTagProps = {
   username: string;
+  imgurl?: string;
   onLogout: () => void;
 };
 
-const UserTag = ({ username, onLogout }: UserTagProps) => {
+const UserTag = ({ username, imgurl, onLogout }: UserTagProps) => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showPinForm, setShowPinForm] = useState(false);
@@ -93,7 +94,7 @@ const UserTag = ({ username, onLogout }: UserTagProps) => {
   return (
     <div className="usertag-container" ref={containerRef}>
       <div className="user-tag" onClick={toggleDropdown}>
-        <img src={avatar} alt="" className="avatar" />
+        <img src={imgurl || avatar} alt="" className="avatar" />
       </div>
 
       {isDropdownActive && (

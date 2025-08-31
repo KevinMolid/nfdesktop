@@ -13,6 +13,10 @@ import Messages from "./components/Messages";
 import NatoAlphabet from "./components/NatoAlphabet";
 import Foodorders from "./components/Foodorders";
 import Users from "./components/Users";
+import Settings from "./components/Settings";
+
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./components/firebase";
 
 import "./App.css";
 
@@ -31,6 +35,7 @@ function App() {
     id: string;
     username: string;
     role: string;
+    imgurl?: string;
   };
 
   const [user, setUser] = useState<User | null>(null);
@@ -51,6 +56,33 @@ function App() {
   }, [activePage]);
 
   useEffect(() => {
+    const storedUser = localStorage.getItem("authUser");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        // fetch fresh user data from DB by ID
+        fetchUserFromDb(parsedUser.id).then((freshUser) => {
+          setUser(freshUser);
+          localStorage.setItem("authUser", JSON.stringify(freshUser)); // keep it in sync
+        });
+      } catch (e) {
+        console.error("Error parsing user from localStorage", e);
+      }
+    }
+  }, []);
+
+  async function fetchUserFromDb(id: string) {
+    const docRef = doc(db, "users", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as User;
+    } else {
+      throw new Error("User not found");
+    }
+  }
+
+  useEffect(() => {
     // Load widgets from local storage and merge with default
     const storedWidgets = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedWidgets) {
@@ -67,17 +99,6 @@ function App() {
         }
       } catch (e) {
         console.error("Error parsing widgets from localStorage", e);
-      }
-    }
-
-    // Load user
-    const storedUser = localStorage.getItem("authUser");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (e) {
-        console.error("Error parsing user from localStorage", e);
       }
     }
   }, []);
@@ -98,6 +119,9 @@ function App() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
 
+  console.log(user);
+  console.log(user?.imgurl);
+
   return user ? (
     <>
       <Header
@@ -117,6 +141,7 @@ function App() {
       <div className="screen">
         <Sidebar
           username={user.username}
+          imgurl={user.imgurl}
           onLogout={handleLogout}
           activePage={activePage}
           setActivePage={setActivePage}
@@ -161,9 +186,15 @@ function App() {
             </>
           )}
 
-          {activePage === "Settings" && (
+          {activePage === "Users" && (
             <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
               <Users user={user} toggleActive={toggleActive} />
+            </SafeWrapper>
+          )}
+
+          {activePage === "Settings" && (
+            <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
+              <Settings />
             </SafeWrapper>
           )}
         </div>

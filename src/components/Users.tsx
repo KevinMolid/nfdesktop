@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import avatar from "../assets/defaultAvatar.png";
+
 import bcrypt from "bcryptjs";
 import {
   doc,
@@ -13,6 +15,8 @@ type UsersProps = {
   user: {
     username: string;
     name?: string;
+    nickname?: string;
+    imgurl?: string;
     role: string;
   };
   toggleActive: (name: string) => void;
@@ -28,6 +32,8 @@ const Users = ({ user, toggleActive }: UsersProps) => {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [editName, setEditName] = useState("");
   const [editNickname, setEditNickname] = useState("");
+  const [isEditingImg, setIsEditingImg] = useState<boolean>(false);
+  const [newImgUrl, setNewImgUrl] = useState<string>("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
@@ -36,6 +42,7 @@ const Users = ({ user, toggleActive }: UsersProps) => {
           const data = doc.data() as {
             username: string;
             name?: string;
+            imgurl?: string;
             nickname?: string;
             role: string;
           };
@@ -67,6 +74,7 @@ const Users = ({ user, toggleActive }: UsersProps) => {
         username: username.toUpperCase(),
         name: "",
         nickname: "",
+        imgurl: "",
         pinHash: hashedPin,
         role: "user",
       });
@@ -81,12 +89,13 @@ const Users = ({ user, toggleActive }: UsersProps) => {
     }
   };
 
-  const handleSaveName = async () => {
+  const handleSaveUser = async () => {
     if (!selectedUser) return;
     const ref = doc(db, "users", selectedUser.id);
     await updateDoc(ref, {
       name: editName,
       nickname: editNickname,
+      imgurl: newImgUrl,
     });
     setSelectedUser(null);
   };
@@ -181,19 +190,43 @@ const Users = ({ user, toggleActive }: UsersProps) => {
       {selectedUser && (
         <div className="edit-user-container">
           <h3>Edit user: {selectedUser.username}</h3>
-          <label>Name:</label>
+          <div className="edit-img-container">
+            <img
+              src={selectedUser.imgurl || avatar}
+              alt=""
+              className="avatar-large"
+            />
+            <button
+              className="edit-img-btn"
+              onClick={() => setIsEditingImg(!isEditingImg)}
+            >
+              <i className="fa-solid fa-pencil"></i>
+            </button>
+          </div>
+          {isEditingImg && (
+            <>
+              <label htmlFor="imgurl">Image URL:</label>
+              <input
+                id="imgurl"
+                value={newImgUrl}
+                onChange={(e) => setNewImgUrl(e.target.value)}
+              />
+            </>
+          )}
+          <label htmlFor="name">Name:</label>
           <input
+            id="name"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
           />
-          <label>Nickname:</label>
-
+          <label htmlFor="nickname">Nickname:</label>
           <input
+            id="nickname"
             value={editNickname}
             onChange={(e) => setEditNickname(e.target.value)}
           />
           <div className="edit-user-btn-container">
-            <button className="save-btn" onClick={handleSaveName}>
+            <button className="save-btn" onClick={handleSaveUser}>
               <i className="fa-solid fa-check"></i>
               Save
             </button>
