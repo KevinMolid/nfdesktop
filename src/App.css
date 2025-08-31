@@ -427,6 +427,7 @@ ul {
 
 .user-name {
   color: var(--text-color);
+  cursor: pointer;
 }
 
 .avatar {

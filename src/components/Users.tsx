@@ -59,6 +59,11 @@ const Users = ({ user, toggleActive }: UsersProps) => {
     setIsCreateActive(!isCreateActive);
   };
 
+  const cancelEditingUser = () => {
+    setSelectedUser(null);
+    setIsEditingImg(false);
+  };
+
   const registerUser = async (username: string, pin: string) => {
     if (username.length !== 3 || pin.length !== 4) {
       setError(
@@ -105,7 +110,7 @@ const Users = ({ user, toggleActive }: UsersProps) => {
       <div className="card-header">
         <h3 className="card-title">Users</h3>
         <div className="card-header-right">
-          {!isCreateActive && user.role === "admin" && (
+          {!isCreateActive && (
             <button onClick={toggleCreateActive}>
               <i className="fa-solid fa-plus grey icon-md hover"></i>
               Add
@@ -166,15 +171,10 @@ const Users = ({ user, toggleActive }: UsersProps) => {
               </p>
               <p className="user-name">
                 <span
-                  style={{
-                    cursor: user.role === "admin" ? "pointer" : "default",
-                  }}
                   onClick={() => {
-                    if (user.role === "admin") {
-                      setSelectedUser(u);
-                      setEditName(u.name ?? "");
-                      setEditNickname(u.nickname ?? "");
-                    }
+                    setSelectedUser(u);
+                    setEditName(u.name ?? "");
+                    setEditNickname(u.nickname ?? "");
                   }}
                 >
                   {u.name || <em>(No name)</em>}
@@ -190,54 +190,75 @@ const Users = ({ user, toggleActive }: UsersProps) => {
       {selectedUser && (
         <div className="edit-user-container">
           <h3>Edit user: {selectedUser.username}</h3>
-          <div className="edit-img-container">
-            <img
-              src={selectedUser.imgurl || avatar}
-              alt=""
-              className="avatar-large"
-            />
-            <button
-              className="edit-img-btn"
-              onClick={() => setIsEditingImg(!isEditingImg)}
-            >
-              <i className="fa-solid fa-pencil"></i>
-            </button>
-          </div>
-          {isEditingImg && (
-            <>
-              <label htmlFor="imgurl">Image URL:</label>
-              <input
-                id="imgurl"
-                value={newImgUrl}
-                onChange={(e) => setNewImgUrl(e.target.value)}
-              />
-            </>
-          )}
-          <label htmlFor="name">Name:</label>
-          <input
-            id="name"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-          />
-          <label htmlFor="nickname">Nickname:</label>
-          <input
-            id="nickname"
-            value={editNickname}
-            onChange={(e) => setEditNickname(e.target.value)}
-          />
-          <div className="edit-user-btn-container">
-            <button className="save-btn" onClick={handleSaveUser}>
-              <i className="fa-solid fa-check"></i>
-              Save
-            </button>
-            <button
-              className="delete-btn"
-              onClick={() => setSelectedUser(null)}
-            >
-              <i className="fa-solid fa-cancel"></i>
-              Cancel
-            </button>
-          </div>
+
+          {/** Check if current user is admin OR editing themselves */}
+          {(() => {
+            const canEdit =
+              user.role === "admin" || user.username === selectedUser.username;
+
+            return (
+              <>
+                <div className="edit-img-container">
+                  <img
+                    src={selectedUser.imgurl || avatar}
+                    alt=""
+                    className="avatar-large"
+                  />
+                  {canEdit && (
+                    <button
+                      className="edit-img-btn"
+                      onClick={() => setIsEditingImg(!isEditingImg)}
+                    >
+                      <i className="fa-solid fa-pencil"></i>
+                    </button>
+                  )}
+                </div>
+
+                {isEditingImg && (
+                  <>
+                    <label htmlFor="imgurl">Image URL:</label>
+                    <input
+                      id="imgurl"
+                      value={newImgUrl}
+                      onChange={(e) => setNewImgUrl(e.target.value)}
+                      disabled={!canEdit}
+                    />
+                  </>
+                )}
+
+                <label htmlFor="name">Name:</label>
+                <input
+                  id="name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  disabled={!canEdit}
+                />
+
+                <label htmlFor="nickname">Nickname:</label>
+                <input
+                  id="nickname"
+                  value={editNickname}
+                  onChange={(e) => setEditNickname(e.target.value)}
+                  disabled={!canEdit}
+                />
+
+                <div className="edit-user-btn-container">
+                  <button
+                    className="save-btn"
+                    onClick={handleSaveUser}
+                    disabled={!canEdit}
+                  >
+                    <i className="fa-solid fa-check"></i>
+                    Save
+                  </button>
+                  <button className="delete-btn" onClick={cancelEditingUser}>
+                    <i className="fa-solid fa-cancel"></i>
+                    Cancel
+                  </button>
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
     </div>
