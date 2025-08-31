@@ -119,9 +119,6 @@ function App() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
 
-  console.log(user);
-  console.log(user?.imgurl);
-
   return user ? (
     <>
       <Header
