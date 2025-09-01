@@ -1,13 +1,9 @@
 type MenuProps = {
-  username: string;
-  onLogout: () => void;
   activePage: string;
   setActivePage: (page: string) => void;
 };
 
 const MobileMenu = ({
-  username,
-  onLogout,
   activePage,
   setActivePage,
 }: MenuProps) => {
@@ -36,6 +32,12 @@ const MobileMenu = ({
         onClick={() => setActivePage("Foodorders")}
       >
         <i className="fa-solid fa-burger"></i>
+      </li>
+      <li
+        className={activePage === "Users" ? "active" : ""}
+        onClick={() => setActivePage("Users")}
+      >
+        <i className="fa-solid fa-users"></i>
       </li>
       <li
         className={activePage === "Settings" ? "active" : ""}

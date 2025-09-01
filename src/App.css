@@ -219,6 +219,12 @@ header {
   z-index: 20;
 }
 
+@media (max-height: 600px) {
+  .sidebar {
+    padding: 18px 8px;
+  }
+}
+
 @media (max-width: 650px) {
   .sidebar {
     display: none;
@@ -231,6 +237,12 @@ header {
   font-size: 1.4rem;
   padding: 10px;
   text-align: center;
+}
+
+@media (max-height: 450px) {
+  .sidebar-menu li {
+    padding: 2px;
+  }
 }
 
 .mobile-menu {
