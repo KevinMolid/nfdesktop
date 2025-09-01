@@ -304,7 +304,7 @@ const Task = ({
                   {getStatusIconForOption(option)}
                 </div>
                 <span
-                  style={{ marginLeft: "8px", textTransform: "capitalize" }}
+                  style={{textTransform: "capitalize" }}
                 >
                   {STATUS_LABELS[option]}
                 </span>
@@ -317,13 +317,13 @@ const Task = ({
       {isDropdownActive && (
         <div className="task-dropdown" ref={dropdownRef}>
           <div
-            className="dropdown-item default-select hover-border"
+            className="dropdown-item hover-border"
             onClick={() => onDelete(id)}
           >
             <div className="dropdown-item-icon-container">
-              <i className="fa-solid fa-trash red"></i>
+          <i className="fa-solid fa-trash red"></i>
             </div>
-            <span style={{ marginLeft: "8px" }}>Delete</span>
+            <div className="dropdown-item-text-container">Delete</div>
           </div>
         </div>
       )}

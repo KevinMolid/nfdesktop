@@ -805,11 +805,14 @@ input.pin-input:-moz-autofill {
 
 .task-dropdown {
   position: absolute;
-  top: 32px;
+  top: 0px;
+  left: 48px;
+  width: max-content;
   background-color: var(--bg2-color);
-  padding: 2px;
-  border: 1px solid var(--border-color);
   z-index: 3;
+  padding: 4px;
+  user-select: none;
+  border: 1px solid var(--border-color);
 }
 
 .task-action {
@@ -973,6 +976,9 @@ input.pin-input:-moz-autofill {
   padding: 4px 8px;
   border: 1px solid transparent;
   min-width: max-content;
+  font-size: 1.2rem;
+  font-weight: 500;
+  gap: 8px;
 }
 
 .dropdown-item-icon-container {
@@ -985,7 +991,7 @@ input.pin-input:-moz-autofill {
   display: flex;
   justify-content: start;
   align-items: center;
-  margin-left: 8px;
+  line-height: 0;
 }
 
 /* PIN-form */
