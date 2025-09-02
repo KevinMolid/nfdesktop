@@ -1,6 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import Sticker from "./Sticker";
+import { Dispatch, SetStateAction } from "react";
 
 export type StickerProps = {
   user: {
@@ -21,13 +22,20 @@ export type StickerProps = {
   onColorChange: () => void;
   onContentChange: (newContent: string) => void;
   onResize: (newWidth: number, newHeight: number) => void;
+  db: any;
+  setStickers: Dispatch<SetStateAction<any[]>>;
+  isShared?: boolean;
+  createdBy?: string;
+  createdByName?: string;
+  canEditContent?: boolean;
+  canResize?: boolean;
 };
 
 const gap = 12; // px
 const cellSize = 252; // px
 
 const DragableSticker = (props: StickerProps) => {
-  const { id, user, width, height, row, col, disableDrag = false } = props;
+  const { id, user, width, height, row, col, disableDrag = false, isShared } = props;
 
   const draggable = useDraggable({ id });
   const { setNodeRef, transform, attributes, listeners, isDragging } =
@@ -53,7 +61,12 @@ const DragableSticker = (props: StickerProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...(disableDrag ? {} : attributes)}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`sticker-wrapper ${isShared ? "sticker-wrapper--shared" : "sticker-wrapper--personal"}`}
+      {...(disableDrag ? {} : attributes)}
+    >
       <Sticker
         {...props}
         dragHandleProps={disableDrag ? {} : { ...attributes, ...listeners }}

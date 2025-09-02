@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { db } from "./firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { Dispatch, SetStateAction } from "react";
 
 type StickerProps = {
   user: {
@@ -21,6 +21,13 @@ type StickerProps = {
   onDelete: (id: number) => void;
   onResize?: (width: number, height: number) => void;
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+  db: any;
+  setStickers: Dispatch<SetStateAction<any[]>>;
+  isShared?: boolean;
+  createdBy?: string;
+  createdByName?: string;
+  canEditContent?: boolean;
+  canResize?: boolean;
 };
 
 const Sticker = ({
@@ -30,11 +37,20 @@ const Sticker = ({
   content,
   width = 1,
   height = 1,
+  row,
+  col,
   onColorChange,
   onContentChange,
   onDelete,
   onResize,
   dragHandleProps,
+  db,
+  setStickers,
+  isShared,
+  createdBy,
+  createdByName,
+  canEditContent = true,
+  canResize = true,
 }: StickerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -96,31 +112,73 @@ const Sticker = ({
 
   const shareSticker = async () => {
     try {
-      if (!user) {
-        console.error("User not logged in.");
-        return;
-      }
+      if (!user) return;
 
-      await addDoc(collection(db, "notes"), {
-        createdBy: user.id,
-        color,
-        content,
-        width,
-        height,
-        createdAt: serverTimestamp(),
-      });
+      const sharedRef = doc(db, "notes", id.toString());
+      const personalRef = doc(db, "users", user.id, "notes", id.toString());
 
-      console.log("Sticker shared to Firestore!");
+      const displayName =
+        (user as any).nickname?.trim() ||
+        (user as any).name?.trim() ||
+        user.username;
+
+      // 1) Upsert the shared doc (same id)
+      await setDoc(
+        sharedRef,
+        {
+          createdBy: user.id,
+          createdByName: displayName,
+          id,
+          color,
+          content,
+          width,
+          height,
+          placements: {
+            [user.id]: { row, col },
+          },
+          // createdAt only on first create; updatedAt on every share
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      // 2) Delete the personal copy from Firestore
+      await deleteDoc(personalRef);
+
+      // 3) Convert the local item to "shared" instead of adding a new one
+      setStickers((prev) =>
+        prev.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                source: "shared",
+                // keep immediate placement so it stays draggable
+                placements: { ...(s as any).placements, [user.id]: { row, col } },
+                // createdBy for delete rules later
+                createdBy: user.id,
+              }
+            : s
+        )
+      );
     } catch (err) {
       console.error("Error sharing sticker:", err);
     }
   };
 
   return (
-    <div className={`sticker-inside sticker-${color}`}>
+    <div className={`sticker-inside ${isShared ? "sticker--shared" : `sticker-${color}`}`}>
       <div className="sticker-headline">
+
+        {isShared && (
+          <div className="sticker-shared-by">
+            Shared by {createdByName || "Unknown"}
+          </div>
+        )}
+
         <div className="drag-handle" {...dragHandleProps}></div>
-        <div className="sticker-icons">
+
+        {canEditContent && <div className="sticker-icons">
           <i
             className="fa-solid fa-share sticker-icon"
             onClick={shareSticker}
@@ -133,10 +191,10 @@ const Sticker = ({
             className="fa-solid fa-trash sticker-icon"
             onClick={() => onDelete(id)}
           ></i>
-        </div>
+        </div>}
       </div>
 
-      {isEditing ? (
+      {isEditing && canEditContent ? (
         <textarea
           ref={textareaRef}
           className="sticker-textarea"
@@ -156,7 +214,7 @@ const Sticker = ({
       )}
 
       {/* Width controls on the right */}
-      <div className="resize-controls right">
+      {canResize && <div className="resize-controls right">
         <i
           className="fa-solid fa-arrows-left-right sticker-icon hover"
           onClick={increaseWidth}
@@ -165,10 +223,10 @@ const Sticker = ({
           className="fa-solid fa-minus sticker-icon hover"
           onClick={decreaseWidth}
         ></i>
-      </div>
+      </div>}
 
       {/* Height controls on the bottom */}
-      <div className="resize-controls bottom">
+      {canEditContent && <div className="resize-controls bottom">
         <i
           className="fa-solid fa-arrows-up-down sticker-icon hover"
           onClick={increaseHeight}
@@ -177,7 +235,7 @@ const Sticker = ({
           className="fa-solid fa-minus sticker-icon hover"
           onClick={decreaseHeight}
         ></i>
-      </div>
+      </div>}
     </div>
   );
 };

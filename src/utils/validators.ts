@@ -1,7 +1,7 @@
 import { StickerData } from "../types";
 import { TaskData } from "../types";
 
-export function isValidSticker(obj: any): obj is StickerData {
+export function isValidSticker(obj: any): obj is StickerData  {
   return obj && typeof obj === "object" &&
     typeof obj.id === "number" &&
     typeof obj.content === "string" &&
