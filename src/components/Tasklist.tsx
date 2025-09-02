@@ -135,6 +135,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setTasks(updatedTasks);
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
+    setNewTaskPriority(0)
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
     if (taskPath.includes("//")) {
@@ -149,6 +150,13 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       newTask
     );
   };
+
+  const discardNewTask = () => {
+    setNewTaskName("New task");
+    setNewTaskDescription("Task description");
+    setNewTaskPriority(0)
+    setIsCreateActive(false);
+  }
 
   const handleRename = async (id: number, newName: string) => {
     const updatedTasks = tasks.map((task) =>
@@ -368,7 +376,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                 Save
               </button>
 
-              <button onClick={toggleCreateActive} className="delete-btn">
+              <button onClick={discardNewTask} className="delete-btn">
                 <i className="fa-solid fa-trash icon-md"></i>
                 Discard
               </button>
