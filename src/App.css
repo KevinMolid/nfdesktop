@@ -1407,13 +1407,18 @@ input.pin-input:-moz-autofill {
   max-height: calc(100vh - 300px);
   overflow-y: scroll;
   flex-direction: column-reverse;
+  padding-right: 8px;
+}
+
+.message-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .message {
   display: flex;
   flex-direction: column;
-  width: 90%;
-  max-width: max-content;
   background-color: var(--bg3-color);
   padding: 4px 8px;
   border-radius: 10px;
@@ -1438,6 +1443,10 @@ input.pin-input:-moz-autofill {
   display: flex;
   gap: 8px;
   align-items: baseline;
+}
+
+.user-msg .message-info {
+  justify-content: end;
 }
 
 .message-timestamp {

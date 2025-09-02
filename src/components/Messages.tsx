@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import avatar from "../assets/defaultAvatar.png";
+
 import {
   query,
   collection,
@@ -19,6 +21,13 @@ type MessagesProps = {
   username: string;
   toggleActive: (name: string) => void;
 };
+
+type UserInfo = {
+  displayName: string;
+  imgUrl?: string;
+};
+
+type UserMap = Record<string, UserInfo>;
 
 const formatTimestamp = (date: Date) => {
   const now = new Date();
@@ -48,7 +57,7 @@ const formatTimestamp = (date: Date) => {
 const Messages = ({ username, toggleActive }: MessagesProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [usersMap, setUsersMap] = useState<Record<string, string>>({});
+  const [usersMap, setUsersMap] = useState<UserMap>({});
 
   useEffect(() => {
     // Query messages in order of creation time
@@ -77,13 +86,16 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
   /* Fetch users data */
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const map: Record<string, string> = {};
+      const map: Record<string, UserInfo> = {};
       snapshot.forEach((doc) => {
         const data = doc.data();
         const username = data.username;
         const nickname = data.nickname?.trim();
         const name = data.name?.trim();
-        map[username] = nickname || name || username; // fallback
+        map[username] = {
+          displayName: nickname || name || username,
+          imgUrl: data.imgurl || null, // 👈 check for imgurl in DB
+        };
       });
       setUsersMap(map);
     });
@@ -118,7 +130,14 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
           const date: Date | null = msg.createdAt?.toDate?.() || null;
 
           return (
-            <div key={msg.id}>
+            <div key={msg.id} className="message-wrapper">
+              {msg.sender !== username && (
+                <img
+                  className="avatar"
+                  src={usersMap[msg.sender]?.imgUrl || avatar}
+                  alt="user-img"
+                />
+              )}
               <div
                 className={`message ${
                   msg.sender === username ? "user-msg" : ""
@@ -127,7 +146,7 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
                 <p className="message-info">
                   {msg.sender !== username && (
                     <strong className="user">
-                      {usersMap[msg.sender] || msg.sender}
+                      {usersMap[msg.sender]?.displayName || msg.sender}
                     </strong>
                   )}
                   <small className="message-timestamp">
@@ -136,6 +155,13 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
                 </p>
                 <p className="message-content">{msg.content}</p>
               </div>
+              {msg.sender === username && (
+                <img
+                  className="avatar"
+                  src={usersMap[msg.sender]?.imgUrl || avatar}
+                  alt="user-img"
+                />
+              )}
             </div>
           );
         })}
