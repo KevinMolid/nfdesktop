@@ -98,17 +98,14 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   }, [user.id, maxCols]);
 
   useEffect(() => {
-    // collect shared stickers that lack a placement for this user
+    // shared stickers missing a placement for this user
     const needsPlacement = stickers.filter(
-      (s: any) =>
-        s.source === "shared" &&
-        (!s.placements || !s.placements[user.id]) // no per-user placement yet
+      (s) => s.source === "shared" && !(s.placements && s.placements[user.id])
     );
-
     if (needsPlacement.length === 0) return;
 
-    // Work with a local copy to compute free slots against what's currently on the board
-    let working = [...stickers];
+    // Work with only already-placed stickers to avoid ghost (0,0) conflicts
+    let working = stickers.filter((s) => s.row !== undefined && s.col !== undefined);
 
     (async () => {
       for (const s of needsPlacement) {
@@ -119,17 +116,15 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
           maxCols
         );
 
-        // update local working list so the next placement respects this one
-        working = working.map((x) =>
-          x.id === s.id ? { ...x, row, col } : x
-        );
+        // add this placement to working so next placement respects it
+        working = [...working, { ...s, row, col }];
 
-        // optimistic UI: update state immediately
+        // optimistic UI
         setStickers((prev) =>
           prev.map((x) => (x.id === s.id ? { ...x, row, col } : x))
         );
 
-        // persist placement for this user in the shared doc
+        // persist per-user placement
         await setDoc(
           doc(db, "notes", s.id.toString()),
           {
@@ -150,25 +145,21 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     source: "personal" | "shared"
   ): StickerWithSource[] {
     const tagged = incoming.map((s: any) => {
-      if (source === "shared" && s.placements) {
-        const placement = s.placements[user.id];
+      if (source === "shared") {
+        const placement = s.placements?.[user.id];
+        // Only set row/col if this user already has a placement
         return {
           ...s,
-          row: placement?.row ?? 0,
-          col: placement?.col ?? 0,
+          ...(placement ? { row: placement.row, col: placement.col } : {}),
           source,
         };
       }
       return { ...s, source };
     });
 
-    // replace everything from this source in one go
     const keep = prev.filter((s) => s.source !== source);
-
-    // also dedupe within the new batch by id
     const byId = new Map<number, StickerWithSource>();
     for (const s of tagged) byId.set(s.id, s);
-
     return [...keep, ...byId.values()];
   }
 
@@ -208,11 +199,11 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
 
     const isFree = (r: number, c: number) => {
       for (const s of existing) {
-        const sr = s.row ?? 0;
-        const sc = s.col ?? 0;
+        if (s.row === undefined || s.col === undefined) continue; // skip unplaced
+        const sr = s.row;
+        const sc = s.col;
         const sw = s.width ?? 1;
         const sh = s.height ?? 1;
-        // overlap?
         if (r < sr + sh && r + h > sr && c < sc + sw && c + w > sc) return false;
       }
       return true;
@@ -224,7 +215,6 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         if (isFree(row, col)) return { row, col };
       }
     }
-    // fallback
     return { row: 0, col: 0 };
   }
 
