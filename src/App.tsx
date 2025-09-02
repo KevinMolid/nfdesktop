@@ -143,8 +143,6 @@ function App() {
       />
 
       <MobileMenu
-        username={user.username}
-        onLogout={handleLogout}
         activePage={activePage}
         setActivePage={setActivePage}
       />
