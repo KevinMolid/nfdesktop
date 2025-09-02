@@ -234,12 +234,13 @@ const Task = ({
           )}
         </div>
 
-        <div>
+        <div className="task-text-wrapper">
           {/* Task title */}
           {isEditing ? (
             <input
               ref={inputRef}
               type="text"
+              spellCheck={false}
               value={editedName}
               onChange={(e) => setEditedName(e.target.value)}
               onBlur={finishEditing}
@@ -263,6 +264,7 @@ const Task = ({
             <input
               ref={descriptionRef}
               type="text"
+              spellCheck={false}
               value={editedDescription ?? ""}
               onChange={(e) => setEditedDescription(e.target.value)}
               onBlur={finishEditingDescription}
@@ -303,9 +305,7 @@ const Task = ({
                 <div className="dropdown-item-icon-container">
                   {getStatusIconForOption(option)}
                 </div>
-                <span
-                  style={{textTransform: "capitalize" }}
-                >
+                <span style={{ textTransform: "capitalize" }}>
                   {STATUS_LABELS[option]}
                 </span>
               </div>
@@ -321,7 +321,7 @@ const Task = ({
             onClick={() => onDelete(id)}
           >
             <div className="dropdown-item-icon-container">
-          <i className="fa-solid fa-trash red"></i>
+              <i className="fa-solid fa-trash red"></i>
             </div>
             <div className="dropdown-item-text-container">Delete</div>
           </div>

@@ -737,6 +737,7 @@ input.pin-input:-moz-autofill {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
 }
 
 .new-task-input {
@@ -754,6 +755,22 @@ input.pin-input:-moz-autofill {
   display: flex;
   gap: 4px;
   margin-right: 4px;
+}
+
+@media (max-width: 700px) {
+  .new-task-btn-container {
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 2px;
+  }
+}
+
+@media (max-width: 700px) {
+  .new-task-btn-container button {
+    font-size: 0.7rem;
+    height: 26px;
+    padding-inline: 13px;
+  }
 }
 
 .task {
@@ -932,6 +949,10 @@ input.pin-input:-moz-autofill {
   user-select: none;
 }
 
+.task-text-wrapper {
+  width: 100%;
+}
+
 .task-edit-input {
   color: var(--text1-color);
   box-sizing: border-box;
@@ -945,6 +966,7 @@ input.pin-input:-moz-autofill {
   border: none;
   white-space: nowrap;
   text-wrap: wrap;
+  width: 100%;
 }
 
 .task-description-input {
@@ -960,6 +982,7 @@ input.pin-input:-moz-autofill {
   border: none;
   white-space: nowrap;
   text-wrap: wrap;
+  width: 100%;
 }
 
 .status-dropdown {
