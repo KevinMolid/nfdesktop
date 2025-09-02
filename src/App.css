@@ -703,6 +703,7 @@ input.pin-input:-moz-autofill {
   align-items: center;
   border-radius: 24px;
   margin-bottom: 4px;
+  padding-inline: 6px;
 }
 
 .new-task-element {
@@ -752,7 +753,7 @@ input.pin-input:-moz-autofill {
 .new-task-btn-container {
   display: flex;
   gap: 4px;
-  margin-right: 12px;
+  margin-right: 4px;
 }
 
 .task {
@@ -765,6 +766,7 @@ input.pin-input:-moz-autofill {
   max-width: 100%;
   align-items: center;
   border-radius: 24px;
+  padding-inline: 8px;
 }
 
 .task:hover {
@@ -835,8 +837,8 @@ input.pin-input:-moz-autofill {
   display: flex;
   font-size: 1.2rem;
   font-weight: 500;
-  min-width: 48px;
-  width: 48px;
+  min-width: 34px;
+  width: 34px;
   color: var(--text5-color)
 }
 
