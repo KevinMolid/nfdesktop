@@ -690,13 +690,6 @@ input.pin-input:-moz-autofill {
   padding-bottom: 4px;
 }
 
-@media (max-width: 500px) {
- .task-list,
- .tasklist-header {
-  margin-inline: -20px;
- }
-}
-
 .create-task-input-container {
   display: flex;
   flex-direction: column;
@@ -797,10 +790,22 @@ input.pin-input:-moz-autofill {
   font-weight: 500;
 }
 
+@media (max-width: 500px) {
+  .task-title {
+    font-size: 0.8rem;
+  }
+}
+
 .task-description {
   color: var(--text2-color);
   font-size: 0.9rem;
   font-weight: 400;
+}
+
+@media (max-width: 500px) {
+  .task-description {
+    font-size: 0.7rem;
+  }
 }
 
 .task-dropdown {
@@ -819,8 +824,8 @@ input.pin-input:-moz-autofill {
   display: flex;
   font-size: 1.2rem;
   font-weight: 500;
-  min-width: 48px;
-  width: 48px;
+  min-width: 34px;
+  width: 34px;
   cursor: pointer;
   user-select: none;
   color: var(--text3-color)
@@ -919,8 +924,8 @@ input.pin-input:-moz-autofill {
   display: flex;
   font-size: 1.2rem;
   font-weight: 500;
-  min-width: 48px;
-  width: 48px;
+  min-width: 36px;
+  width: 36px;
   cursor: pointer;
   user-select: none;
 }
