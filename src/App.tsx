@@ -15,7 +15,7 @@ import Foodorders from "./components/Foodorders";
 import Users from "./components/Users";
 import Settings from "./components/Settings";
 
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "./components/firebase";
 
 import "./App.css";
@@ -93,6 +93,31 @@ function App() {
   }
 
   useEffect(() => {
+    if (!user?.id) return; // no user yet
+
+    const ref = doc(db, "users", user.id);
+    const unsubscribe = onSnapshot(
+      ref,
+      (snap) => {
+        if (snap.exists()) {
+          const freshUser = { id: snap.id, ...(snap.data() as any) } as User;
+          setUser(freshUser);
+          localStorage.setItem("authUser", JSON.stringify(freshUser));
+        } else {
+          // user doc deleted
+          setUser(null);
+          localStorage.removeItem("authUser");
+        }
+      },
+      (err) => {
+        console.error("User onSnapshot error:", err);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user?.id, db]);
+
+  useEffect(() => {
     // Load widgets from local storage and merge with default
     const storedWidgets = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedWidgets) {
@@ -142,10 +167,7 @@ function App() {
         toggleActive={toggleActive}
       />
 
-      <MobileMenu
-        activePage={activePage}
-        setActivePage={setActivePage}
-      />
+      <MobileMenu activePage={activePage} setActivePage={setActivePage} />
 
       <div className="screen">
         <Sidebar
