@@ -10,7 +10,7 @@ import Dashboard from "./components/Dashboard";
 
 /* Pages */
 import Messages from "./components/Messages";
-import NatoAlphabet from "./components/NatoAlphabet";
+import Tools from "./components/Tools";
 import Foodorders from "./components/Foodorders";
 import Users from "./components/Users";
 import Settings from "./components/Settings";
@@ -191,13 +191,7 @@ function App() {
             />
           )}
 
-          {activePage === "Tools" && (
-            <>
-              <SafeWrapper fallback={<div>Kunne ikke laste Nato-alfabet</div>}>
-                <NatoAlphabet toggleActive={toggleActive} />
-              </SafeWrapper>
-            </>
-          )}
+          {activePage === "Tools" && <Tools toggleActive={toggleActive} />}
 
           {activePage === "Chat" && (
             <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
@@ -217,11 +211,7 @@ function App() {
             </>
           )}
 
-          {activePage === "Users" && (
-            <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-              <Users user={user} toggleActive={toggleActive} />
-            </SafeWrapper>
-          )}
+          {activePage === "Users" && <Users user={user} toggleActive={toggleActive} />}
 
           {activePage === "Settings" && (
             <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
