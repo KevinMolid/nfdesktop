@@ -11,6 +11,8 @@ import {
 type Link = { id: string; name: string; href: string };
 type LinkCategory = { category: string; links: Link[] };
 
+const MY_LINKS_LABEL = "My Links";
+
 const STATIC_CATEGORIES: LinkCategory[] = [
   {
     category: "Norrønafly",
@@ -199,7 +201,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
   const allCategories: LinkCategory[] = [
     ...STATIC_CATEGORIES,
     ...(customLinks.length > 0
-      ? [{ category: "My Links", links: customLinks }]
+      ? [{ category: MY_LINKS_LABEL, links: customLinks }]
       : []),
   ];
 
@@ -276,41 +278,38 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                 {links.map((link) => (
                   <li
                     key={link.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      position: "relative",
-                    }}
+                    style={{ display: "flex", alignItems: "center", position: "relative" }}
                   >
-                    {category === "Mine lenker" && (
+                    {/* Kebab menu only for My Links */}
+                    {category === MY_LINKS_LABEL && (
                       <div
                         ref={openDropdownId === link.id ? dropdownRef : null}
-                        style={{ position: "relative" }}
+                        style={{ position: "relative", marginRight: 8 }}
                       >
                         <div
-                          className="icon-div hover"
+                          className="icon-div task-action hover"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent category toggle
+                            e.stopPropagation(); // don’t toggle the category
                             toggleDropdown(link.id);
                           }}
                           title="Alternativer"
-                          style={{ marginRight: 8 }}
+                          aria-haspopup="menu"
+                          aria-expanded={openDropdownId === link.id}
                         >
                           <i className="fa-solid fa-bars"></i>
                         </div>
 
                         {openDropdownId === link.id && (
-                          <div className="task-dropdown">
+                          <div className="task-dropdown" role="menu">
                             <div
-                              className="dropdown-item default-select hover-border"
+                              className="dropdown-item hover-border"
+                              role="menuitem"
                               onClick={() => handleDeleteLink(link.id)}
                             >
                               <div className="dropdown-item-icon-container">
                                 <i className="fa-solid fa-trash red"></i>
                               </div>
-                              <span style={{ marginLeft: "8px" }}>
-                                Slett lenke
-                              </span>
+                              <div className="dropdown-item-text-container">Delete</div>
                             </div>
                           </div>
                         )}
