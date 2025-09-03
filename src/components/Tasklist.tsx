@@ -3,10 +3,11 @@ import Task from "./Task";
 import { db } from "./firebase";
 import {
   collection,
-  getDocs,
+  onSnapshot,
   setDoc,
   doc,
   deleteDoc,
+  query,
 } from "firebase/firestore";
 
 import { TaskData } from "../types";
@@ -89,27 +90,26 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   }, [isFilterActive]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (!user?.id) {
-        console.error("❌ No valid user ID");
-        return;
-      }
+    if (!user?.id) return;
 
-      try {
-        const snapshot = await getDocs(
-          collection(db, "users", user.id, "tasks")
-        );
+    const tasksRef = collection(db, "users", user.id, "tasks");
+    // You can add orderBy(...) here if you want, e.g.:
+    // const q = query(tasksRef, orderBy("status"), orderBy("priority"));
+    const q = query(tasksRef);
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
         const dbTasks = snapshot.docs
-          .map((doc) => doc.data())
-          .filter(isValidTask);
+          .map((d) => d.data())
+          .filter(isValidTask) as TaskData[];
         setTasks(dbTasks);
-      } catch (e) {
-        console.error("❌ Failed to fetch tasks from DB:", e);
-      }
-    };
+      },
+      (err) => console.error("❌ Tasks listener error:", err)
+    );
 
-    fetchTasks();
-  }, [user]);
+    return () => unsubscribe();
+  }, [user?.id]);
 
   useEffect(() => {
     localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
