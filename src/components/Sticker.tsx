@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
-import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, useState } from "react";
+import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import type { Dispatch, SetStateAction } from "react";
+
+type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
 
 type StickerProps = {
   user: {
@@ -10,13 +12,13 @@ type StickerProps = {
     role: string;
   };
   id: number;
-  color: string;
+  color: StickerColor;
   content: string;
   width?: number;
   height?: number;
   row: number;
   col: number;
-  onColorChange: () => void;
+  onColorChange: (color: StickerColor) => void; // choose a color from dropdown
   onContentChange: (content: string) => void;
   onDelete: (id: number) => void;
   onResize?: (width: number, height: number) => void;
@@ -28,7 +30,10 @@ type StickerProps = {
   createdByName?: string;
   canEditContent?: boolean;
   canResize?: boolean;
+  canChangeColor?: boolean;
 };
+
+const COLORS: StickerColor[] = ["default", "yellow", "blue", "red", "green"];
 
 const Sticker = ({
   id,
@@ -47,29 +52,32 @@ const Sticker = ({
   db,
   setStickers,
   isShared,
-  createdBy,
   createdByName,
   canEditContent = true,
   canResize = true,
+  canChangeColor = true,
 }: StickerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const increaseWidth = () => {
-    if (onResize) onResize(width + 1, height);
-  };
+  // palette dropdown state
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const paletteRef = useRef<HTMLDivElement | null>(null);
 
-  const decreaseWidth = () => {
-    if (onResize) onResize(Math.max(1, width - 1), height);
-  };
+  useEffect(() => {
+    const closeOnOutside = (e: MouseEvent) => {
+      if (paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+        setIsPaletteOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutside);
+    return () => document.removeEventListener("mousedown", closeOnOutside);
+  }, []);
 
-  const increaseHeight = () => {
-    if (onResize) onResize(width, height + 1);
-  };
-
-  const decreaseHeight = () => {
-    if (onResize) onResize(width, Math.max(1, height - 1));
-  };
+  const increaseWidth = () => onResize?.(width + 1, height);
+  const decreaseWidth = () => onResize?.(Math.max(1, width - 1), height);
+  const increaseHeight = () => onResize?.(width, height + 1);
+  const decreaseHeight = () => onResize?.(width, Math.max(1, height - 1));
 
   /** Parse simple BBCode into HTML */
   function parseBBCode(text: string): string {
@@ -77,35 +85,31 @@ const Sticker = ({
       .replace(/\[b\](.*?)\[\/b\]/gi, "<strong>$1</strong>")
       .replace(/\[i\](.*?)\[\/i\]/gi, "<em>$1</em>")
       .replace(/\[u\](.*?)\[\/u\]/gi, "<u>$1</u>")
-      .replace(/\n/g, "<br />"); // preserve line breaks
+      .replace(/\n/g, "<br />");
   }
 
   /** Handle keyboard shortcuts inside textarea */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!e.ctrlKey && !e.metaKey) return; // Only trigger with CTRL (or CMD on Mac)
-
-    let tag: string | null = null;
-    if (e.key.toLowerCase() === "b") tag = "b";
-    if (e.key.toLowerCase() === "i") tag = "i";
-    if (e.key.toLowerCase() === "u") tag = "u";
+    if (!e.ctrlKey && !e.metaKey) return;
+    let tag: "b" | "i" | "u" | null = null;
+    const k = e.key.toLowerCase();
+    if (k === "b") tag = "b";
+    if (k === "i") tag = "i";
+    if (k === "u") tag = "u";
 
     if (tag && textareaRef.current) {
       e.preventDefault();
       const el = textareaRef.current;
       const start = el.selectionStart;
       const end = el.selectionEnd;
-      const selectedText = content.substring(start, end);
-
-      const before = content.substring(0, start);
-      const after = content.substring(end);
-
-      const newText = `${before}[${tag}]${selectedText}[/${tag}]${after}`;
-      onContentChange(newText);
-
-      // Reselect the wrapped text
+      const selected = content.substring(start, end);
+      const next = `${content.substring(0, start)}[${tag}]${selected}[/${tag}]${content.substring(
+        end
+      )}`;
+      onContentChange(next);
       setTimeout(() => {
-        el.selectionStart = start + tag.length + 2;
-        el.selectionEnd = end + tag.length + 2;
+        el.selectionStart = start + tag!.length + 2;
+        el.selectionEnd = end + tag!.length + 2;
       }, 0);
     }
   };
@@ -118,11 +122,8 @@ const Sticker = ({
       const personalRef = doc(db, "users", user.id, "notes", id.toString());
 
       const displayName =
-        (user as any).nickname?.trim() ||
-        (user as any).name?.trim() ||
-        user.username;
+        (user as any).nickname?.trim() || (user as any).name?.trim() || user.username;
 
-      // 1) Upsert the shared doc (same id)
       await setDoc(
         sharedRef,
         {
@@ -136,26 +137,21 @@ const Sticker = ({
           placements: {
             [user.id]: { row, col },
           },
-          // createdAt only on first create; updatedAt on every share
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         },
         { merge: true }
       );
 
-      // 2) Delete the personal copy from Firestore
       await deleteDoc(personalRef);
 
-      // 3) Convert the local item to "shared" instead of adding a new one
       setStickers((prev) =>
         prev.map((s) =>
           s.id === id
             ? {
                 ...s,
                 source: "shared",
-                // keep immediate placement so it stays draggable
                 placements: { ...(s as any).placements, [user.id]: { row, col } },
-                // createdBy for delete rules later
                 createdBy: user.id,
               }
             : s
@@ -169,29 +165,61 @@ const Sticker = ({
   return (
     <div className={`sticker-inside ${isShared ? "sticker--shared" : `sticker-${color}`}`}>
       <div className="sticker-headline">
+        {isShared && <div className="sticker-shared-by">Shared by {createdByName || "Unknown"}</div>}
 
-        {isShared && (
-          <div className="sticker-shared-by">
-            Shared by {createdByName || "Unknown"}
+        <div className="drag-handle" {...dragHandleProps} />
+
+        {canEditContent && (
+          <div className="sticker-icons">
+            {!isShared && (
+              <i className="fa-solid fa-share sticker-icon" onClick={shareSticker} />
+            )}
+
+            <div ref={paletteRef} style={{ position: "relative"}}>
+              <i
+                className={`fa-solid fa-palette sticker-icon ${!canChangeColor ? "disabled" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canChangeColor) setIsPaletteOpen((v) => !v);
+                }}
+                title="Choose color"
+                aria-haspopup="menu"
+                aria-expanded={isPaletteOpen}
+              />
+
+              {isPaletteOpen && (
+                <div className="color-dropdown" role="menu" style={{ right: 0 }}>
+                  {COLORS.map((c) => (
+                    <div
+                      key={c}
+                      className={`dropdown-item hover-border sticker-${c}`}
+                      role="menuitem"
+                      onClick={() => {
+                        onColorChange(c);
+                        setIsPaletteOpen(false);
+                      }}
+                    >
+                      <div className="dropdown-item-icon-container">
+                        {/* Use colored dot via FontAwesome; relies on your color classes */}
+                        <i
+                          className={`fa-solid fa-circle ${
+                            c === "default" ? "lightgrey" : c
+                          }`}
+                        />
+                      </div>
+                      <div className="dropdown-item-text-container" style={{ textTransform: "capitalize" }}>
+                        {c}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <i className="fa-solid fa-trash sticker-icon" onClick={() => onDelete(id)} />
+
           </div>
         )}
-
-        <div className="drag-handle" {...dragHandleProps}></div>
-
-        {canEditContent && <div className="sticker-icons">
-          <i
-            className="fa-solid fa-share sticker-icon"
-            onClick={shareSticker}
-          />
-          <i
-            className="fa-solid fa-palette sticker-icon"
-            onClick={onColorChange}
-          ></i>
-          <i
-            className="fa-solid fa-trash sticker-icon"
-            onClick={() => onDelete(id)}
-          ></i>
-        </div>}
       </div>
 
       {isEditing && canEditContent ? (
@@ -209,33 +237,25 @@ const Sticker = ({
         <div
           className="sticker-content"
           dangerouslySetInnerHTML={{ __html: parseBBCode(content) }}
-          onClick={() => setIsEditing(true)}
+          onClick={() => canEditContent && setIsEditing(true)}
         />
       )}
 
       {/* Width controls on the right */}
-      {canResize && <div className="resize-controls right">
-        <i
-          className="fa-solid fa-arrows-left-right sticker-icon hover"
-          onClick={increaseWidth}
-        ></i>
-        <i
-          className="fa-solid fa-minus sticker-icon hover"
-          onClick={decreaseWidth}
-        ></i>
-      </div>}
+      {canResize && (
+        <div className="resize-controls right">
+          <i className="fa-solid fa-arrows-left-right sticker-icon hover" onClick={increaseWidth} />
+          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseWidth} />
+        </div>
+      )}
 
       {/* Height controls on the bottom */}
-      {canEditContent && <div className="resize-controls bottom">
-        <i
-          className="fa-solid fa-arrows-up-down sticker-icon hover"
-          onClick={increaseHeight}
-        ></i>
-        <i
-          className="fa-solid fa-minus sticker-icon hover"
-          onClick={decreaseHeight}
-        ></i>
-      </div>}
+      {canResize && (
+        <div className="resize-controls bottom">
+          <i className="fa-solid fa-arrows-up-down sticker-icon hover" onClick={increaseHeight} />
+          <i className="fa-solid fa-minus sticker-icon hover" onClick={decreaseHeight} />
+        </div>
+      )}
     </div>
   );
 };

@@ -1194,6 +1194,18 @@ input.pin-input:-moz-autofill {
   padding-left: 8px;
 }
 
+.color-dropdown {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: max-content;
+  background-color: var(--bg2-color);
+  z-index: 300;
+  padding: 4px;
+  user-select: none;
+  border: 1px solid var(--border-color);
+}
+
 .resize-controls {
   position: absolute;
   display: none;
@@ -1223,6 +1235,7 @@ input.pin-input:-moz-autofill {
 }
 
 .sticker-default {
+  color: var(--text-color);
   background-color: var(--bg3-color);
 }
 
@@ -1252,18 +1265,22 @@ input.pin-input:-moz-autofill {
 }
 
 .sticker-yellow {
+  color: #111;
   background-color: #FFF9b1;
 }
 
 .sticker-blue {
+  color: #111;
   background-color: #b1e4ff;
 }
 
 .sticker-red {
+  color: #111;
   background-color: #fec5c5;
 }
 
 .sticker-green {
+  color: #111;
   background-color: #b4ffb1;
 }
 
@@ -1315,7 +1332,7 @@ input.pin-input:-moz-autofill {
 }
 
 .sticker-textarea {
-  color: black;
+  color: #111;
   font-size: 1rem;
   font-family: inherit;
   box-sizing: border-box;

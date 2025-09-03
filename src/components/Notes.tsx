@@ -1,26 +1,23 @@
-import { useRef } from "react";
-import { onSnapshot } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import {
+  collection,
+  doc,
+  deleteDoc,
+  onSnapshot,
+  setDoc,
+} from "firebase/firestore";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 
+import { db } from "./firebase";
+import DragableSticker from "./DragableSticker";
 import { StickerData } from "../types";
 import { isValidSticker } from "../utils/validators";
 
-import DragableSticker from "./DragableSticker";
-import { useState, useEffect } from "react";
-import { db } from "./firebase";
-import { collection, setDoc, doc, deleteDoc } from "firebase/firestore";
-
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { DragEndEvent } from "@dnd-kit/core";
-
 const cellSize = 252; // px
 
-type StickerWithSource = StickerData & {
+type StickerWithSource = Omit<StickerData, "color"> & {
+  color: StickerColor;
   source: "personal" | "shared";
   placements?: Record<string, { row: number; col: number }>;
   createdBy?: string;
@@ -37,9 +34,11 @@ type NotesProps = {
   toggleActive: (name: string) => void;
 };
 
+type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
+
 const Notes = ({ user, toggleActive }: NotesProps) => {
   const [stickers, setStickers] = useState<StickerWithSource[]>([]);
-  const [maxCols, setMaxCols] = useState(3); // default
+  const [maxCols, setMaxCols] = useState(3);
   const [isMobileView, setIsMobileView] = useState(false);
 
   const boardRef = useRef<HTMLDivElement>(null);
@@ -47,47 +46,37 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 1350);
-    };
-
-    handleResize(); // initial check
+    const handleResize = () => setIsMobileView(window.innerWidth < 1350);
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
     const observer = new ResizeObserver(() => {
-      if (boardRef.current) {
-        const boardWidth = boardRef.current.offsetWidth;
-        const newMaxCols = Math.max(1, Math.floor(boardWidth / cellSize));
-        setMaxCols(newMaxCols);
-        setIsMobileView(newMaxCols <= 1); // update on resize too
-      }
+      if (!boardRef.current) return;
+      const boardWidth = boardRef.current.offsetWidth;
+      const newMaxCols = Math.max(1, Math.floor(boardWidth / cellSize));
+      setMaxCols(newMaxCols);
+      setIsMobileView(newMaxCols <= 1);
     });
 
-    if (boardRef.current) {
-      observer.observe(boardRef.current);
-    }
-
+    if (boardRef.current) observer.observe(boardRef.current);
     return () => observer.disconnect();
   }, []);
 
+  // Live notes listeners
   useEffect(() => {
     const personalRef = collection(db, "users", user.id, "notes");
     const sharedRef = collection(db, "notes");
 
     const unsubPersonal = onSnapshot(personalRef, (snapshot) => {
-      const personal = snapshot.docs
-        .map((doc) => doc.data())
-        .filter(isValidSticker);
+      const personal = snapshot.docs.map((d) => d.data()).filter(isValidSticker);
       setStickers((prev) => mergeStickers(prev, personal, "personal"));
     });
 
     const unsubShared = onSnapshot(sharedRef, (snapshot) => {
-      const shared = snapshot.docs
-        .map((doc) => doc.data())
-        .filter(isValidSticker);
+      const shared = snapshot.docs.map((d) => d.data()).filter(isValidSticker);
       setStickers((prev) => mergeStickers(prev, shared, "shared"));
     });
 
@@ -95,36 +84,27 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       unsubPersonal();
       unsubShared();
     };
-  }, [user.id, maxCols]);
+  }, [user.id]);
 
+  // Ensure shared notes get a per-user placement
   useEffect(() => {
-    // shared stickers missing a placement for this user
     const needsPlacement = stickers.filter(
       (s) => s.source === "shared" && !(s.placements && s.placements[user.id])
     );
     if (needsPlacement.length === 0) return;
 
-    // Work with only already-placed stickers to avoid ghost (0,0) conflicts
+    // Work only with placed stickers to avoid (0,0) conflicts
     let working = stickers.filter((s) => s.row !== undefined && s.col !== undefined);
 
     (async () => {
       for (const s of needsPlacement) {
-        const { row, col } = findFreePlacement(
-          s.width ?? 1,
-          s.height ?? 1,
-          working,
-          maxCols
-        );
-
-        // add this placement to working so next placement respects it
+        const { row, col } = findFreePlacement(s.width ?? 1, s.height ?? 1, working, maxCols);
         working = [...working, { ...s, row, col }];
 
-        // optimistic UI
-        setStickers((prev) =>
-          prev.map((x) => (x.id === s.id ? { ...x, row, col } : x))
-        );
+        // Optimistic
+        setStickers((prev) => prev.map((x) => (x.id === s.id ? { ...x, row, col } : x)));
 
-        // persist per-user placement
+        // Persist per-user placement
         await setDoc(
           doc(db, "notes", s.id.toString()),
           {
@@ -139,22 +119,28 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     })();
   }, [stickers, user.id, maxCols]);
 
+  // 2) Helper to coerce Firestore strings into the union
+  const toStickerColor = (c: unknown): StickerColor => {
+    const allowed = ["default", "yellow", "blue", "red", "green"] as const;
+    return (allowed as readonly string[]).includes(String(c)) ? (c as StickerColor) : "default";
+  };
+
   function mergeStickers(
     prev: StickerWithSource[],
     incoming: StickerData[],
     source: "personal" | "shared"
   ): StickerWithSource[] {
     const tagged = incoming.map((s: any) => {
+      const base = {
+        ...s,
+        color: toStickerColor(s.color),      // ← normalize here
+        source,
+      };
       if (source === "shared") {
         const placement = s.placements?.[user.id];
-        // Only set row/col if this user already has a placement
-        return {
-          ...s,
-          ...(placement ? { row: placement.row, col: placement.col } : {}),
-          source,
-        };
+        return placement ? { ...base, row: placement.row, col: placement.col } : base;
       }
-      return { ...s, source };
+      return base;
     });
 
     const keep = prev.filter((s) => s.source !== source);
@@ -178,16 +164,13 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
 
       for (let i = row; i < row + height; i++) {
         for (let j = col; j < col + width; j++) {
-          if (i >= r && i < r + h && j >= c && j < c + w) {
-            return false;
-          }
+          if (i >= r && i < r + h && j >= c && j < c + w) return false;
         }
       }
     }
     return true;
   };
 
-  // helper: find the first free spot that fits (width x height)
   function findFreePlacement(
     width: number,
     height: number,
@@ -199,7 +182,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
 
     const isFree = (r: number, c: number) => {
       for (const s of existing) {
-        if (s.row === undefined || s.col === undefined) continue; // skip unplaced
+        if (s.row === undefined || s.col === undefined) continue;
         const sr = s.row;
         const sc = s.col;
         const sw = s.width ?? 1;
@@ -218,43 +201,22 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     return { row: 0, col: 0 };
   }
 
-  const handleColorChange = async (id: number) => {
-    // compute new color locally
-    let nextColor: string | null = null;
+  const handleSetColor = async (id: number, newColor: StickerColor) => {
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, color: newColor } : s)));
 
-    setStickers((prev) =>
-      prev.map((s) => {
-        if (s.id !== id) return s;
-        const newColor =
-          s.color === "default"
-            ? "yellow"
-            : s.color === "yellow"
-            ? "blue"
-            : s.color === "blue"
-            ? "red"
-            : s.color === "red"
-            ? "green"
-            : "default";
-        nextColor = newColor;
-        return { ...s, color: newColor };
-      })
-    );
-
-    // find sticker & persist to the correct collection
     const sticker = stickers.find((s) => s.id === id);
-    if (!sticker || !nextColor) return;
+    if (!sticker) return;
 
     if (sticker.source === "personal") {
       await setDoc(
         doc(db, "users", user.id, "notes", id.toString()),
-        { ...sticker, color: nextColor },
+        { ...sticker, color: newColor },
         { merge: true }
       );
-    } else if (sticker.source === "shared") {
-      // global color for the shared note
+    } else {
       await setDoc(
         doc(db, "notes", id.toString()),
-        { ...sticker, color: nextColor },
+        { ...sticker, color: newColor },
         { merge: true }
       );
     }
@@ -265,7 +227,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       if (sticker.source === "personal") {
         const ref = doc(db, "users", userId, "notes", sticker.id.toString());
         await setDoc(ref, sticker, { merge: true });
-      } else if (sticker.source === "shared") {
+      } else {
         const ref = doc(db, "notes", sticker.id.toString());
         await setDoc(ref, sticker, { merge: true });
       }
@@ -275,24 +237,18 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   };
 
   const handleContentChange = async (id: number, newContent: string) => {
-    setStickers(prev =>
-      prev.map(s => (s.id === id ? { ...s, content: newContent } : s))
-    );
-
-    const sticker = stickers.find(s => s.id === id);
-    if (sticker) {
-      await saveSticker({ ...sticker, content: newContent }, user.id);
-    }
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, content: newContent } : s)));
+    const sticker = stickers.find((s) => s.id === id);
+    if (sticker) await saveSticker({ ...sticker, content: newContent }, user.id);
   };
 
   const handleResize = async (id: number, newWidth: number, newHeight: number) => {
     const sticker = stickers.find((s) => s.id === id);
     if (!sticker) return;
 
-    const updated = stickers.map((s) =>
-      s.id === id ? { ...s, width: newWidth, height: newHeight } : s
+    setStickers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, width: newWidth, height: newHeight } : s))
     );
-    setStickers(updated);
 
     if (sticker.source === "personal") {
       await setDoc(doc(db, "users", user.id, "notes", id.toString()), {
@@ -300,7 +256,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         width: newWidth,
         height: newHeight,
       });
-    } else if (sticker.source === "shared") {
+    } else {
       await setDoc(
         doc(db, "notes", id.toString()),
         { ...sticker, width: newWidth, height: newHeight },
@@ -333,20 +289,11 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       const sh = s.height ?? 1;
       const sr = s.row ?? 0;
       const sc = s.col ?? 0;
-      return (
-        newRow < sr + sh &&
-        newRow + height > sr &&
-        newCol < sc + sw &&
-        newCol + width > sc
-      );
+      return newRow < sr + sh && newRow + height > sr && newCol < sc + sw && newCol + width > sc;
     });
-
     if (isOccupied) return;
 
-    const updated = stickers.map((s) =>
-      s.id === id ? { ...s, row: newRow, col: newCol } : s
-    );
-    setStickers(updated);
+    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, row: newRow, col: newCol } : s)));
 
     if (sticker.source === "personal") {
       await setDoc(doc(db, "users", user.id, "notes", id.toString()), {
@@ -354,7 +301,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         row: newRow,
         col: newCol,
       });
-    } else if (sticker.source === "shared") {
+    } else {
       await setDoc(
         doc(db, "notes", id.toString()),
         {
@@ -370,44 +317,28 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   };
 
   const deleteSticker = async (sticker: StickerWithSource) => {
-    const preview =
-      sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
-    const confirmed = window.confirm(
-      `Are you sure you want to delete note "${preview}"?`
-    );
-
+    const preview = sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
+    const confirmed = window.confirm(`Are you sure you want to delete note "${preview}"?`);
     if (!confirmed) return;
 
-    // Optimistic local update
     setStickers((prev) => prev.filter((s) => s.id !== sticker.id));
 
     try {
       if (sticker.source === "personal") {
-        // delete from personal notes
-        await deleteDoc(
-          doc(db, "users", user.id, "notes", sticker.id.toString())
-        );
-      } else if (sticker.source === "shared") {
+        await deleteDoc(doc(db, "users", user.id, "notes", sticker.id.toString()));
+      } else {
         const sharedRef = doc(db, "notes", sticker.id.toString());
-
         if (sticker.createdBy === user.id) {
-          // ✅ creator deletes the entire shared sticker
           await deleteDoc(sharedRef);
         } else {
-          // ✅ other user just removes their placement
           const { placements = {} } = sticker;
           const updatedPlacements = { ...placements };
           delete updatedPlacements[user.id];
 
-          // If no placements left → delete entire doc
           if (Object.keys(updatedPlacements).length === 0) {
             await deleteDoc(sharedRef);
           } else {
-            await setDoc(
-              sharedRef,
-              { placements: updatedPlacements },
-              { merge: true }
-            );
+            await setDoc(sharedRef, { placements: updatedPlacements }, { merge: true });
           }
         }
       }
@@ -417,7 +348,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   };
 
   const addSticker = async () => {
-    const newSticker: StickerWithSource  = {
+    const newSticker: StickerWithSource = {
       content: "...",
       color: "default",
       id: Date.now(),
@@ -427,10 +358,9 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       source: "personal",
     };
 
-    const width = newSticker.width!;
-    const height = newSticker.height!;
+    const width = newSticker.width ?? 1;
+    const height = newSticker.height ?? 1;
 
-    // Reuse placement logic to find free space
     let placed = false;
     let row = 0;
     let col = 0;
@@ -452,15 +382,10 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       return;
     }
 
-    const updatedStickers = [...stickers, newSticker];
-    setStickers(updatedStickers);
-    await setDoc(
-      doc(db, "users", user.id, "notes", newSticker.id.toString()),
-      newSticker
-    );
+    setStickers((prev) => [...prev, newSticker]);
+    await setDoc(doc(db, "users", user.id, "notes", newSticker.id.toString()), newSticker);
   };
 
-  // Sorting stickers for mobile
   const sortedStickers = [...stickers].sort((a, b) => {
     const ra = a.row ?? 0;
     const rb = b.row ?? 0;
@@ -469,15 +394,12 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     return ra !== rb ? ra - rb : ca - cb;
   });
 
-  // Calculate max row occupied by any sticker
   const boardHeight = isMobileView
     ? sortedStickers.reduce((sum, s) => sum + (s.height ?? 1), 0) * cellSize
     : (stickers.reduce((max, s) => {
         const row = (s.row ?? 0) + (s.height ?? 1);
         return Math.max(max, row);
-      }, 0) +
-        1) *
-      cellSize;
+      }, 0) + 1) * cellSize;
 
   return (
     <div className="card has-header full-width">
@@ -485,64 +407,58 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         <h3 className="card-title">Noticeboard</h3>
         <div className="card-header-right">
           <button onClick={addSticker}>
-            <i className="fa-solid fa-plus grey icon-md hover"></i>
+            <i className="fa-solid fa-plus grey icon-md hover" />
             Add
           </button>
-          <button
-            className="close-widget-btn"
-            onClick={() => toggleActive("Notes")}
-          >
+          <button className="close-widget-btn" onClick={() => toggleActive("Notes")}>
             <i className="fa-solid fa-x icon-md hover" />
           </button>
         </div>
       </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="stickerboard" style={{ height: boardHeight }}>
+
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="stickerboard" ref={boardRef} style={{ height: boardHeight }}>
           {(isMobileView
             ? (() => {
                 let nextRow = 0;
                 return sortedStickers.map((sticker) => {
-                  const adjusted = {
-                    ...sticker,
-                    row: nextRow,
-                  };
+                  const adjusted = { ...sticker, row: nextRow };
                   nextRow += sticker.height ?? 1;
                   return adjusted;
                 });
               })()
             : stickers
-          ).map((sticker) => 
-            {const canEditShared = !(sticker.source === "shared") || sticker.createdBy === user.id;
-            return <DragableSticker
-              user={user}
-              key={`${sticker.source}-${sticker.id}`}
-              id={sticker.id}
-              content={sticker.content}
-              color={sticker.color}
-              onDelete={() => deleteSticker(sticker)}
-              onColorChange={() => handleColorChange(sticker.id)}
-              onContentChange={(newContent) =>
-                handleContentChange(sticker.id, newContent)
-              }
-              onResize={(w, h) => handleResize(sticker.id, w, h)}
-              width={sticker.width || 1}
-              height={sticker.height || 1}
-              row={sticker.row ?? 0}
-              col={isMobileView ? 0 : sticker.col ?? 0}
-              disableDrag={isMobileView}
-              db={db}
-              setStickers={setStickers}
-              isShared={sticker.source === "shared"}
-              createdBy={sticker.createdBy}
-              createdByName={sticker.createdByName}
-              canEditContent={canEditShared}
-              canResize={canEditShared}
-            />}
-          )}
+          ).map((sticker) => {
+            const canEditShared =
+              !(sticker.source === "shared") || sticker.createdBy === user.id;
+
+            return (
+              <DragableSticker
+                user={user}
+                key={`${sticker.source}-${sticker.id}`}
+                id={sticker.id}
+                content={sticker.content}
+                color={sticker.color}
+                onDelete={() => deleteSticker(sticker)}
+                onColorChange={(color) => handleSetColor(sticker.id, color as StickerColor)}
+                onContentChange={(newContent) => handleContentChange(sticker.id, newContent)}
+                onResize={(w, h) => handleResize(sticker.id, w, h)}
+                width={sticker.width || 1}
+                height={sticker.height || 1}
+                row={sticker.row ?? 0}
+                col={isMobileView ? 0 : sticker.col ?? 0}
+                disableDrag={isMobileView}
+                db={db}
+                setStickers={setStickers}
+                isShared={sticker.source === "shared"}
+                createdBy={sticker.createdBy}
+                createdByName={sticker.createdByName}
+                canEditContent={canEditShared}
+                canResize={canEditShared}
+                canChangeColor={canEditShared}
+              />
+            );
+          })}
         </div>
       </DndContext>
     </div>
