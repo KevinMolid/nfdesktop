@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import {
   collection,
-  getDocs,
   setDoc,
   doc,
   deleteDoc,
+  onSnapshot,
+  query,
+  orderBy,
 } from "firebase/firestore";
 
 type Link = { id: string; name: string; href: string };
@@ -127,24 +129,27 @@ const Links = ({ user, toggleActive }: LinksProps) => {
     localStorage.setItem(EXPANDED_KEY, JSON.stringify(expandedCategories));
   }, [expandedCategories]);
 
+  // OnSnapshot listener for custom links
   useEffect(() => {
-    const loadLinks = async () => {
-      let dbLinks: Link[] = [];
-      try {
-        const snapshot = await getDocs(
-          collection(db, "users", user.id, "links")
-        );
-        dbLinks = snapshot.docs.map((doc) => {
-          return { id: doc.id, ...(doc.data() as Omit<Link, "id">) };
-        });
-      } catch (e) {
-        console.warn("Failed to fetch DB links", e);
-      }
+    if (!user?.id) return;
 
-      setCustomLinks(dbLinks);
-    };
+    const linksRef = collection(db, "users", user.id, "links");
+    // order however you want; name is common
+    const q = query(linksRef, orderBy("name"));
 
-    loadLinks();
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const dbLinks = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as Omit<Link, "id">),
+        }));
+        setCustomLinks(dbLinks);
+      },
+      (err) => console.error("Links listener error:", err)
+    );
+
+    return () => unsubscribe();
   }, [user.id]);
 
   // Close dropdown on outside click
