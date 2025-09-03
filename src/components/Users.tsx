@@ -1,4 +1,5 @@
 import Userlist from "./Userlist";
+import Usergroups from "./Usergroups";
 import SafeWrapper from "./SafeWrapper";
 
 type UsersProps = {
@@ -17,6 +18,10 @@ const Users = ({ user, toggleActive }: UsersProps) => {
       <div className="widget-container">
         <SafeWrapper fallback={<div>Could not load users</div>}>
             <Userlist user={user} toggleActive={toggleActive} />
+        </SafeWrapper>
+
+        <SafeWrapper fallback={<div>Could not load user groups</div>}>
+            <Usergroups toggleActive={toggleActive} />
         </SafeWrapper>
       </div>
     </div>
