@@ -8,6 +8,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  updateDoc,
 } from "firebase/firestore";
 
 type Link = { id: string; name: string; href: string };
@@ -120,6 +121,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
   const [showForm, setShowForm] = useState(false);
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkHref, setNewLinkHref] = useState("");
+  const [edit, setEdit] = useState<{ id: string; name: string; href: string } | null>(null);
 
   // Track which dropdown is open (link ID) or null for none
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -210,6 +212,32 @@ const Links = ({ user, toggleActive }: LinksProps) => {
       : []),
   ];
 
+  // Normalize URL (prepend https:// if missing)
+  const ensureHttps = (url: string) => {
+    const v = url.trim();
+    return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  };
+
+  const startEdit = (link: Link) => {
+    setEdit({ id: link.id, name: link.name, href: link.href });
+    setOpenDropdownId(null);
+    setShowForm(false); // don’t show “add new” while editing
+  };
+
+  const cancelEdit = () => setEdit(null);
+
+  const saveEdit = async () => {
+    if (!edit) return;
+    const name = edit.name.trim();
+    const href = ensureHttps(edit.href);
+    if (!name || !href) return;
+
+    await updateDoc(doc(db, "users", user.id, "links", edit.id), { name, href });
+
+    // Let onSnapshot refresh UI; just close the editor
+    setEdit(null);
+  };
+
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
@@ -217,14 +245,14 @@ const Links = ({ user, toggleActive }: LinksProps) => {
         <div className="card-header-right">
           {!showForm && (
             <button onClick={() => setShowForm((prev) => !prev)}>
-              <i className="fa-solid fa-plus grey icon-md hover" /> Add
+              <i className="fa-solid fa-plus grey icon-md" /> Add
             </button>
           )}
           <button
             className="close-widget-btn"
             onClick={() => toggleActive("Links")}
           >
-            <i className="fa-solid fa-x icon-md hover" />
+            <i className="fa-solid fa-x icon-md" />
           </button>
         </div>
       </div>
@@ -249,12 +277,12 @@ const Links = ({ user, toggleActive }: LinksProps) => {
             />
             <div className="button-group">
               <button className="save-btn" onClick={handleAddLink}>
-                <i className="fa-solid fa-check" />
-                Confirm
+                <i className="fa-solid fa-save icon-md" />
+                Save
               </button>
               <button className="delete-btn" onClick={() => setShowForm(false)}>
-                <i className="fa-solid fa-cancel" />
-                Cancel
+                <i className="fa-solid fa-trash icon-md" />
+                Discard
               </button>
             </div>
           </div>
@@ -309,6 +337,17 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                             <div
                               className="dropdown-item hover-border"
                               role="menuitem"
+                              onClick={() => startEdit(link)}
+                            >
+                              <div className="dropdown-item-icon-container">
+                                <i className="fa-solid fa-pencil grey"></i>
+                              </div>
+                              <div className="dropdown-item-text-container">Edit</div>
+                            </div>
+
+                            <div
+                              className="dropdown-item hover-border"
+                              role="menuitem"
                               onClick={() => handleDeleteLink(link.id)}
                             >
                               <div className="dropdown-item-icon-container">
@@ -336,6 +375,41 @@ const Links = ({ user, toggleActive }: LinksProps) => {
           </div>
         );
       })}
+
+      {edit && (
+        <div className="create-task-box">
+          <h4>Edit link</h4>
+          <div className="create-task-input-container">
+            <input
+              type="text"
+              placeholder="Link name"
+              value={edit.name}
+              onChange={(e) => setEdit((s) => (s ? { ...s, name: e.target.value } : s))}
+              onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+              className="input m-b-1"
+            />
+            <input
+              type="text"
+              placeholder="URL (https://...)"
+              value={edit.href}
+              onChange={(e) => setEdit((s) => (s ? { ...s, href: e.target.value } : s))}
+              onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+              className="input m-b-1"
+            />
+            <div className="button-group">
+              <button className="save-btn" onClick={saveEdit}>
+                <i className="fa-solid fa-save icon-md" />
+                Update
+              </button>
+              <button className="delete-btn" onClick={cancelEdit}>
+                <i className="fa-solid fa-xmark icon-md" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
