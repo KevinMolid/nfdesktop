@@ -29,7 +29,10 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
   // Edit state
   const [edit, setEdit] = useState<Group | null>(null);
 
-  // Dropdown state (which group's dropdown is open)
+  // Selected group (for highlighting)
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  // Dropdown state
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,13 +47,18 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
           return { id: d.id, name: data.name ?? "" };
         });
         setGroups(list);
+
+        // If the selected group was deleted, clear selection
+        if (selectedGroupId && !list.some((g) => g.id === selectedGroupId)) {
+          setSelectedGroupId(null);
+        }
       },
       (err) => {
         console.error("usergroups listener error:", err);
       }
     );
     return () => unsub();
-  }, []);
+  }, [selectedGroupId]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -78,11 +86,13 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
       return;
     }
     try {
-      await addDoc(collection(db, "usergroups"), { name });
+      const ref = await addDoc(collection(db, "usergroups"), { name });
       setSuccess(`Group "${name}" was created!`);
       setError("");
       setNewGroupName("");
       setIsCreateActive(false);
+      // Optionally select the newly created group
+      setSelectedGroupId(ref.id);
     } catch (e) {
       console.error("Error creating user group:", e);
       setError("Creation failed.");
@@ -123,6 +133,7 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
     try {
       await deleteDoc(doc(db, "usergroups", id));
       setOpenDropdownId(null);
+      if (selectedGroupId === id) setSelectedGroupId(null);
       // onSnapshot will refresh the list
     } catch (e) {
       console.error("Failed to delete group:", e);
@@ -132,6 +143,10 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
 
   const toggleDropdown = (id: string) => {
     setOpenDropdownId((prev) => (prev === id ? null : id));
+  };
+
+  const selectGroup = (id: string) => {
+    setSelectedGroupId((prev) => (prev === id ? null : id)); // toggle selection
   };
 
   return (
@@ -185,73 +200,78 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
         {success && <p style={{ color: "green" }}>{success}</p>}
 
         <ul>
-          <li>
-            <h4>Name</h4>
-          </li>
-
-          {groups.map((g) => (
-            <li
-              key={g.id}
-              className="userlist"
-              style={{ display: "flex", alignItems: "center", position: "relative" }}
-            >
-              {/* Kebab menu, same pattern as Links.tsx */}
-              <div
-                ref={openDropdownId === g.id ? dropdownRef : null}
-                style={{ position: "relative", marginRight: 8 }}
+          {groups.map((g) => {
+            const isSelected = selectedGroupId === g.id;
+            return (
+              <li
+                key={g.id}
+                className={`user-group ${isSelected ? "selected-group" : ""}`}
+                style={{ display: "flex", alignItems: "center", position: "relative", cursor: "pointer" }}
+                onClick={() => selectGroup(g.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    selectGroup(g.id);
+                  }
+                }}
+                tabIndex={0}
+                role="option"
+                aria-selected={isSelected}
               >
+                {/* Kebab menu */}
                 <div
-                  className="icon-div task-action hover"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown(g.id);
-                  }}
-                  title="Options"
-                  aria-haspopup="menu"
-                  aria-expanded={openDropdownId === g.id}
+                  ref={openDropdownId === g.id ? dropdownRef : null}
+                  style={{ position: "relative", marginRight: 8 }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <i className="fa-solid fa-bars" />
+                  <div
+                    className="icon-div task-action hover"
+                    onClick={() => toggleDropdown(g.id)}
+                    title="Options"
+                    aria-haspopup="menu"
+                    aria-expanded={openDropdownId === g.id}
+                  >
+                    <i className="fa-solid fa-bars" />
+                  </div>
+
+                  {openDropdownId === g.id && (
+                    <div className="task-dropdown" role="menu">
+                      <div
+                        className="dropdown-item hover-border"
+                        role="menuitem"
+                        onClick={() => startEdit(g)}
+                      >
+                        <div className="dropdown-item-icon-container">
+                          <i className="fa-solid fa-pencil grey" />
+                        </div>
+                        <div className="dropdown-item-text-container">Edit</div>
+                      </div>
+
+                      <div
+                        className="dropdown-item hover-border"
+                        role="menuitem"
+                        onClick={() => handleDeleteGroup(g.id)}
+                      >
+                        <div className="dropdown-item-icon-container">
+                          <i className="fa-solid fa-trash red" />
+                        </div>
+                        <div className="dropdown-item-text-container">Delete</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {openDropdownId === g.id && (
-                  <div className="task-dropdown" role="menu">
-                    <div
-                      className="dropdown-item hover-border"
-                      role="menuitem"
-                      onClick={() => startEdit(g)}
-                    >
-                      <div className="dropdown-item-icon-container">
-                        <i className="fa-solid fa-pencil grey" />
-                      </div>
-                      <div className="dropdown-item-text-container">Edit</div>
-                    </div>
-
-                    <div
-                      className="dropdown-item hover-border"
-                      role="menuitem"
-                      onClick={() => handleDeleteGroup(g.id)}
-                    >
-                      <div className="dropdown-item-icon-container">
-                        <i className="fa-solid fa-trash red" />
-                      </div>
-                      <div className="dropdown-item-text-container">Delete</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Name (click also opens edit) */}
-              <p className="user-name" style={{ flex: 1 }}>
-                <span onClick={() => startEdit(g)}>
+                {/* Name (clicking the row selects; edit via menu) */}
+                <p className="user-name" style={{ flex: 1 }}>
                   {g.name || <em>(No name)</em>}
-                </span>
-              </p>
-            </li>
-          ))}
+                </p>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
-      {/* Edit panel (simple, like in Links.tsx) */}
+      {/* Edit panel */}
       {edit && (
         <div className="create-task-box">
           <h4>Edit group</h4>

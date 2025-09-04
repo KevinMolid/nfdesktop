@@ -469,6 +469,21 @@ ul {
   object-fit: cover;
 }
 
+/* User groups */
+.user-group {
+  border-radius: 8px;
+}
+
+.user-group:hover {
+  background: var(--bg3-color);
+}
+
+.selected-group {
+  background: var(--bg3-color);
+}
+
+/* */
+
 .main-container {
   padding: 32px;
   flex: 1;
