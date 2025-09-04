@@ -1206,6 +1206,18 @@ input.pin-input:-moz-autofill {
   border: 1px solid var(--border-color);
 }
 
+.color-dropdown-preview {
+  height: 28px;
+  width: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preview-text {
+  font-size: 0.5rem;
+}
+
 .resize-controls {
   position: absolute;
   display: none;

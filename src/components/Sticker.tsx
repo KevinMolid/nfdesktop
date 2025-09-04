@@ -187,28 +187,21 @@ const Sticker = ({
                 aria-expanded={isPaletteOpen}
               />
 
+              {/* Color dropdown */}
               {isPaletteOpen && (
                 <div className="color-dropdown" role="menu" style={{ right: 0 }}>
                   {COLORS.map((c) => (
                     <div
                       key={c}
-                      className={`dropdown-item hover-border sticker-${c}`}
+                      className={`dropdown-item hover-border`}
                       role="menuitem"
                       onClick={() => {
                         onColorChange(c);
                         setIsPaletteOpen(false);
                       }}
                     >
-                      <div className="dropdown-item-icon-container">
-                        {/* Use colored dot via FontAwesome; relies on your color classes */}
-                        <i
-                          className={`fa-solid fa-circle ${
-                            c === "default" ? "lightgrey" : c
-                          }`}
-                        />
-                      </div>
-                      <div className="dropdown-item-text-container" style={{ textTransform: "capitalize" }}>
-                        {c}
+                      <div className={`color-dropdown-preview sticker-${c}`}>
+                        <span className="preview-text">NOTE</span>
                       </div>
                     </div>
                   ))}
