@@ -1,38 +1,54 @@
-import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { useDraggable } from "@dnd-kit/core";
 import Sticker from "./Sticker";
-import { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
-/** Match what Sticker needs */
+type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
+
 type SortableStickerProps = {
-  user: { id: string; username: string; name?: string; role: string };
+  user: {
+    id: string;
+    username: string;
+    name?: string;
+    role: string;
+  };
   id: number;
   content: string;
-  color: string;
+  color: string; // comes from Firestore as string
   width: number;
   height: number;
   row: number;
   col: number;
   disableDrag?: boolean;
-  onDelete: () => void;
-  onColorChange: () => void;
+  onDelete: (id: number) => void;
+  onColorChange: (color: StickerColor) => void;
   onContentChange: (newContent: string) => void;
   onResize: (newWidth: number, newHeight: number) => void;
-
-  /** These were missing */
   db: any;
   setStickers: Dispatch<SetStateAction<any[]>>;
-
-  /** Optional extras you used earlier */
   isShared?: boolean;
   createdBy?: string;
   createdByName?: string;
   canEditContent?: boolean;
   canResize?: boolean;
+  canChangeColor?: boolean;
 };
 
-const gap = 12;      // px
+const gap = 12; // px
 const cellSize = 252; // px
+
+const toStickerColor = (c: string | undefined): StickerColor => {
+  switch ((c || "").toLowerCase()) {
+    case "yellow":
+    case "blue":
+    case "red":
+    case "green":
+    case "default":
+      return c as StickerColor;
+    default:
+      return "default";
+  }
+};
 
 const SortableSticker = (props: SortableStickerProps) => {
   const {
@@ -42,21 +58,11 @@ const SortableSticker = (props: SortableStickerProps) => {
     row,
     col,
     disableDrag = false,
-    // rest contains user, db, setStickers, handlers, etc.
-    ...rest
+    isShared,
+    // keep the rest in props; we'll spread into <Sticker />
   } = props;
 
-  const draggable = useDraggable({ id });
-  const { setNodeRef, transform, attributes, listeners, isDragging } =
-    disableDrag
-      ? {
-          setNodeRef: undefined,
-          transform: null as any,
-          attributes: {} as any,
-          listeners: {} as any,
-          isDragging: false,
-        }
-      : draggable;
+  const { setNodeRef, transform, attributes, listeners, isDragging } = useDraggable({ id });
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -64,22 +70,34 @@ const SortableSticker = (props: SortableStickerProps) => {
     left: col * cellSize,
     width: width * cellSize - gap,
     height: height * cellSize - gap,
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(disableDrag ? null : transform),
     zIndex: isDragging ? 1000 : 1,
     touchAction: "manipulation",
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...(disableDrag ? {} : attributes)}>
+    <div
+      ref={disableDrag ? undefined : setNodeRef}
+      style={style}
+      className={`sticker-wrapper ${
+        isShared ? "sticker-wrapper--shared" : "sticker-wrapper--personal"
+      }`}
+    >
       <Sticker
-        {...rest}
-        id={id}
-        width={width}
-        height={height}
-        row={row}
-        col={col}
-        /** Provide drag handle props when enabled */
-        dragHandleProps={disableDrag ? {} : { ...attributes, ...listeners }}
+        {...props}
+        // Normalize color to the union type StickerColor
+        color={toStickerColor(props.color)}
+        // Use a drag handle inside the sticker (don’t spread on wrapper)
+        dragHandleProps={
+          disableDrag
+            ? {}
+            : {
+                ...attributes,
+                ...listeners,
+                role: "button",
+                "aria-grabbed": isDragging || undefined,
+              }
+        }
       />
     </div>
   );
