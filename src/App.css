@@ -340,8 +340,14 @@ ul {
 /* Users */
 .userlist {
   display: grid;
-  grid-template-columns: 48px 200px 1fr;
+  grid-template-columns: 42px 200px 50px auto;
   gap: 8px;
+}
+
+@media (max-width: 450px) {
+  .userlist {
+  grid-template-columns: 42px 160px 50px auto;
+  }
 }
 
 .edit-user-container {

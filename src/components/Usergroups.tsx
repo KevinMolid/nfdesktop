@@ -9,6 +9,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 
 type UsergroupsProps = {
@@ -16,6 +18,7 @@ type UsergroupsProps = {
 };
 
 type Group = { id: string; name: string };
+type User = { id: string; username: string; name?: string };
 
 const Usergroups = ({ toggleActive }: UsergroupsProps) => {
   const [error, setError] = useState("");
@@ -36,11 +39,18 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
+  // Users + filtering (for membership picking)
+  const [users, setUsers] = useState<User[]>([]);
+  const [userFilter, setUserFilter] = useState("");
+
+  // Members of selected group (userIds)
+  const [memberIds, setMemberIds] = useState<Set<string>>(new Set());
+
   // Realtime groups
   useEffect(() => {
-    const q = query(collection(db, "usergroups"), orderBy("name"));
+    const qGroups = query(collection(db, "usergroups"), orderBy("name"));
     const unsub = onSnapshot(
-      q,
+      qGroups,
       (snap) => {
         const list: Group[] = snap.docs.map((d) => {
           const data = d.data() as { name?: string };
@@ -51,6 +61,7 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
         // If the selected group was deleted, clear selection
         if (selectedGroupId && !list.some((g) => g.id === selectedGroupId)) {
           setSelectedGroupId(null);
+          setMemberIds(new Set());
         }
       },
       (err) => {
@@ -60,10 +71,54 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
     return () => unsub();
   }, [selectedGroupId]);
 
+  // Realtime users (pick from)
+  useEffect(() => {
+    const usersRef = collection(db, "users");
+    const unsub = onSnapshot(
+      usersRef,
+      (snap) => {
+        const list: User[] = snap.docs.map((d) => {
+          const data = d.data() as any;
+          return {
+            id: d.id,
+            username: data.username ?? d.id,
+            name: data.name ?? data.nickname ?? "",
+          };
+        });
+        list.sort((a, b) => a.username.localeCompare(b.username));
+        setUsers(list);
+      },
+      (err) => console.error("users listener error:", err)
+    );
+    return () => unsub();
+  }, []);
+
+  // Realtime members of the selected group
+  useEffect(() => {
+    if (!selectedGroupId) {
+      setMemberIds(new Set());
+      return;
+    }
+    const membersRef = collection(db, "usergroups", selectedGroupId, "members");
+    const unsub = onSnapshot(
+      membersRef,
+      (snap) => {
+        const ids = new Set<string>();
+        snap.forEach((d) => ids.add(d.id));
+        setMemberIds(ids);
+      },
+      (err) => console.error("members listener error:", err)
+    );
+    return () => unsub();
+  }, [selectedGroupId]);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setOpenDropdownId(null);
       }
     };
@@ -91,8 +146,7 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
       setError("");
       setNewGroupName("");
       setIsCreateActive(false);
-      // Optionally select the newly created group
-      setSelectedGroupId(ref.id);
+      setSelectedGroupId(ref.id); // select newly created group
     } catch (e) {
       console.error("Error creating user group:", e);
       setError("Creation failed.");
@@ -133,7 +187,10 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
     try {
       await deleteDoc(doc(db, "usergroups", id));
       setOpenDropdownId(null);
-      if (selectedGroupId === id) setSelectedGroupId(null);
+      if (selectedGroupId === id) {
+        setSelectedGroupId(null);
+        setMemberIds(new Set());
+      }
       // onSnapshot will refresh the list
     } catch (e) {
       console.error("Failed to delete group:", e);
@@ -148,6 +205,46 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
   const selectGroup = (id: string) => {
     setSelectedGroupId((prev) => (prev === id ? null : id)); // toggle selection
   };
+
+  // Toggle membership for a user in the selected group
+  const toggleMembership = async (user: User) => {
+    if (!selectedGroupId) return;
+    const memberRef = doc(
+      db,
+      "usergroups",
+      selectedGroupId,
+      "members",
+      user.id
+    );
+
+    try {
+      if (memberIds.has(user.id)) {
+        await deleteDoc(memberRef);
+        setSuccess(`Removed ${user.username} from group.`);
+      } else {
+        await setDoc(
+          memberRef,
+          {
+            userId: user.id,
+            username: user.username,
+            addedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        setSuccess(`Added ${user.username} to group.`);
+      }
+      setError("");
+    } catch (e) {
+      console.error("Membership toggle failed:", e);
+      setError("Failed to update membership.");
+      setSuccess("");
+    }
+  };
+
+  const filteredUsers = users.filter((u) => {
+    const hay = (u.username + " " + (u.name || "")).toLowerCase();
+    return hay.includes(userFilter.toLowerCase());
+  });
 
   return (
     <div className="card has-header grow-1">
@@ -199,14 +296,24 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
         {error && <p style={{ color: "red" }}>{error}</p>}
         {success && <p style={{ color: "green" }}>{success}</p>}
 
+        {/* Groups list */}
         <ul>
+          <li>
+            <h4>Name</h4>
+          </li>
+
           {groups.map((g) => {
             const isSelected = selectedGroupId === g.id;
             return (
               <li
                 key={g.id}
                 className={`user-group ${isSelected ? "selected-group" : ""}`}
-                style={{ display: "flex", alignItems: "center", position: "relative", cursor: "pointer" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  position: "relative",
+                  cursor: "pointer",
+                }}
                 onClick={() => selectGroup(g.id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -255,13 +362,15 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
                         <div className="dropdown-item-icon-container">
                           <i className="fa-solid fa-trash red" />
                         </div>
-                        <div className="dropdown-item-text-container">Delete</div>
+                        <div className="dropdown-item-text-container">
+                          Delete
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Name (clicking the row selects; edit via menu) */}
+                {/* Name */}
                 <p className="user-name" style={{ flex: 1 }}>
                   {g.name || <em>(No name)</em>}
                 </p>
@@ -269,6 +378,70 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
             );
           })}
         </ul>
+
+        {/* Members editor */}
+        <div className="m-t-2">
+          <h4>Members</h4>
+          {!selectedGroupId ? (
+            <p className="lightgrey">Select a group to manage its members.</p>
+          ) : (
+            <>
+              <div className="create-task-input-container m-b-1">
+                <input
+                  type="text"
+                  placeholder="Filter users by name or username"
+                  value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                  className="input"
+                />
+              </div>
+
+              <ul className="user-list">
+                {filteredUsers.map((u) => {
+                  const isMember = memberIds.has(u.id);
+                  return (
+                    <li
+                      key={u.id}
+                      className={`userlist ${
+                        isMember ? "active-selection" : ""
+                      }`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        position: "relative",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => toggleMembership(u)}
+                    >
+                      <div
+                        className="icon-div hover"
+                        title={isMember ? "Remove from group" : "Add to group"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleMembership(u);
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        {isMember ? (
+                          <i className="fa-solid fa-check green" />
+                        ) : (
+                          <i className="fa-solid fa-plus grey" />
+                        )}
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <strong className="user">{u.username}</strong>
+                        {u.name && (
+                          <small className="lightgrey">{u.name}</small>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Edit panel */}
@@ -280,7 +453,9 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
               type="text"
               placeholder="Group name"
               value={edit.name}
-              onChange={(e) => setEdit((s) => (s ? { ...s, name: e.target.value } : s))}
+              onChange={(e) =>
+                setEdit((s) => (s ? { ...s, name: e.target.value } : s))
+              }
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
               className="input m-b-1"
             />

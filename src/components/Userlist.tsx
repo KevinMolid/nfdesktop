@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import avatar from "../assets/defaultAvatar.png";
 
 import bcrypt from "bcryptjs";
@@ -8,6 +8,9 @@ import {
   collection,
   addDoc,
   onSnapshot,
+  deleteDoc,
+  setDoc,
+  Unsubscribe,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -22,6 +25,11 @@ type UsersProps = {
   toggleActive: (name: string) => void;
 };
 
+type GroupMembershipState = Record<
+  string, // groupId
+  { name: string; members: Set<string> } // Set of userIds
+>;
+
 const Userlist = ({ user, toggleActive }: UsersProps) => {
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
@@ -35,6 +43,12 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
   const [isEditingImg, setIsEditingImg] = useState<boolean>(false);
   const [newImgUrl, setNewImgUrl] = useState<string>("");
 
+  // groupId -> { name, members:Set<userId> }
+  const [groupMemberships, setGroupMemberships] =
+    useState<GroupMembershipState>({});
+  const membersUnsubsRef = useRef<Unsubscribe[]>([]);
+
+  // Users listener
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const userList = snapshot.docs
@@ -53,6 +67,61 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Groups + members listeners
+  useEffect(() => {
+    const unsubGroups = onSnapshot(
+      collection(db, "usergroups"),
+      (groupsSnap) => {
+        // Clean up previous members listeners
+        membersUnsubsRef.current.forEach((u) => u());
+        membersUnsubsRef.current = [];
+
+        // Reset/seed names (members will be filled by sub-listeners)
+        const seed: GroupMembershipState = {};
+        groupsSnap.forEach((gDoc) => {
+          const gData = gDoc.data() as { name?: string };
+          seed[gDoc.id] = {
+            name: gData.name ?? "",
+            members: new Set<string>(),
+          };
+        });
+        setGroupMemberships(seed);
+
+        // For each group, listen to its members subcollection
+        groupsSnap.forEach((gDoc) => {
+          const gId = gDoc.id;
+          const membersRef = collection(db, "usergroups", gId, "members");
+
+          const unsubMembers = onSnapshot(
+            membersRef,
+            (memSnap) => {
+              const memSet = new Set<string>();
+              memSnap.forEach((m) => memSet.add(m.id)); // member doc id = userId
+
+              // Update just this group's members (keep others intact)
+              setGroupMemberships((prev) => ({
+                ...prev,
+                [gId]: {
+                  name: prev[gId]?.name ?? (gDoc.data() as any)?.name ?? "",
+                  members: memSet,
+                },
+              }));
+            },
+            (err) => console.error("members listener error:", err)
+          );
+
+          membersUnsubsRef.current.push(unsubMembers);
+        });
+      }
+    );
+
+    return () => {
+      unsubGroups();
+      membersUnsubsRef.current.forEach((u) => u());
+      membersUnsubsRef.current = [];
+    };
   }, []);
 
   const toggleCreateActive = () => {
@@ -103,6 +172,14 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
       imgurl: newImgUrl,
     });
     setSelectedUser(null);
+  };
+
+  // Helper: get group names a user belongs to
+  const groupsForUser = (userId: string): string[] => {
+    return Object.values(groupMemberships)
+      .filter((g) => g.members.has(userId))
+      .map((g) => g.name || "(unnamed)")
+      .sort((a, b) => a.localeCompare(b));
   };
 
   return (
@@ -163,26 +240,38 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
             <h4>Code</h4>
             <h4>Name</h4>
             <h4>Role</h4>
+            <h4>Groups</h4>
           </li>
-          {users.map((u) => (
-            <li key={u.id} className="userlist">
-              <p>
-                <strong className="user">{u.username}</strong>
-              </p>
-              <p className="user-name">
-                <span
-                  onClick={() => {
-                    setSelectedUser(u);
-                    setEditName(u.name ?? "");
-                    setEditNickname(u.nickname ?? "");
-                  }}
-                >
-                  {u.name || <em>(No name)</em>}
-                </span>
-              </p>
-              <p>{u.role === "admin" ? "Admin" : "User"}</p>
-            </li>
-          ))}
+          {users.map((u) => {
+            const userGroups = groupsForUser(u.id);
+            return (
+              <li key={u.id} className="userlist">
+                <p>
+                  <strong className="user">{u.username}</strong>
+                </p>
+                <p className="user-name">
+                  <span
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setEditName(u.name ?? "");
+                      setEditNickname(u.nickname ?? "");
+                      setNewImgUrl(u.imgurl ?? "");
+                    }}
+                  >
+                    {u.name || <em>(No name)</em>}
+                  </span>
+                </p>
+                <p>{u.role === "admin" ? "Admin" : "User"}</p>
+                <p>
+                  {userGroups.length ? (
+                    userGroups.join(", ")
+                  ) : (
+                    <span className="lightgrey">(no groups)</span>
+                  )}
+                </p>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -190,8 +279,6 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
       {selectedUser && (
         <div className="edit-user-container">
           <h3>Edit user: {selectedUser.username}</h3>
-
-          {/** Check if current user is admin OR editing themselves */}
           {(() => {
             const canEdit =
               user.role === "admin" || user.username === selectedUser.username;
@@ -251,7 +338,10 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
                     <i className="fa-solid fa-check"></i>
                     Save
                   </button>
-                  <button className="delete-btn" onClick={cancelEditingUser}>
+                  <button
+                    className="delete-btn"
+                    onClick={() => setSelectedUser(null)}
+                  >
                     <i className="fa-solid fa-cancel"></i>
                     Cancel
                   </button>
