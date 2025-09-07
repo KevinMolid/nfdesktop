@@ -211,7 +211,9 @@ function App() {
             </>
           )}
 
-          {activePage === "Users" && <Users user={user} toggleActive={toggleActive} />}
+          {activePage === "Users" && (
+            <Users user={user} toggleActive={toggleActive} />
+          )}
 
           {activePage === "Settings" && (
             <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
