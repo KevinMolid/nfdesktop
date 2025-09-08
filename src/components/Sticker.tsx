@@ -1,4 +1,4 @@
-import { useRef, useState, Dispatch, SetStateAction } from "react";
+import { useEffect, useRef, useState, Dispatch, SetStateAction } from "react";
 
 type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
 
@@ -26,9 +26,9 @@ type StickerProps = {
   // actions
   onColorChange: (color: StickerColor) => void;
   onContentChange: (content: string) => void;
-  onDelete: () => void; // <- no arg; DragableSticker passes () => void
+  onDelete: () => void;           // <- no-arg handler (bind id where you call it)
   onResize?: (width: number, height: number) => void;
-  onOpenShare?: () => void; // <- open the share modal (from Notes)
+  onOpenShare?: () => void;       // <- opens share modal in Notes
 
   // drag
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
@@ -51,6 +51,8 @@ type StickerProps = {
   canResize?: boolean;
   canChangeColor?: boolean;
 };
+
+const COLORS: StickerColor[] = ["default", "yellow", "blue", "red", "green"];
 
 const Sticker = ({
   id,
@@ -78,6 +80,20 @@ const Sticker = ({
 }: StickerProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  // palette dropdown state
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const paletteRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+        setIsPaletteOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const increaseWidth = () => onResize?.(width + 1, height);
   const decreaseWidth = () => onResize?.(Math.max(1, width - 1), height);
@@ -137,21 +153,48 @@ const Sticker = ({
 
         {canEditContent && (
           <div className="sticker-icons">
-            {/* OPEN THE MODAL IN NOTES, DO NOT SHARE IMMEDIATELY */}
+            {/* Share: open modal in Notes */}
             <i
               className="fa-solid fa-share sticker-icon"
               onClick={onOpenShare}
               title="Share"
               role="button"
             />
-            {canChangeColor && (
+
+            {/* Color palette dropdown */}
+            <div ref={paletteRef} style={{ position: "relative" }}>
               <i
-                className="fa-solid fa-palette sticker-icon"
-                onClick={() => onColorChange(color)}
-                title="Change color"
-                role="button"
+                className={`fa-solid fa-palette sticker-icon ${!canChangeColor ? "disabled" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canChangeColor) setIsPaletteOpen((v) => !v);
+                }}
+                title="Choose color"
+                aria-haspopup="menu"
+                aria-expanded={isPaletteOpen}
               />
-            )}
+              {isPaletteOpen && (
+                <div className="color-dropdown" role="menu" style={{ right: 0 }}>
+                  {COLORS.map((c) => (
+                    <div
+                      key={c}
+                      className="dropdown-item hover-border"
+                      role="menuitem"
+                      onClick={() => {
+                        onColorChange(c);
+                        setIsPaletteOpen(false);
+                      }}
+                    >
+                      <div className={`color-dropdown-preview sticker-${c}`}>
+                        <span className="preview-text">NOTE</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Delete */}
             <i
               className="fa-solid fa-trash sticker-icon"
               onClick={onDelete}
@@ -177,7 +220,7 @@ const Sticker = ({
         <div
           className="sticker-content"
           dangerouslySetInnerHTML={{ __html: parseBBCode(content) }}
-          onClick={() => setIsEditing(true)}
+          onClick={() => canEditContent && setIsEditing(true)}
         />
       )}
 
