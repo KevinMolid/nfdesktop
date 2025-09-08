@@ -15,6 +15,9 @@ import Foodorders from "./components/Foodorders";
 import Users from "./components/Users";
 import Settings from "./components/Settings";
 
+import { useAutoReloadOnVersion } from "./hooks/useAutoReloadOnVersion";
+import { CURRENT_VERSION } from "./appVersion";
+
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "./components/firebase";
 
@@ -37,6 +40,8 @@ function App() {
     role: string;
     imgurl?: string;
   };
+
+  useAutoReloadOnVersion(CURRENT_VERSION);
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // NEW
