@@ -5,8 +5,16 @@ import {
   deleteDoc,
   onSnapshot,
   setDoc,
+  query,
+  orderBy,
 } from "firebase/firestore";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 
 import { db } from "./firebase";
@@ -16,12 +24,25 @@ import { isValidSticker } from "../utils/validators";
 
 const cellSize = 252; // px
 
+type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
+
+type Audience = {
+  /** if true, ignore users/groups */
+  everyone?: boolean;
+  /** user ids allowed */
+  userIds?: string[];
+  /** usergroup ids allowed (must be group *IDs*) */
+  groupIds?: string[];
+};
+
 type StickerWithSource = Omit<StickerData, "color"> & {
   color: StickerColor;
   source: "personal" | "shared";
   placements?: Record<string, { row: number; col: number }>;
   createdBy?: string;
   createdByName?: string;
+  /** visibility */
+  share?: Audience;
 };
 
 type NotesProps = {
@@ -34,24 +55,87 @@ type NotesProps = {
   toggleActive: (name: string) => void;
 };
 
-type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
-
 const Notes = ({ user, toggleActive }: NotesProps) => {
   const [stickers, setStickers] = useState<StickerWithSource[]>([]);
   const [maxCols, setMaxCols] = useState(3);
   const [isMobileView, setIsMobileView] = useState(false);
 
-  const boardRef = useRef<HTMLDivElement>(null);
+  const [userNamesById, setUserNamesById] = useState<Record<string, string>>(
+    {}
+  );
+  const [groupNamesById, setGroupNamesById] = useState<Record<string, string>>(
+    {}
+  );
+  const [allUsers, setAllUsers] = useState<
+    Array<{ id: string; username: string; name?: string }>
+  >([]);
+  const [allGroups, setAllGroups] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [myGroupIds, setMyGroupIds] = useState<string[]>([]); // derived from usergroups/{gid}/members/{uid}
 
+  // Share modal state
+  const [shareOpenForId, setShareOpenForId] = useState<number | null>(null);
+  const [shareEveryone, setShareEveryone] = useState<boolean>(true);
+  const [shareUserIds, setShareUserIds] = useState<string[]>([]);
+  const [shareGroupIds, setShareGroupIds] = useState<string[]>([]);
+
+  const boardRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(useSensor(PointerSensor));
 
+  // Users → id -> display name
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "users"), (snap) => {
+      const map: Record<string, string> = {};
+      snap.forEach((d) => {
+        const data = d.data() as any;
+        const display =
+          (data.nickname && String(data.nickname).trim()) ||
+          (data.name && String(data.name).trim()) ||
+          data.username ||
+          d.id;
+        map[d.id] = display;
+      });
+      setUserNamesById(map);
+    });
+    return () => unsub();
+  }, []);
+
+  // Groups → id -> name
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "usergroups"), (snap) => {
+      const map: Record<string, string> = {};
+      snap.forEach((d) => {
+        const data = d.data() as { name?: string };
+        map[d.id] = data.name || d.id;
+      });
+      setGroupNamesById(map);
+    });
+    return () => unsub();
+  }, []);
+
+  // Build the "Shared with ..." label (names, not counts)
+  function getShareLabel(sticker: any): string {
+    const share = sticker.share as Audience | undefined;
+    if (!share || share.everyone) return "everyone";
+
+    const names: string[] = [];
+    (share.userIds || []).forEach((uid) =>
+      names.push(userNamesById[uid] || uid)
+    );
+    (share.groupIds || []).forEach((gid) =>
+      names.push(groupNamesById[gid] || gid)
+    );
+    return names.length ? names.join(", ") : "no one";
+  }
+
+  // Responsive layout
   useEffect(() => {
     const handleResize = () => setIsMobileView(window.innerWidth < 1350);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
   useEffect(() => {
     const observer = new ResizeObserver(() => {
       if (!boardRef.current) return;
@@ -60,31 +144,83 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       setMaxCols(newMaxCols);
       setIsMobileView(newMaxCols <= 1);
     });
-
     if (boardRef.current) observer.observe(boardRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Live notes listeners
+  // Directory listeners (users & groups for share picker)
   useEffect(() => {
-    const personalRef = collection(db, "users", user.id, "notes");
-    const sharedRef = collection(db, "notes");
+    const unsubUsers = onSnapshot(
+      query(collection(db, "users"), orderBy("username")),
+      (snap) => {
+        setAllUsers(
+          snap.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as { username: string; name?: string }),
+          }))
+        );
+      }
+    );
 
-    const unsubPersonal = onSnapshot(personalRef, (snapshot) => {
-      const personal = snapshot.docs.map((d) => d.data()).filter(isValidSticker);
-      setStickers((prev) => mergeStickers(prev, personal, "personal"));
-    });
+    // Groups + per-group membership watcher for THIS user
+    let memberUnsubs: Array<() => void> = [];
+    const unsubGroups = onSnapshot(collection(db, "usergroups"), (snap) => {
+      const groups = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as { name: string }),
+      }));
+      setAllGroups(groups);
 
-    const unsubShared = onSnapshot(sharedRef, (snapshot) => {
-      const shared = snapshot.docs.map((d) => d.data()).filter(isValidSticker);
-      setStickers((prev) => mergeStickers(prev, shared, "shared"));
+      // reset current mem listeners + my groups
+      memberUnsubs.forEach((u) => u());
+      memberUnsubs = [];
+      setMyGroupIds([]);
+
+      // for each group: watch usergroups/{gid}/members/{uid}
+      groups.forEach((g) => {
+        const memRef = doc(db, "usergroups", g.id, "members", user.id);
+        const u = onSnapshot(memRef, (memSnap) => {
+          setMyGroupIds((prev) => {
+            const exists = memSnap.exists();
+            const already = prev.includes(g.id);
+            if (exists && !already) return [...prev, g.id];
+            if (!exists && already) return prev.filter((x) => x !== g.id);
+            return prev;
+          });
+        });
+        memberUnsubs.push(u);
+      });
     });
 
     return () => {
-      unsubPersonal();
-      unsubShared();
+      unsubUsers();
+      unsubGroups();
+      memberUnsubs.forEach((u) => u());
     };
   }, [user.id]);
+
+  // Personal notes
+  useEffect(() => {
+    const personalRef = collection(db, "users", user.id, "notes");
+    const unsubPersonal = onSnapshot(personalRef, (snapshot) => {
+      const personal = snapshot.docs
+        .map((d) => d.data())
+        .filter(isValidSticker);
+      setStickers((prev) => mergeStickers(prev, personal, "personal"));
+    });
+    return () => unsubPersonal();
+  }, [user.id]);
+
+  // Shared notes (filter by audience)
+  useEffect(() => {
+    const sharedRef = collection(db, "notes");
+    const unsubShared = onSnapshot(sharedRef, (snapshot) => {
+      const raw = snapshot.docs.map((d) => d.data()).filter(isValidSticker);
+      const visible = raw.filter((n: any) => canSee(n, user.id, myGroupIds));
+      setStickers((prev) => mergeStickers(prev, visible, "shared"));
+    });
+    return () => unsubShared();
+  }, [user.id, myGroupIds]);
 
   // Ensure shared notes get a per-user placement
   useEffect(() => {
@@ -93,16 +229,24 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     );
     if (needsPlacement.length === 0) return;
 
-    // Work only with placed stickers to avoid (0,0) conflicts
-    let working = stickers.filter((s) => s.row !== undefined && s.col !== undefined);
+    let working = stickers.filter(
+      (s) => s.row !== undefined && s.col !== undefined
+    );
 
     (async () => {
       for (const s of needsPlacement) {
-        const { row, col } = findFreePlacement(s.width ?? 1, s.height ?? 1, working, maxCols);
+        const { row, col } = findFreePlacement(
+          s.width ?? 1,
+          s.height ?? 1,
+          working,
+          maxCols
+        );
         working = [...working, { ...s, row, col }];
 
         // Optimistic
-        setStickers((prev) => prev.map((x) => (x.id === s.id ? { ...x, row, col } : x)));
+        setStickers((prev) =>
+          prev.map((x) => (x.id === s.id ? { ...x, row, col } : x))
+        );
 
         // Persist per-user placement
         await setDoc(
@@ -119,10 +263,12 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     })();
   }, [stickers, user.id, maxCols]);
 
-  // 2) Helper to coerce Firestore strings into the union
+  // color normalizer
   const toStickerColor = (c: unknown): StickerColor => {
     const allowed = ["default", "yellow", "blue", "red", "green"] as const;
-    return (allowed as readonly string[]).includes(String(c)) ? (c as StickerColor) : "default";
+    return (allowed as readonly string[]).includes(String(c))
+      ? (c as StickerColor)
+      : "default";
   };
 
   function mergeStickers(
@@ -131,14 +277,16 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     source: "personal" | "shared"
   ): StickerWithSource[] {
     const tagged = incoming.map((s: any) => {
-      const base = {
+      const base: StickerWithSource = {
         ...s,
-        color: toStickerColor(s.color),      // ← normalize here
+        color: toStickerColor(s.color),
         source,
       };
       if (source === "shared") {
         const placement = s.placements?.[user.id];
-        return placement ? { ...base, row: placement.row, col: placement.col } : base;
+        return placement
+          ? { ...base, row: placement.row, col: placement.col }
+          : base;
       }
       return base;
     });
@@ -147,6 +295,22 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     const byId = new Map<number, StickerWithSource>();
     for (const s of tagged) byId.set(s.id, s);
     return [...keep, ...byId.values()];
+  }
+
+  // visibility check
+  function canSee(n: any, uid: string, myGroups: string[]): boolean {
+    const share: Audience | undefined = n.share;
+
+    // Creator always sees their own note
+    if (n.createdBy === uid) return true;
+
+    // Back-compat: no share field = visible to everyone
+    if (!share || share.everyone) return true;
+
+    if (share.userIds?.includes(uid)) return true;
+    if (share.groupIds?.some((gid) => myGroups.includes(gid))) return true;
+
+    return false;
   }
 
   const isGridSpaceFree = (
@@ -187,7 +351,8 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         const sc = s.col;
         const sw = s.width ?? 1;
         const sh = s.height ?? 1;
-        if (r < sr + sh && r + h > sr && c < sc + sw && c + w > sc) return false;
+        if (r < sr + sh && r + h > sr && c < sc + sw && c + w > sc)
+          return false;
       }
       return true;
     };
@@ -202,7 +367,9 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   }
 
   const handleSetColor = async (id: number, newColor: StickerColor) => {
-    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, color: newColor } : s)));
+    setStickers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, color: newColor } : s))
+    );
 
     const sticker = stickers.find((s) => s.id === id);
     if (!sticker) return;
@@ -237,17 +404,26 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   };
 
   const handleContentChange = async (id: number, newContent: string) => {
-    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, content: newContent } : s)));
+    setStickers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, content: newContent } : s))
+    );
     const sticker = stickers.find((s) => s.id === id);
-    if (sticker) await saveSticker({ ...sticker, content: newContent }, user.id);
+    if (sticker)
+      await saveSticker({ ...sticker, content: newContent }, user.id);
   };
 
-  const handleResize = async (id: number, newWidth: number, newHeight: number) => {
+  const handleResize = async (
+    id: number,
+    newWidth: number,
+    newHeight: number
+  ) => {
     const sticker = stickers.find((s) => s.id === id);
     if (!sticker) return;
 
     setStickers((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, width: newWidth, height: newHeight } : s))
+      prev.map((s) =>
+        s.id === id ? { ...s, width: newWidth, height: newHeight } : s
+      )
     );
 
     if (sticker.source === "personal") {
@@ -289,11 +465,18 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       const sh = s.height ?? 1;
       const sr = s.row ?? 0;
       const sc = s.col ?? 0;
-      return newRow < sr + sh && newRow + height > sr && newCol < sc + sw && newCol + width > sc;
+      return (
+        newRow < sr + sh &&
+        newRow + height > sr &&
+        newCol < sc + sw &&
+        newCol + width > sc
+      );
     });
     if (isOccupied) return;
 
-    setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, row: newRow, col: newCol } : s)));
+    setStickers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, row: newRow, col: newCol } : s))
+    );
 
     if (sticker.source === "personal") {
       await setDoc(doc(db, "users", user.id, "notes", id.toString()), {
@@ -317,15 +500,20 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
   };
 
   const deleteSticker = async (sticker: StickerWithSource) => {
-    const preview = sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
-    const confirmed = window.confirm(`Are you sure you want to delete note "${preview}"?`);
+    const preview =
+      sticker.content.slice(0, 15) + (sticker.content.length > 15 ? "..." : "");
+    const confirmed = window.confirm(
+      `Are you sure you want to delete note "${preview}"?`
+    );
     if (!confirmed) return;
 
     setStickers((prev) => prev.filter((s) => s.id !== sticker.id));
 
     try {
       if (sticker.source === "personal") {
-        await deleteDoc(doc(db, "users", user.id, "notes", sticker.id.toString()));
+        await deleteDoc(
+          doc(db, "users", user.id, "notes", sticker.id.toString())
+        );
       } else {
         const sharedRef = doc(db, "notes", sticker.id.toString());
         if (sticker.createdBy === user.id) {
@@ -333,12 +521,16 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
         } else {
           const { placements = {} } = sticker;
           const updatedPlacements = { ...placements };
-          delete updatedPlacements[user.id];
+          delete (updatedPlacements as any)[user.id];
 
           if (Object.keys(updatedPlacements).length === 0) {
             await deleteDoc(sharedRef);
           } else {
-            await setDoc(sharedRef, { placements: updatedPlacements }, { merge: true });
+            await setDoc(
+              sharedRef,
+              { placements: updatedPlacements },
+              { merge: true }
+            );
           }
         }
       }
@@ -383,7 +575,68 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     }
 
     setStickers((prev) => [...prev, newSticker]);
-    await setDoc(doc(db, "users", user.id, "notes", newSticker.id.toString()), newSticker);
+    await setDoc(
+      doc(db, "users", user.id, "notes", newSticker.id.toString()),
+      newSticker
+    );
+  };
+
+  // open share modal for a sticker
+  const openShareModal = (stickerId: number) => {
+    const s = stickers.find((x) => x.id === stickerId);
+    setShareOpenForId(stickerId);
+    const existing = s?.share;
+    setShareEveryone(existing?.everyone ?? true);
+    setShareUserIds(existing?.userIds ?? []);
+    setShareGroupIds(existing?.groupIds ?? []);
+  };
+  const closeShareModal = () => setShareOpenForId(null);
+
+  const toggleInArray = (arr: string[], id: string) =>
+    arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
+
+  const saveShare = async () => {
+    if (shareOpenForId == null) return;
+    const s = stickers.find((x) => x.id === shareOpenForId);
+    if (!s) return;
+
+    const finalShare: Audience = shareEveryone
+      ? { everyone: true, userIds: [], groupIds: [] }
+      : {
+          everyone: false,
+          // ensure author is included
+          userIds: Array.from(new Set([...(shareUserIds || []), user.id])),
+          groupIds: shareGroupIds || [],
+        };
+
+    const payload = {
+      ...s,
+      share: finalShare,
+      createdBy: s.createdBy ?? user.id,
+      createdByName: s.createdByName ?? (user.name?.trim() || user.username),
+      placements: {
+        ...(s.placements || {}),
+        [user.id]: { row: s.row ?? 0, col: s.col ?? 0 },
+      },
+    };
+
+    await setDoc(doc(db, "notes", s.id.toString()), payload, { merge: true });
+
+    if (s.source === "personal") {
+      await deleteDoc(doc(db, "users", user.id, "notes", s.id.toString()));
+      setStickers(
+        (prev) =>
+          prev.map((x) =>
+            x.id === s.id ? { ...(payload as any), source: "shared" } : x
+          ) as StickerWithSource[]
+      );
+    } else {
+      setStickers((prev) =>
+        prev.map((x) => (x.id === s.id ? { ...x, share: payload.share } : x))
+      );
+    }
+
+    closeShareModal();
   };
 
   const sortedStickers = [...stickers].sort((a, b) => {
@@ -399,7 +652,9 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     : (stickers.reduce((max, s) => {
         const row = (s.row ?? 0) + (s.height ?? 1);
         return Math.max(max, row);
-      }, 0) + 1) * cellSize;
+      }, 0) +
+        1) *
+      cellSize;
 
   return (
     <div className="card has-header full-width">
@@ -410,14 +665,25 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
             <i className="fa-solid fa-plus grey icon-md hover" />
             Add
           </button>
-          <button className="close-widget-btn" onClick={() => toggleActive("Notes")}>
+          <button
+            className="close-widget-btn"
+            onClick={() => toggleActive("Notes")}
+          >
             <i className="fa-solid fa-x icon-md hover" />
           </button>
         </div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className="stickerboard" ref={boardRef} style={{ height: boardHeight }}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div
+          className="stickerboard"
+          ref={boardRef}
+          style={{ height: boardHeight }}
+        >
           {(isMobileView
             ? (() => {
                 let nextRow = 0;
@@ -440,8 +706,12 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                 content={sticker.content}
                 color={sticker.color}
                 onDelete={() => deleteSticker(sticker)}
-                onColorChange={(color) => handleSetColor(sticker.id, color as StickerColor)}
-                onContentChange={(newContent) => handleContentChange(sticker.id, newContent)}
+                onColorChange={(color) =>
+                  handleSetColor(sticker.id, color as StickerColor)
+                }
+                onContentChange={(newContent) =>
+                  handleContentChange(sticker.id, newContent)
+                }
                 onResize={(w, h) => handleResize(sticker.id, w, h)}
                 width={sticker.width || 1}
                 height={sticker.height || 1}
@@ -456,11 +726,106 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                 canEditContent={canEditShared}
                 canResize={canEditShared}
                 canChangeColor={canEditShared}
+                onOpenShare={() => openShareModal(sticker.id)}
+                share={(sticker as any).share}
+                shareLabel={getShareLabel(sticker)}
               />
             );
           })}
         </div>
       </DndContext>
+
+      {/* Share modal */}
+      {shareOpenForId !== null && (
+        <div className="share-note-box" role="dialog" aria-modal="true">
+          <h4>Share note</h4>
+
+          <div>
+            <label className="m-r-1">
+              <input
+                type="checkbox"
+                checked={shareEveryone}
+                onChange={(e) => setShareEveryone(e.target.checked)}
+              />{" "}
+              Share with everyone
+            </label>
+          </div>
+
+          {!shareEveryone && (
+            <div
+              className="share-grid"
+              style={{
+                display: "grid",
+                gap: "24px",
+                gridTemplateColumns: "2fr 1fr",
+                marginBottom: "24px",
+              }}
+            >
+              <div>
+                <h5>Users</h5>
+                <ul>
+                  {allUsers.map((u) => {
+                    const label = u.name?.trim()
+                      ? `${u.name} (${u.username})`
+                      : u.username;
+                    const checked = shareUserIds.includes(u.id);
+                    return (
+                      <li key={u.id}>
+                        <label className="checkbox-row">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setShareUserIds((arr) => toggleInArray(arr, u.id))
+                            }
+                          />
+                          <span>{label}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              <div>
+                <h5>User groups</h5>
+                <ul>
+                  {allGroups.map((g) => {
+                    const checked = shareGroupIds.includes(g.id);
+                    return (
+                      <li key={g.id}>
+                        <label className="checkbox-row">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setShareGroupIds((arr) =>
+                                toggleInArray(arr, g.id)
+                              )
+                            }
+                          />
+                          <span>{g.name}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <div className="button-group m-t-1">
+            <button className="save-btn" onClick={saveShare}>
+              <i className="fa-solid fa-share-nodes icon-md" />
+              Share
+            </button>
+            <button className="delete-btn" onClick={closeShareModal}>
+              <i className="fa-solid fa-xmark icon-md" />
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

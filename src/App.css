@@ -340,8 +340,14 @@ ul {
 /* Users */
 .userlist {
   display: grid;
-  grid-template-columns: 48px 200px 1fr;
+  grid-template-columns: 42px 200px 50px auto;
   gap: 8px;
+}
+
+@media (max-width: 450px) {
+  .userlist {
+  grid-template-columns: 42px 160px 50px auto;
+  }
 }
 
 .edit-user-container {
@@ -1413,6 +1419,20 @@ input.pin-input:-moz-autofill {
   .sticker-inside:hover .resize-controls.right {
     display: none;
   }
+}
+
+.share-note-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--bg3-color);
+  border: 1px solid var(--text5-color);
+  padding: 24px 48px;
+  border-radius: 10px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Burgermenu */

@@ -4,6 +4,7 @@ import Sticker from "./Sticker";
 import type { Dispatch, SetStateAction } from "react";
 
 type StickerColor = "default" | "yellow" | "blue" | "red" | "green";
+type Audience = { everyone?: boolean; userIds?: string[]; groupIds?: string[] };
 
 export type StickerProps = {
   user: {
@@ -20,10 +21,14 @@ export type StickerProps = {
   row: number;
   col: number;
   disableDrag?: boolean;
-  onDelete: (id: number) => void;
+
+  // FIX: match Sticker.tsx
+  onDelete: () => void;
+
   onColorChange: (color: StickerColor) => void;
   onContentChange: (newContent: string) => void;
   onResize: (newWidth: number, newHeight: number) => void;
+
   db: any;
   setStickers: Dispatch<SetStateAction<any[]>>;
   isShared?: boolean;
@@ -32,6 +37,10 @@ export type StickerProps = {
   canEditContent?: boolean;
   canResize?: boolean;
   canChangeColor?: boolean;
+
+  onOpenShare?: () => void;
+  share?: Audience;
+  shareLabel?: string;
 };
 
 const gap = 12; // px
@@ -40,7 +49,8 @@ const cellSize = 252; // px
 const DragableSticker = (props: StickerProps) => {
   const { id, width, height, row, col, disableDrag = false, isShared } = props;
 
-  const { setNodeRef, transform, attributes, listeners, isDragging } = useDraggable({ id });
+  const { setNodeRef, transform, attributes, listeners, isDragging } =
+    useDraggable({ id });
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -55,7 +65,7 @@ const DragableSticker = (props: StickerProps) => {
 
   return (
     <div
-      ref={disableDrag ? undefined : setNodeRef} 
+      ref={disableDrag ? undefined : setNodeRef}
       style={style}
       className={`sticker-wrapper ${
         isShared ? "sticker-wrapper--shared" : "sticker-wrapper--personal"
