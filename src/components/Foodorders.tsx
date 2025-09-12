@@ -78,7 +78,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["129", "165"],
+      prices: ["135", "165"],
     },
     {
       name: "Döner i Rull",
@@ -94,7 +94,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["129", "165"],
+      prices: ["135", "165"],
     },
     {
       name: "Shawarma i Pita",
