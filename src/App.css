@@ -157,7 +157,7 @@ h4 {
   color: var(--text-color);
   background-color: var(--bg3-color);
   height: 40px;
-  text-align: center;
+  padding: 0 8px;
   border: none;
   border-radius: 20px;
   outline: none;
