@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import RadioButton from "./RadioButton";
 import StageSlider from "./StageSlider";
 import { AnimatedButton } from "./AnimatedButton";
@@ -8,7 +8,7 @@ import FoodordersList from "./FoodordersList";
 import SafeWrapper from "./SafeWrapper";
 
 import { db } from "./firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { collection, addDoc, Timestamp, onSnapshot } from "firebase/firestore";
 
 type MessageType = "success" | "error" | "info" | "warning" | "";
 
@@ -30,7 +30,42 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   const [orderOptions, setOrderOptions] = useState<any>({});
   const [drink, setDrink] = useState<string>("");
   const [otherDrink, setOtherDrink] = useState("");
-  
+  const [orderFor, setOrderFor] = useState<string>(user.username);
+  const [userOptions, setUserOptions] = useState<
+    Array<{ username: string; label: string }>
+  >([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "users"), (snap) => {
+      const opts = snap.docs
+        .map((d) => {
+          const data = d.data() as {
+            username: string;
+            nickname?: string;
+            name?: string;
+          };
+          const label = (
+            data.nickname?.trim() ||
+            data.name?.trim() ||
+            data.username ||
+            ""
+          ).toString();
+          return { username: data.username, label };
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      setUserOptions(opts);
+
+      // If the selected user disappears, fall back to current user
+      if (!opts.some((o) => o.username === orderFor)) {
+        setOrderFor(user.username);
+      }
+    });
+
+    return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.username]);
+
   const menu = [
     {
       name: "Kebab i Pita",
@@ -175,26 +210,11 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   ];
 
   const drinks = [
-    {
-      name: "Cola",
-      price: 15,
-    },
-    {
-      name: "Cola Zero",
-      price: 15,
-    },
-    {
-      name: "Solo",
-      price: 15,
-    },
-    {
-      name: "Other",
-      price: "???",
-    },
-    {
-      name: "No drink",
-      price: 0,
-    },
+    { name: "Cola", price: 15 },
+    { name: "Cola Zero", price: 15 },
+    { name: "Solo", price: 15 },
+    { name: "Other", price: "???" },
+    { name: "No drink", price: 0 },
   ];
 
   const handleSelectFood = (foodName: string) => {
@@ -230,8 +250,8 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   const handleExtraChange = (name: string) => {
     setOrderOptions((prev: any) => {
       const updated = prev.extra?.includes(name)
-        ? prev.extra.filter((e:any) => e !== name) // remove
-        : [...(prev.extra || []), name];       // add
+        ? prev.extra.filter((e: any) => e !== name)
+        : [...(prev.extra || []), name];
       return { ...prev, extra: updated };
     });
   };
@@ -250,10 +270,8 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
   let selectedPrice = "";
   if (selectedItem) {
     if (selectedItem.prices.length === 1) {
-      // Only one price available → use it
       selectedPrice = selectedItem.prices[0];
     } else if (selectedItem.sizes && orderOptions.sizes) {
-      // Match the selected size with its corresponding price
       const sizeIndex = selectedItem.sizes.indexOf(orderOptions.sizes);
       if (sizeIndex !== -1 && selectedItem.prices[sizeIndex]) {
         selectedPrice = selectedItem.prices[sizeIndex];
@@ -261,35 +279,33 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
     }
   }
 
- // --- total price for UI ---
-let finalPrice: string | number = "???";
+  // --- total price for UI ---
+  let finalPrice: string | number = "???";
 
-if (selectedItem) {
-  // base food price
-  if (selectedPrice !== "???") {
-    const foodPrice = parseInt(selectedPrice, 10);
+  if (selectedItem) {
+    if (selectedPrice !== "???") {
+      const foodPrice = parseInt(selectedPrice, 10);
 
-    // extras price (orderOptions.extra holds names)
-    const extrasPrice = (selectedItem.extra || [])
-      .filter((e: any) => orderOptions.extra?.includes(e.name))
-      .reduce((sum: number, e: any) => sum + (e.price || 0), 0);
+      const extrasPrice = (selectedItem.extra || [])
+        .filter((e: any) => orderOptions.extra?.includes(e.name))
+        .reduce((sum: number, e: any) => sum + (e.price || 0), 0);
 
-    // drink price (0 if none selected; ??? only if selected drink is ???)
-    const drinkObj = drinks.find((d) => d.name === drink);
-    if (drinkObj && drinkObj.price === "???") {
-      finalPrice = "???";
+      const drinkObj = drinks.find((d) => d.name === drink);
+      if (drinkObj && drinkObj.price === "???") {
+        finalPrice = "???";
+      } else {
+        const drinkPrice =
+          drinkObj && typeof drinkObj.price === "number" ? drinkObj.price : 0;
+
+        finalPrice = foodPrice + extrasPrice + drinkPrice;
+      }
     } else {
-      const drinkPrice =
-        drinkObj && typeof drinkObj.price === "number" ? drinkObj.price : 0;
-
-      finalPrice = foodPrice + extrasPrice + drinkPrice;
+      finalPrice = "???";
     }
-  } else {
-    // base price is unknown for this size/item
-    finalPrice = "???";
   }
-}
 
+  const selectedUserLabel =
+    userOptions.find((u) => u.username === orderFor)?.label || orderFor;
 
   return (
     <div className="container">
@@ -348,6 +364,24 @@ if (selectedItem) {
           {selectedItem && (
             <div className="food-container">
               <h2>{selectedItem.name}</h2>
+
+              {user.role === "admin" && (
+                <div className="order-for" style={{ marginBottom: 12 }}>
+                  <h4 style={{ marginBottom: 6 }}>Order for:</h4>
+                  <select
+                    value={orderFor}
+                    onChange={(e) => setOrderFor(e.target.value)}
+                    className="input dropdown"
+                  >
+                    {userOptions.map((u) => (
+                      <option key={u.username} value={u.username}>
+                        {u.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="food-options">
                 {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
                   selectedItem[type]?.length ? (
@@ -374,35 +408,40 @@ if (selectedItem) {
                           onChange={(val) => handleChange("spice", val, true)}
                           labels={selectedItem.spice}
                         />
-                      ) : type === "extra"
-                        ? selectedItem.extra?.map((val: any) => (
+                      ) : type === "extra" ? (
+                        selectedItem.extra?.map((val: any) => (
                           <div className="options" key={val.name}>
-                          <label>
-                            <input
-                              type="checkbox"
-                              checked={orderOptions.extra?.includes(val.name) || false}
-                              onChange={() => handleExtraChange(val.name)}
-                            />
-                            {val.name}
-                          </label>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  orderOptions.extra?.includes(val.name) ||
+                                  false
+                                }
+                                onChange={() => handleExtraChange(val.name)}
+                              />
+                              {val.name}
+                            </label>
                           </div>
                         ))
-                        : selectedItem[type].map((val: string) => (
-                            <div className="options" key={val+"idk"}>
-                              <label>
-                                <input
-                                  type="checkbox"
-                                  name={type}
-                                  checked={
-                                    Array.isArray(orderOptions[type]) &&
-                                    orderOptions[type].includes(val)
-                                  }
-                                  onChange={() => handleChange(type, val)}
-                                />
-                                {val}
-                              </label>
-                            </div>
-                          ))}
+                      ) : (
+                        selectedItem[type].map((val: string) => (
+                          <div className="options" key={val + "idk"}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                name={type}
+                                checked={
+                                  Array.isArray(orderOptions[type]) &&
+                                  orderOptions[type].includes(val)
+                                }
+                                onChange={() => handleChange(type, val)}
+                              />
+                              {val}
+                            </label>
+                          </div>
+                        ))
+                      )}
                     </div>
                   ) : null
                 )}
@@ -416,7 +455,9 @@ if (selectedItem) {
                     />
                     {drink === "Other" && (
                       <div className="other-drink-container">
-                        <label htmlFor="drink"><h4>Specify drink:</h4></label>
+                        <label htmlFor="drink">
+                          <h4>Specify drink:</h4>
+                        </label>
                         <input
                           id="drink"
                           type="text"
@@ -452,7 +493,8 @@ if (selectedItem) {
                         return;
                       }
 
-                      const drinkValue = drink === "Other" ? otherDrink.trim() : drink;
+                      const drinkValue =
+                        drink === "Other" ? otherDrink.trim() : drink;
 
                       try {
                         await addDoc(collection(db, "foodorders"), {
@@ -461,16 +503,25 @@ if (selectedItem) {
                           drink: drinkValue,
                           price: finalPrice,
                           createdAt: Timestamp.now(),
-                          createdBy: user.username,
+                          // only admins can set a different user
+                          createdBy:
+                            user.role === "admin" ? orderFor : user.username,
                         });
                         setMessage({
-                          text: `You ordered ${selectedFood} with ${drinkValue}.`,
+                          text: `Order for ${
+                            user.role === "admin"
+                              ? selectedUserLabel
+                              : user.username
+                          }: ${selectedFood} with ${drinkValue}.`,
                           type: "success",
                         });
+                        // reset state
                         setSelectedFood(null);
                         setDrink("");
                         setOtherDrink("");
                         setOrderOptions({});
+                        // reset dropdown to default user
+                        setOrderFor(user.username);
                       } catch (error) {
                         console.error("Feil ved bestilling:", error);
                         setMessage({
@@ -482,7 +533,6 @@ if (selectedItem) {
                   >
                     <i className="fa-solid fa-cart-shopping"></i> Order
                   </AnimatedButton>
-
                 </div>
               </div>
             </div>
