@@ -23,7 +23,6 @@ type FoodOrder = {
   id: string;
   createdBy: string;
   createdAt: Timestamp;
-  // Support both old and new formats:
   order?: FoodItem[];
   item?: string;
   options?: FoodItem["options"];
@@ -45,7 +44,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
-  const [showOrdersModal, setShowOrdersModal] = useState(false)
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -72,7 +71,11 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const map: Record<string, string> = {};
       snapshot.forEach((doc) => {
-        const data = doc.data();
+        const data = doc.data() as {
+          username: string;
+          nickname?: string;
+          name?: string;
+        };
         const username = data.username;
         const nickname = data.nickname?.trim();
         const name = data.name?.trim();
@@ -100,6 +103,68 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     } catch (error) {
       console.error("Feil ved sletting av bestillinger:", error);
     }
+  };
+
+  // ---------- Helpers for modal formatting ----------
+
+  const sizeLabel = (size?: string) => {
+    if (!size || size === "Normal") return "";
+    if (size === "Large") return " Stor";
+    return ` ${size}`;
+  };
+
+  const transformExtras = (arr: string[]) =>
+    arr.map((x) => {
+      const t = x.trim().toLowerCase();
+      // match common spellings
+      if (t === "pommes frittes" || t === "pommes frites") {
+        return "Pommes Frittes oppi";
+      }
+      return x;
+    });
+
+  // Basic HTML escape to keep bold tags safe & avoid injecting markup
+  const escapeHtml = (s: string) =>
+    s
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const escapeJoin = (arr: string[]) => arr.map(escapeHtml).join(", ");
+
+  const formatItemBlockHtml = (
+    displayName: string,
+    item: string,
+    options?: FoodItem["options"]
+  ) => {
+    const removeList = options?.remove ?? [];
+    const extraList = options?.extra ?? [];
+    const spice = options?.spice;
+    const size = options?.sizes;
+
+    const shortName = (displayName || "").slice(0, 6);
+    const paddedName = shortName.padEnd(6, " ");
+
+    const lines: string[] = [];
+
+    lines.push(
+      `${escapeHtml(paddedName)}\t` +
+        `<strong>${escapeHtml(item)}${escapeHtml(sizeLabel(size))}</strong>`
+    );
+
+    if (spice && spice !== "Medium") lines.push(`\t\t${escapeHtml(spice)}`);
+    if (removeList.length > 0) lines.push(`\t\tUten ${escapeJoin(removeList)}`);
+
+    // Extras + empty line under it
+    const prettyExtras = transformExtras(extraList);
+    if (prettyExtras.length > 0) {
+      lines.push(`\t\t${escapeJoin(prettyExtras)}`);
+    }
+
+    lines.push("");
+    return lines.join("\n ");
   };
 
   const renderOrder = (
@@ -138,49 +203,20 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     );
   };
 
-  const renderPageOrder = (
-    item: string,
-    options?: FoodItem["options"],
-  ) => {
-    const removeList = options?.remove ?? [];
-    const extraList = options?.extra ?? [];
-    const size = options?.sizes;
-    const spice = options?.spice;
-
-    return (
-      <div>
-          <strong>
-            {item}
-            {size === "Normal"
-              ? ""
-              : size === "Large"
-              ? " Stor"
-              : size
-              ? ` ${size}`
-              : ""}
-          </strong>
-        {spice && spice !== "Medium" && <div>{spice}</div>}
-        {removeList.length > 0 && <div>Uten {removeList.join(", ")}</div>}
-        {extraList.map((extra, i) => (
-          <div key={i}>{extra}</div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="card has-header grow-1">
       <div className="card-header">
-
         <h3>Orders</h3>
         <div className="card-header-right icon-container">
-          <button onClick={() => setShowOrdersModal(!showOrdersModal)}><i className="fa-solid fa-file"></i> Show Page</button>
-          {user.role === "admin" && orders.length !== 0 && (
-          <button className="delete-btn" onClick={clearAllOrders}>
-            <i className="fa-solid fa-trash"></i>
-            Delete orders
+          <button onClick={() => setShowOrdersModal(!showOrdersModal)}>
+            <i className="fa-solid fa-file"></i> Show Page
           </button>
-        )}
+          {user.role === "admin" && orders.length !== 0 && (
+            <button className="delete-btn" onClick={clearAllOrders}>
+              <i className="fa-solid fa-trash"></i>
+              Delete orders
+            </button>
+          )}
         </div>
       </div>
       <div className="card-content">
@@ -198,7 +234,6 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
                     : "foodorders-item"
                 }
                 key={order.id}
-                style={{ marginBottom: "1rem" }}
               >
                 <p className="message-info">
                   <strong className="user">
@@ -228,38 +263,56 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         )}
       </div>
 
-        {/* Modal */}
-      {showOrdersModal && <div className="modal">
-        <button onClick={() => setShowOrdersModal(!showOrdersModal)}><i className="fa-solid fa-x"></i> Close</button>
-        <ul className="foodorders-list">
-            {orders.map((order) => (
-              <div
-                className={
-                  order.createdBy === user.username
-                    ? "foodorders-item-user"
-                    : "foodorders-item"
-                }
-                key={order.id}
-                style={{ marginBottom: "1rem" }}
-              >
-                {usersMap[order.createdBy] || order.createdBy}
-                <ul>
-                  {order.order?.map((item, index) =>
-                    renderPageOrder(
-                      item.item,
-                      item.options,
-                    )
-                  )}
-                  {order.item &&
-                    renderPageOrder(
-                      order.item,
-                      order.options,
-                    )}
-                </ul>
-              </div>
-            ))}
+      {/* Orders Modal */}
+      {showOrdersModal && (
+        <div className="modal foodorders-modal">
+          <button onClick={() => setShowOrdersModal(!showOrdersModal)}>
+            <i className="fa-solid fa-x"></i> Close
+          </button>
+
+          <ul className="foodorders-modal-list">
+            {orders.map((order) => {
+              const displayName = usersMap[order.createdBy] || order.createdBy;
+
+              // Build one HTML block per item in the order
+              const blocks: string[] = [];
+
+              if (order.order?.length) {
+                order.order.forEach((itm) => {
+                  blocks.push(
+                    formatItemBlockHtml(displayName, itm.item, itm.options)
+                  );
+                });
+              }
+
+              if (order.item) {
+                blocks.push(
+                  formatItemBlockHtml(displayName, order.item, order.options)
+                );
+              }
+
+              const modalHtml = blocks.join("\n");
+
+              return (
+                <li key={order.id}>
+                  <pre
+                    className="foodorders-modal-text"
+                    style={{
+                      whiteSpace: "pre",
+                      lineHeight: 1.35,
+                      margin: 0,
+                      fontFamily: "inherit",
+                      // Optional: control tab stop width if you want tighter columns
+                      // tabSize: 8 as any,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: modalHtml }}
+                  />
+                </li>
+              );
+            })}
           </ul>
-      </div>}
+        </div>
+      )}
     </div>
   );
 };

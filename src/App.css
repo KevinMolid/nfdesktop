@@ -2226,7 +2226,20 @@ a:hover {
 .foodorders-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 10px;
+  gap: 10px;
+}
+
+.foodorders-modal {
+  display: flex;
+  gap: 20px;
+}
+
+.foodorders-modal-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  max-height: 90vh;
+  gap: 4px 24px;
 }
 
 .foodorders-item {
