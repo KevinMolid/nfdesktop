@@ -60,6 +60,7 @@ const STATIC_CATEGORIES: LinkCategory[] = [
         name: "Hartzell",
         href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html",
       },
+            { id: "static-lyreco", name: "Lyreco", href: "https://www.lyreco.no/" },
       { id: "static-9", name: "Skygeek", href: "https://skygeek.com/" },
       { id: "static-10", name: "Textron", href: "https://ww2.txtav.com/" },
     ],
