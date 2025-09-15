@@ -1,1 +1,1 @@
-export const CURRENT_VERSION = 1.0; // bump this when deploying new build
+export const CURRENT_VERSION = 1.01;

@@ -22,6 +22,7 @@ const Sidebar = ({
         <a href="https://www.norronafly.com/" target="_blank">
           <img src={logo} alt="Norrønafly logo" className="nflogo" />
         </a>
+        <p>hi</p>
       </div>
       <ul className="sidebar-menu">
         <li
