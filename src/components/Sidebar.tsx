@@ -1,5 +1,6 @@
 import logo from "../assets/nflogo.png";
 import UserTag from "./UserTag";
+import { CURRENT_VERSION } from "../appVersion";
 
 type SidebarProps = {
   username: string;
@@ -22,7 +23,7 @@ const Sidebar = ({
         <a href="https://www.norronafly.com/" target="_blank">
           <img src={logo} alt="Norrønafly logo" className="nflogo" />
         </a>
-        <p>hi</p>
+        <small>v{CURRENT_VERSION}</small>
       </div>
       <ul className="sidebar-menu">
         <li

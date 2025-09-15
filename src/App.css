@@ -127,6 +127,10 @@ p {
   margin: 0;
 }
 
+small {
+  color: var(--text3-color);
+}
+
 .info-text {
   text-align: start;
 }
