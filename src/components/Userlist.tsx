@@ -291,12 +291,14 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
                     alt=""
                     className="avatar-large"
                   />
-                  <button
-                    className="edit-img-btn"
-                    onClick={() => setIsEditingImg(!isEditingImg)}
-                  >
-                    <i className="fa-solid fa-pencil"></i>
-                  </button>
+                  {canEdit && (
+                    <button
+                      className="edit-img-btn"
+                      onClick={() => setIsEditingImg(!isEditingImg)}
+                    >
+                      <i className="fa-solid fa-pencil"></i>
+                    </button>
+                  )}
                 </div>
 
                 {isEditingImg && (
