@@ -257,12 +257,6 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
               Add
             </button>
           )}
-          <button
-            className="close-widget-btn"
-            onClick={() => toggleActive("Users")}
-          >
-            <i className="fa-solid fa-x icon-md hover" />
-          </button>
         </div>
       </div>
 
