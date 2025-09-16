@@ -93,8 +93,6 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     if (!user?.id) return;
 
     const tasksRef = collection(db, "users", user.id, "tasks");
-    // You can add orderBy(...) here if you want, e.g.:
-    // const q = query(tasksRef, orderBy("status"), orderBy("priority"));
     const q = query(tasksRef);
 
     const unsubscribe = onSnapshot(

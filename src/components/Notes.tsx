@@ -639,6 +639,64 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
     closeShareModal();
   };
 
+  const unshareNote = async () => {
+    if (shareOpenForId == null) return;
+    const s = stickers.find((x) => x.id === shareOpenForId);
+    if (!s) return;
+
+    // Only the creator can unshare (others can already "leave" via delete)
+    if (s.source !== "shared" || s.createdBy !== user.id) {
+      // nothing to do; just close
+      closeShareModal();
+      return;
+    }
+
+    try {
+      // Build the personal copy (keep current placement for the creator)
+      const personalCopy = {
+        content: s.content,
+        color: s.color,
+        id: s.id,
+        index: s.index ?? 0,
+        width: s.width ?? 1,
+        height: s.height ?? 1,
+        row: s.placements?.[user.id]?.row ?? s.row ?? 0,
+        col: s.placements?.[user.id]?.col ?? s.col ?? 0,
+      };
+
+      // 1) Write it back to the creator's personal notes
+      await setDoc(
+        doc(db, "users", user.id, "notes", s.id.toString()),
+        personalCopy,
+        { merge: true }
+      );
+
+      // 2) Remove the shared copy so it's no longer visible to others
+      await deleteDoc(doc(db, "notes", s.id.toString()));
+
+      // 3) Update local state
+      setStickers((prev) =>
+        prev.map((x) =>
+          x.id === s.id
+            ? {
+                ...x,
+                ...personalCopy,
+                source: "personal",
+                share: undefined,
+                placements: undefined,
+                createdBy: undefined,
+                createdByName: undefined,
+              }
+            : x
+        )
+      );
+    } catch (err) {
+      console.error("Error unsharing note:", err);
+    } finally {
+      closeShareModal();
+    }
+  };
+
   const sortedStickers = [...stickers].sort((a, b) => {
     const ra = a.row ?? 0;
     const rb = b.row ?? 0;
@@ -815,15 +873,49 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
           )}
 
           <div className="button-group m-t-1">
-            <button className="save-btn" onClick={saveShare}>
-              <i className="fa-solid fa-share-nodes icon-md" />
-              Share
-            </button>
+            {/* Unshare: only if this is a shared note AND I'm the creator */}
+            {(() => {
+              const s =
+                shareOpenForId != null
+                  ? stickers.find((x) => x.id === shareOpenForId)
+                  : null;
+              const canUnshare = !!(s && s.source === "shared" && s.createdBy === user.id);
+              return (
+                canUnshare && (
+                  <button className="delete-btn" onClick={unshareNote}>
+                    <i className="fa-solid fa-unlink icon-md" />
+                    Unshare
+                  </button>
+                )
+              );
+            })()}
+
+            {/* Primary button: Share → Save when already shared */}
+            {(() => {
+              const s =
+                shareOpenForId != null
+                  ? stickers.find((x) => x.id === shareOpenForId)
+                  : null;
+              const isAlreadyShared = !!(s && s.source === "shared");
+              const primaryLabel = isAlreadyShared ? "Save" : "Share";
+              const primaryIcon = isAlreadyShared
+                ? "fa-solid fa-floppy-disk icon-md"
+                : "fa-solid fa-share-nodes icon-md";
+
+              return (
+                <button className="save-btn" onClick={saveShare}>
+                  <i className={primaryIcon} />
+                  {primaryLabel}
+                </button>
+              );
+            })()}
+
             <button className="delete-btn" onClick={closeShareModal}>
               <i className="fa-solid fa-xmark icon-md" />
               Cancel
             </button>
           </div>
+
         </div>
       )}
     </div>
