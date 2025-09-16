@@ -705,30 +705,64 @@ input.pin-input:-moz-autofill {
 }
 
 /* Message */
-.message-container {
+.alerts-stack {
   position: fixed;
-  bottom: 4px;
   left: 8px;
+  bottom: 8px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  z-index: 1000;
+  max-width: min(420px, 90vw);
+}
+
+.alert {
+  position: relative;
+  display: flex;
   align-items: center;
+  justify-content: center; 
+  align-items: center; 
   height: 32px;
-  border-radius: 16px;
-  background-color: #0fad73;
-  z-index: 100;
+  gap: 12px;
   padding-left: 32px;
   padding-right: 64px;
+  border-radius: 16px;
+  color: #fff;
+  background-color: #0fad73;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.message-error {
-  background-color: #ad0f0f;
-}
-
-.message-container p {
-  font-weight: 500;
+.alert p {
   color: white;
-  text-align: center;
 }
+
+.alert--success { background-color: #0fad73; }
+.alert--error   { background-color: #ad0f0f; }
+.alert--info    { background-color: #0f73ad; }
+.alert--warning { background-color: #ad7c0f; }
+
+.alert__text {
+  margin: 0;
+  font-weight: 500;
+}
+
+.alert__close {
+  position: absolute;
+  right: 0;
+  margin-left: auto;
+  line-height: 0;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 0 16px 16px 0;
+}
+
+.alert__close:hover {
+    background: rgba(0, 0, 0, 0.3);
+
+} 
 
 /* ToDo */
 .task-list {

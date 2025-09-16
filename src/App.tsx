@@ -1,5 +1,5 @@
 import Login from "./components/Login";
-import Message from "./components/Message";
+import Alert from "./components/Alert";
 
 import SafeWrapper from "./components/SafeWrapper";
 
@@ -33,6 +33,10 @@ const DEFAULT_WIDGETS = [
 
 const LOCAL_STORAGE_KEY = "widgets";
 
+type ToastType = "success" | "error" | "info" | "warning" | "";
+type Toast = { text: string; type: ToastType };
+type ToastWithId = Toast & { id: string };
+
 function App() {
   type User = {
     id: string;
@@ -46,13 +50,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // NEW
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
-  const [message, setMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "info" | "warning" | "";
-  }>({
-    text: "",
-    type: "",
-  });
+  const [alerts, setAlerts] = useState<ToastWithId[]>([]);
   const [activePage, setActivePage] = useState(
     () => localStorage.getItem("activePage") || "Dashboard"
   );
@@ -159,6 +157,18 @@ function App() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
 
+  const setAlertsAdapter: React.Dispatch<React.SetStateAction<Toast>> = (next) => {
+    const base: Toast =
+      typeof next === "function"
+        ? (next as (prev: Toast) => Toast)({ text: "", type: "" })
+        : next;
+
+    if (!base?.text) return;
+
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setAlerts((prev) => [...prev, { ...base, id }]);
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -184,9 +194,15 @@ function App() {
         />
 
         <div className="main-container">
-          {message.text && (
-            <Message message={message} setMessage={setMessage} />
-          )}
+          <div className="alerts-stack">
+            {alerts.map((a) => (
+              <Alert
+                key={a.id}
+                alert={{ text: a.text, type: a.type }}
+                onClose={() => setAlerts((prev) => prev.filter((x) => x.id !== a.id))}
+              />
+            ))}
+          </div>
 
           {activePage === "Dashboard" && (
             <Dashboard
@@ -209,7 +225,7 @@ function App() {
               <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
                 <Foodorders
                   user={user}
-                  setMessage={setMessage}
+                  setAlerts={setAlertsAdapter}
                   toggleActive={toggleActive}
                 />
               </SafeWrapper>

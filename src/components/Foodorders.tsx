@@ -18,13 +18,13 @@ type UsersProps = {
     role: string;
     id: string;
   };
-  setMessage: React.Dispatch<
+  setAlerts: React.Dispatch<
     React.SetStateAction<{ text: string; type: MessageType }>
   >;
   toggleActive: (name: string) => void;
 };
 
-const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
+const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedFood, setSelectedFood] = useState<string | null>(null);
   const [orderOptions, setOrderOptions] = useState<any>({});
@@ -478,17 +478,17 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                       if (!selectedFood) return;
 
                       if (!drink) {
-                        setMessage({
-                          text: "Please select a drink before ordering.",
-                          type: "error",
+                        setAlerts({
+                          text: "Please select a drink!",
+                          type: "warning",
                         });
                         return;
                       }
 
                       if (drink === "Other" && !otherDrink.trim()) {
-                        setMessage({
-                          text: "Please specify the drink when selecting 'Other'.",
-                          type: "error",
+                        setAlerts({
+                          text: "Please specify drink when selecting 'Other'",
+                          type: "warning",
                         });
                         return;
                       }
@@ -507,7 +507,7 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                           createdBy:
                             user.role === "admin" ? orderFor : user.username,
                         });
-                        setMessage({
+                        setAlerts({
                           text: `Order for ${
                             user.role === "admin"
                               ? selectedUserLabel
@@ -524,8 +524,8 @@ const Foodorders = ({ user, setMessage, toggleActive }: UsersProps) => {
                         setOrderFor(user.username);
                       } catch (error) {
                         console.error("Feil ved bestilling:", error);
-                        setMessage({
-                          text: "Noe gikk galt med bestillingen.",
+                        setAlerts({
+                          text: "Something went wrong with the order.",
                           type: "error",
                         });
                       }
