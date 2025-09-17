@@ -134,6 +134,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
     setNewTaskPriority(0)
+    setIsEditingNewPriority(false);
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
     if (taskPath.includes("//")) {
@@ -153,6 +154,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
     setNewTaskPriority(0)
+    setIsEditingNewPriority(false);
     setIsCreateActive(false);
   }
 
