@@ -723,7 +723,7 @@ input.pin-input:-moz-autofill {
   align-items: center;
   justify-content: center; 
   align-items: center; 
-  height: 32px;
+  min-height: 32px;
   gap: 12px;
   padding-left: 32px;
   padding-right: 64px;
@@ -737,10 +737,23 @@ input.pin-input:-moz-autofill {
   color: white;
 }
 
+@media (max-width: 500px) {
+  .alert {
+    padding-left: 16px;
+    padding-right: 52px;
+  }
+}
+
+@media (max-width: 500px) {
+  .alert p {
+    font-size: 0.8rem;
+  }
+}
+
 .alert--success { background-color: #0fad73; }
 .alert--error   { background-color: #ad0f0f; }
 .alert--info    { background-color: #0f73ad; }
-.alert--warning { background-color: #ad7c0f; }
+.alert--warning { background-color: #d87a00; }
 
 .alert__text {
   margin: 0;
@@ -752,6 +765,7 @@ input.pin-input:-moz-autofill {
   right: 0;
   margin-left: auto;
   line-height: 0;
+  height: 100%;
   background: rgba(0, 0, 0, 0.2);
   border: none;
   color: inherit;
