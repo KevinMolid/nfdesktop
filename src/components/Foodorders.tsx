@@ -508,11 +508,10 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
                             user.role === "admin" ? orderFor : user.username,
                         });
                         setAlerts({
-                          text: `Order for ${
-                            user.role === "admin"
-                              ? selectedUserLabel
-                              : user.username
-                          }: ${selectedFood} with ${drinkValue}.`,
+                          text:
+                            (user.role === "admin" && orderFor !== user.username
+                              ? `Order for ${selectedUserLabel}: `
+                              : "Ordered ") + `${selectedFood} with ${drinkValue}.`,
                           type: "success",
                         });
                         // reset state
