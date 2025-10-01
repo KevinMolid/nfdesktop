@@ -21,9 +21,9 @@ const STATIC_CATEGORIES: LinkCategory[] = [
     category: "Norrønafly",
     links: [
       {
-        id: "static-1",
-        name: "Reports - Fossum IT",
-        href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview",
+        id: "astrow",
+        name: "Astrow",
+        href: "https://s5.astrow.net/timerecorder_53022_1527000516/",
       },
       {
         id: "static-2",
@@ -34,6 +34,16 @@ const STATIC_CATEGORIES: LinkCategory[] = [
         id: "static-3",
         name: "Customs - Emma EDOC",
         href: "https://emmaedoc.no/",
+      },
+      {
+        id: "iChemistry",
+        name: "iChemistry",
+        href: "https://ichemistry.intersolia.com/main/norronafly",
+      },
+      {
+        id: "static-1",
+        name: "Reports - Fossum IT",
+        href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview",
       },
       {
         id: "static-4",
