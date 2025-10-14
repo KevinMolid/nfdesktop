@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 import bcrypt from "bcryptjs";
 import logoB from "../assets/logo-b.png";
 import logoBW from "../assets/logo-bw.png";
+
+const LAST_USER_KEY = "lastLoggedInUser";
 
 const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
   const [username, setUsername] = useState("");
@@ -13,35 +15,94 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
   const [showPin, setShowPin] = useState(false);
+  const [isSwitchingUser, setIsSwitchingUser] = useState(false);
 
+  // Validation styling
+  const [usernameError, setUsernameError] = useState(false);
+  const [pinError, setPinError] = useState(false);
+
+  const usernameInputRef = useRef<HTMLInputElement | null>(null);
+  const pinInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Observe theme
   useEffect(() => {
     const observer = new MutationObserver(() => {
       const isDark =
         document.documentElement.getAttribute("data-theme") === "dark";
       setIsDarkMode(isDark);
     });
-
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
-
     return () => observer.disconnect();
   }, []);
 
+  // Load last user
+  useEffect(() => {
+    const last = localStorage.getItem(LAST_USER_KEY);
+    if (last) {
+      setUsername(last);
+      setIsSwitchingUser(false);
+    } else {
+      setIsSwitchingUser(true);
+    }
+  }, []);
+
+  // Focus username when switching
+  useEffect(() => {
+    if (isSwitchingUser) {
+      usernameInputRef.current?.focus();
+    }
+  }, [isSwitchingUser]);
+
   const handleLogin = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault(); // Prevent form reload
+    if (e) e.preventDefault();
     setError("");
 
+    const uname = username.trim().toUpperCase();
+    const isUsernameMissing = isSwitchingUser ? uname.length === 0 : false;
+
+    let newError = "";
+    let usernameFieldError = false;
+    let pinFieldError = false;
+
+    if (isUsernameMissing && !pin) {
+      newError = "Please enter your username and PIN.";
+      usernameFieldError = true;
+      pinFieldError = true;
+    } else if (isUsernameMissing) {
+      newError = "Please enter your username.";
+      usernameFieldError = true;
+    } else if (!pin) {
+      newError = "Please enter your PIN.";
+      pinFieldError = true;
+    } else if (pin.length !== 4) {
+      newError = "The PIN must consist of 4 digits.";
+      pinFieldError = true;
+    }
+
+    if (newError) {
+      setError(newError);
+      setUsernameError(usernameFieldError);
+      setPinError(pinFieldError);
+
+      // Focus the first missing/invalid field
+      if (usernameFieldError) {
+        setIsSwitchingUser(true);
+        usernameInputRef.current?.focus();
+      } else if (pinFieldError) {
+        pinInputRef.current?.focus();
+      }
+      return;
+    }
+
     try {
-      const q = query(
-        collection(db, "users"),
-        where("username", "==", username.toUpperCase())
-      );
+      const q = query(collection(db, "users"), where("username", "==", uname));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-        setError("Incorrect username or PIN");
+        setError("Incorrect username or PIN.");
         return;
       }
 
@@ -51,6 +112,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       const isMatch = await bcrypt.compare(pin, userData.pinHash);
 
       if (isMatch) {
+        localStorage.setItem(LAST_USER_KEY, uname);
         onLogin({ id: userDoc.id, ...userData });
       } else {
         setError("Incorrect username or PIN.");
@@ -61,10 +123,34 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
     }
   };
 
+  const handleUsernameChange = (v: string) => {
+    const next = v.replace(/\s/g, "").toUpperCase().slice(0, 3);
+    setUsername(next);
+    if (next) {
+      setUsernameError(false);
+      if (!pinError) setError("");
+    }
+  };
+
+  const handlePinChange = (v: string) => {
+    const numericValue = v.replace(/\D/g, "").slice(0, 4);
+    setPin(numericValue);
+    if (numericValue.length === 4) {
+      setPinError(false);
+      if (!usernameError) setError("");
+    }
+  };
+
+  const handleSwitchUser = () => {
+    setIsSwitchingUser(true);
+    setUsername("");
+    setUsernameError(false); // do NOT mark red on switch
+  };
+
   return (
-    <form className="login-container" onSubmit={handleLogin}>
+    <form className="login-container" onSubmit={handleLogin} noValidate>
       <div className="logo">
-        <a href="https://www.norronafly.com/" target="_blank">
+        <a href="https://www.norronafly.com/" target="_blank" rel="noreferrer">
           <img
             src={isDarkMode ? logoBW : logoB}
             alt="Norrønafly logo"
@@ -72,39 +158,73 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           />
         </a>
       </div>
+
       {/* Username */}
-      <input
-        className="login-input"
-        type="text"
-        placeholder="USR"
-        maxLength={3}
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      {/* PIN */}
-      <div className="pin-input-container">
+      {!isSwitchingUser ? (
+        <div
+          className="last-user-row"
+          style={{ display: "flex", gap: 8, alignItems: "center" }}
+        >
+          <span className="last-user-text" aria-label="Last logged in user">
+            {username}
+          </span>
+          <button
+            type="button"
+            className="change-user-button"
+            title="Switch user"
+            aria-label="Switch user"
+            onClick={handleSwitchUser}
+            style={{ lineHeight: 0 }}
+          >
+            <i className="fa-solid fa-right-left"></i>
+          </button>
+        </div>
+      ) : (
         <input
+          ref={usernameInputRef}
+          className={`login-input ${usernameError ? "container-invalid" : ""}`}
+          type="text"
+          placeholder="User"
+          maxLength={3}
+          value={username}
+          onChange={(e) => handleUsernameChange(e.target.value)}
+        />
+      )}
+
+      {/* PIN */}
+      <div
+        className={`pin-input-container ${pinError ? "container-invalid" : ""}`}
+      >
+        <input
+          ref={pinInputRef}
           className="pin-input"
-          type={showPin ? "text " : "password"}
+          type={showPin ? "text" : "password"}
           placeholder="••••"
           maxLength={4}
           value={pin}
-          onChange={(e) => {
-            const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-digits
-            setPin(numericValue);
-          }}
+          onChange={(e) => handlePinChange(e.target.value)}
+          inputMode="numeric"
+          aria-label="PIN"
         />
         <div className="pin-input-placeholder">
           {showPin ? (
             <i
               className="fa-solid fa-eye"
               onClick={() => setShowPin(!showPin)}
-            ></i>
+              role="button"
+              aria-label="Hide PIN"
+              title="Hide PIN"
+              tabIndex={0}
+            />
           ) : (
             <i
               className="fa-solid fa-eye-slash"
               onClick={() => setShowPin(!showPin)}
-            ></i>
+              role="button"
+              aria-label="Show PIN"
+              title="Show PIN"
+              tabIndex={0}
+            />
           )}
         </div>
       </div>
@@ -113,6 +233,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
         <i className="fa-solid fa-right-to-bracket"></i>
         Sign in
       </button>
+
       <div className="pin-feedback-container">
         {error && <p className="login-error">{error}</p>}
       </div>
