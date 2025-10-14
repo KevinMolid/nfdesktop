@@ -238,7 +238,7 @@ function App() {
 
           {activePage === "Settings" && (
             <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-              <Settings />
+              <Settings user={user} />
             </SafeWrapper>
           )}
         </div>

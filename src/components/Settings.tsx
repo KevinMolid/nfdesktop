@@ -1,10 +1,23 @@
 import AppVersionControl from "./AppVersionControl";
 
-const Settings = () => {
+type User = {
+  id: string;
+  username: string;
+  role: string;
+};
+
+type SettingsProps = {
+  user: User;
+};
+
+const Settings = ({ user }: SettingsProps) => {
   return (
-    <div>
-      <p>This page has not yet been implemented.</p>
-      <AppVersionControl />
+    <div className="container">
+      <div className="page-header">
+        <h1>Settings</h1>
+      </div>
+
+      <AppVersionControl user={user}/>
     </div>
   );
 };

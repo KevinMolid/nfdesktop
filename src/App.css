@@ -105,6 +105,7 @@ html, body {
   justify-content: space-between;
   align-items: baseline;
   padding-left: 20px;
+  height: 48px;
 }
 
 @media (max-width: 500px) {
@@ -556,6 +557,11 @@ ul {
 }
 
 /* Login */
+.login-logo {
+  max-width: 300px;
+  margin-right: 12px;
+}
+
 .login-container {
   display: flex;
   flex-direction: column;
@@ -605,7 +611,6 @@ ul {
   width: 214px;
   height: 40px;
   border-radius: 20px;
-  padding: 0;
 }
 
 .container-invalid {
@@ -2415,6 +2420,26 @@ a:hover {
   font-size: 1.8rem;
   font-weight: 500;
   margin-bottom: 12px;
+}
+
+/* Settings */
+.version-input {
+  box-sizing: border-box;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  max-width: 200px;
+  height: 38px;
+  border: none;
+  border-radius: 19px;
+  text-align: center;
+}
+
+.version-btn {
+  max-width: 200px;
+}
+
+.version-btn:disabled {
+  background-color: var(--bg3-color);
 }
 
 /* Modal */

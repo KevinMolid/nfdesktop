@@ -120,12 +120,12 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
   };
 
   return (
-    <div className="card has-header grow-1">
-      <div className="card-header">
-        <h3 className="card-title">Chat</h3>
+    <div className="container">
+      <div className="page-header">
+        <h1>Chat</h1>
       </div>
 
-      <div className="messages-container">
+      <div className="card messages-container">
         {messages.map((msg: any) => {
           const date: Date | null = msg.createdAt?.toDate?.() || null;
 

@@ -24,6 +24,9 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
   const usernameInputRef = useRef<HTMLInputElement | null>(null);
   const pinInputRef = useRef<HTMLInputElement | null>(null);
 
+  // NEW: guard against duplicate auto-logins
+  const autoLoginRef = useRef(false);
+
   // Observe theme
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -61,7 +64,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
     setError("");
 
     const uname = username.trim().toUpperCase();
-    const isUsernameMissing = isSwitchingUser ? uname.length === 0 : false;
+    const isUsernameMissing = isSwitchingUser ? uname.length === 0 : uname.length === 0;
 
     let newError = "";
     let usernameFieldError = false;
@@ -87,13 +90,15 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       setUsernameError(usernameFieldError);
       setPinError(pinFieldError);
 
-      // Focus the first missing/invalid field
       if (usernameFieldError) {
         setIsSwitchingUser(true);
         usernameInputRef.current?.focus();
       } else if (pinFieldError) {
         pinInputRef.current?.focus();
       }
+
+      // allow future auto-login after user edits
+      autoLoginRef.current = false;
       return;
     }
 
@@ -103,6 +108,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
 
       if (snapshot.empty) {
         setError("Incorrect username or PIN.");
+        autoLoginRef.current = false; // allow retry after corrections
         return;
       }
 
@@ -116,20 +122,22 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
         onLogin({ id: userDoc.id, ...userData });
       } else {
         setError("Incorrect username or PIN.");
+        autoLoginRef.current = false;
       }
     } catch (err) {
       console.error("Login error:", err);
       setError("Noe gikk galt.");
+      autoLoginRef.current = false;
     }
   };
 
   const handleUsernameChange = (v: string) => {
     const next = v.replace(/\s/g, "").toUpperCase().slice(0, 3);
     setUsername(next);
-    if (next) {
-      setUsernameError(false);
-      if (!pinError) setError("");
-    }
+    // clear username error & allow auto-login to trigger when valid
+    if (next) setUsernameError(false);
+    setError((prev) => (pinError || usernameError ? prev : "")); // optional
+    autoLoginRef.current = false;
   };
 
   const handlePinChange = (v: string) => {
@@ -139,24 +147,37 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
       setPinError(false);
       if (!usernameError) setError("");
     }
+    autoLoginRef.current = false;
   };
 
   const handleSwitchUser = () => {
     setIsSwitchingUser(true);
     setUsername("");
     setUsernameError(false); // do NOT mark red on switch
+    autoLoginRef.current = false;
   };
+
+  // NEW: auto-login effect when both fields are valid
+  useEffect(() => {
+    const ready =
+      username.trim().length > 0 &&
+      pin.length === 4;
+
+    if (ready && !autoLoginRef.current) {
+      autoLoginRef.current = true; // lock to prevent double calls
+      // slight microtask delay helps avoid race with state updates
+      Promise.resolve().then(() => handleLogin());
+    }
+  }, [username, pin]); // deliberately not depending on isSwitchingUser
 
   return (
     <form className="login-container" onSubmit={handleLogin} noValidate>
-      <div className="logo">
-        <a href="https://www.norronafly.com/" target="_blank" rel="noreferrer">
+      <div>
           <img
             src={isDarkMode ? logoBW : logoB}
             alt="Norrønafly logo"
-            className="nflogo"
+            className="login-logo"
           />
-        </a>
       </div>
 
       {/* Username */}
@@ -199,7 +220,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           ref={pinInputRef}
           className="pin-input"
           type={showPin ? "text" : "password"}
-          placeholder="••••"
+          placeholder="PIN"
           maxLength={4}
           value={pin}
           onChange={(e) => handlePinChange(e.target.value)}
