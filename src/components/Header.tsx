@@ -1,17 +1,16 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import Burgermenu from "./Burgermenu";
 import UserTag from "./UserTag";
 
 import logo from "../assets/nflogo.png";
 
 type MenuProps = {
   username: string;
+  userImgUrl: string;
   widgets: { name: string; active: boolean }[];
-  toggleActive: (name: string) => void;
   onLogout: () => void;
 };
 
-const Header = ({ username, widgets, toggleActive, onLogout }: MenuProps) => {
+const Header = ({ username, userImgUrl, onLogout }: MenuProps) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.getAttribute("data-theme") === "dark";
   });
@@ -58,7 +57,8 @@ const Header = ({ username, widgets, toggleActive, onLogout }: MenuProps) => {
             </a>
           </div>
           <div className="menu-bar-right">
-            <UserTag username={username} onLogout={onLogout} />
+            <p className="username">{username}</p>
+            <UserTag username={username} imgurl={userImgUrl} onLogout={onLogout} />
           </div>
         </div>
       </div>

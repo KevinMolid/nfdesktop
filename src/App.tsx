@@ -177,9 +177,9 @@ function App() {
     <>
       <Header
         username={user.username}
+        userImgUrl={user.imgurl || ""}
         onLogout={handleLogout}
         widgets={widgets}
-        toggleActive={toggleActive}
       />
 
       <MobileMenu activePage={activePage} setActivePage={setActivePage} />

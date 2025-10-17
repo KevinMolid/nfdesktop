@@ -430,6 +430,11 @@ ul {
   position: relative;
 }
 
+.username {
+  font-weight: bold;
+  color: var(--text1-color)
+}
+
 .user-tag {
   display: flex;
   justify-content: center;
@@ -676,6 +681,7 @@ input.pin-input:-moz-autofill {
 .menu-bar-right {
   display: flex;
   align-items: center;
+  gap: 8px;
   justify-content: end;
 }
 
