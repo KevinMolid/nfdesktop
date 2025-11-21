@@ -1,5 +1,7 @@
 import AppVersionControl from "./AppVersionControl";
 
+import DarkModeToggle from "./DarkModeToggle";
+
 type User = {
   id: string;
   username: string;
@@ -17,6 +19,7 @@ const Settings = ({ user }: SettingsProps) => {
         <h1>Settings</h1>
       </div>
 
+      <DarkModeToggle />
       <AppVersionControl user={user}/>
     </div>
   );

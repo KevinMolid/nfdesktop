@@ -24,6 +24,13 @@ import { db } from "./components/firebase";
 import "./App.css";
 
 import { useState, useEffect } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 const DEFAULT_WIDGETS = [
   { name: "Links", active: true },
@@ -41,6 +48,7 @@ function App() {
   type User = {
     id: string;
     username: string;
+    name?: string;
     role: string;
     imgurl?: string;
   };
@@ -48,16 +56,40 @@ function App() {
   useAutoReloadOnVersion(CURRENT_VERSION);
 
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // NEW
+  const [loading, setLoading] = useState(true);
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
   const [alerts, setAlerts] = useState<ToastWithId[]>([]);
-  const [activePage, setActivePage] = useState(
-    () => localStorage.getItem("activePage") || "Dashboard"
-  );
 
-  useEffect(() => {
-    localStorage.setItem("activePage", activePage);
-  }, [activePage]);
+  // --- React Router integration ---
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Map path <-> page name so Sidebar/MobileMenu can keep using activePage + setActivePage
+  const pathToPage: Record<string, string> = {
+    "/": "Dashboard",
+    "/tools": "Tools",
+    "/chat": "Chat",
+    "/foodorders": "Foodorders",
+    "/users": "Users",
+    "/settings": "Settings",
+  };
+
+  const pageToPath: Record<string, string> = {
+    Dashboard: "/",
+    Tools: "/tools",
+    Chat: "/chat",
+    Foodorders: "/foodorders",
+    Users: "/users",
+    Settings: "/settings",
+  };
+
+  const activePage = pathToPage[location.pathname] || "Dashboard";
+
+  const setActivePage = (page: string) => {
+    const path = pageToPath[page] ?? "/";
+    navigate(path);
+  };
+  // --- end React Router integration ---
 
   useEffect(() => {
     const storedUser = localStorage.getItem("authUser");
@@ -118,7 +150,7 @@ function App() {
     );
 
     return () => unsubscribe();
-  }, [user?.id, db]);
+  }, [user?.id]);
 
   useEffect(() => {
     // Load widgets from local storage and merge with default
@@ -149,7 +181,7 @@ function App() {
   const toggleActive = (name: string) => {
     const updatedWidgets = widgets.map((w) => {
       if (w.name === name) {
-        const newState = w.active ? false : true;
+        const newState = !w.active;
         return { ...w, active: newState };
       } else return w;
     });
@@ -173,7 +205,18 @@ function App() {
     return <div className="loading">Loading...</div>;
   }
 
-  return user ? (
+  if (!user) {
+    return (
+      <Login
+        onLogin={(u) => {
+          setUser(u);
+          localStorage.setItem("authUser", JSON.stringify(u));
+        }}
+      />
+    );
+  }
+
+  return (
     <>
       <Header
         username={user.username}
@@ -187,10 +230,9 @@ function App() {
       <div className="screen">
         <Sidebar
           username={user.username}
+          name={user.name || ""}
           imgurl={user.imgurl}
           onLogout={handleLogout}
-          activePage={activePage}
-          setActivePage={setActivePage}
         />
 
         <div className="main-container">
@@ -199,58 +241,75 @@ function App() {
               <Alert
                 key={a.id}
                 alert={{ text: a.text, type: a.type }}
-                onClose={() => setAlerts((prev) => prev.filter((x) => x.id !== a.id))}
+                onClose={() =>
+                  setAlerts((prev) => prev.filter((x) => x.id !== a.id))
+                }
               />
             ))}
           </div>
 
-          {activePage === "Dashboard" && (
-            <Dashboard
-              user={user}
-              widgets={widgets}
-              toggleActive={toggleActive}
-            />
-          )}
-
-          {activePage === "Tools" && <Tools toggleActive={toggleActive} />}
-
-          {activePage === "Chat" && (
-            <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
-              <Messages username={user.username} toggleActive={toggleActive} />
-            </SafeWrapper>
-          )}
-
-          {activePage === "Foodorders" && (
-            <>
-              <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
-                <Foodorders
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Dashboard
                   user={user}
-                  setAlerts={setAlertsAdapter}
+                  widgets={widgets}
                   toggleActive={toggleActive}
                 />
-              </SafeWrapper>
-            </>
-          )}
+              }
+            />
 
-          {activePage === "Users" && (
-            <Users user={user} toggleActive={toggleActive} />
-          )}
+            <Route
+              path="/tools"
+              element={<Tools toggleActive={toggleActive} />}
+            />
 
-          {activePage === "Settings" && (
-            <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-              <Settings user={user} />
-            </SafeWrapper>
-          )}
+            <Route
+              path="/chat"
+              element={
+                <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
+                  <Messages
+                    username={user.username}
+                    toggleActive={toggleActive}
+                  />
+                </SafeWrapper>
+              }
+            />
+
+            <Route
+              path="/foodorders"
+              element={
+                <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
+                  <Foodorders
+                    user={user}
+                    setAlerts={setAlertsAdapter}
+                    toggleActive={toggleActive}
+                  />
+                </SafeWrapper>
+              }
+            />
+
+            <Route
+              path="/users"
+              element={<Users user={user} toggleActive={toggleActive} />}
+            />
+
+            <Route
+              path="/settings"
+              element={
+                <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
+                  <Settings user={user} />
+                </SafeWrapper>
+              }
+            />
+
+            {/* Fallback: any unknown route goes to Dashboard */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </div>
       </div>
     </>
-  ) : (
-    <Login
-      onLogin={(u) => {
-        setUser(u);
-        localStorage.setItem("authUser", JSON.stringify(u));
-      }}
-    />
   );
 }
 
