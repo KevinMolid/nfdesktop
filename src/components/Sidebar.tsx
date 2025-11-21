@@ -23,11 +23,12 @@ const SidebarComponent = ({ username, name, imgurl, onLogout }: SidebarProps) =>
 
   return (
     <div className="sidebar-container">
+      <div className="sidebar-scroll">
       <Sidebar
         width={collapsed ? "80px" : "270px"}
         textColor="white"
         isCollapse={collapsed}
-        themeColor="#ee5a15ff"
+        themeColor="#e26126ff"
         themeSecondaryColor="#ffffff"
         userName={username}
         designation={name}
@@ -137,6 +138,9 @@ const SidebarComponent = ({ username, name, imgurl, onLogout }: SidebarProps) =>
           </MenuItem>
         </Menu>
       </Sidebar>
+      <div className="sidebar-bottom">
+      </div>
+      </div>
     </div>
   );
 };

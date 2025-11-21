@@ -24,16 +24,16 @@ export default function DarkModeToggle() {
       {dark ? (
         <>
           <div className="dropdown-item-icon-container">
-            <i className="fa-solid fa-moon grey"></i>
+            <i className="fa-solid fa-sun grey"></i>
           </div>
-          <div className="dropdown-item-text-container">Darkmode</div>
+          <div className="dropdown-item-text-container">Lightmode</div>
         </>
       ) : (
         <>
           <div className="dropdown-item-icon-container">
-            <i className="fa-solid fa-sun grey"></i>
+            <i className="fa-solid fa-moon grey"></i>
           </div>
-          <div className="dropdown-item-text-container">Lightmode</div>
+          <div className="dropdown-item-text-container">Darkmode</div>
         </>
       )}
     </div>
