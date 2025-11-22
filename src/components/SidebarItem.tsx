@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { SidebarContext } from "./SidebarNew";
+import { SidebarContext } from "./Sidebar";
 import { useNavigate, useLocation } from "react-router-dom";
 
 type SidebarItemProps = {

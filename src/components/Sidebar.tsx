@@ -1,148 +1,108 @@
-import { useState } from "react";
-import { Sidebar, Menu, MenuItem, Logo } from "react-mui-sidebar";
-import { NavLink, useLocation } from "react-router-dom";
-import logo from "../assets/logo-white-small.png";
-import logoNotext from "../assets/logo-white-small-notext.png";
-
+import { useState, createContext, useEffect } from "react";
+import logoBlack from "../assets/logo-black-small.png";
+import logoWhite from "../assets/logo-white-small.png";
 import avatar from "../assets/defaultAvatar.png";
+import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 
 type SidebarProps = {
   username: string;
   name: string;
   imgurl?: string;
   onLogout: () => void;
+  children: React.ReactNode;
 };
 
-const SidebarComponent = ({ username, name, imgurl, onLogout }: SidebarProps) => {
-  const location = useLocation();
+type SidebarContextValue = {
+  expanded: boolean;
+};
 
-  // 👇 control collapsed / expanded
-  const [collapsed, setCollapsed] = useState(false);
+export const SidebarContext = createContext<SidebarContextValue | undefined>(
+  undefined
+);
 
-  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
+  const [expanded, setExpanded] = useState<boolean>(() => {
+    const stored = localStorage.getItem("sidebarExpanded");
+    return stored ? JSON.parse(stored) : true; // default = expanded
+  });
+  const [isDark, setIsDark] = useState(
+    () => localStorage.getItem("theme") === "dark"
+  );
+  const logo = isDark ? logoWhite : logoBlack;
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("sidebarExpanded", JSON.stringify(expanded));
+  }, [expanded]);
 
   return (
-    <div className="sidebar-container">
-      <div className="sidebar-scroll">
-      <Sidebar
-        width={collapsed ? "80px" : "270px"}
-        textColor="white"
-        isCollapse={collapsed}
-        themeColor="#e26126ff"
-        themeSecondaryColor="#ffffff"
-        userName={username}
-        designation={name}
-        userimg={imgurl || avatar}
-        onLogout={onLogout}
-      >
-        <Logo img={collapsed ? logoNotext : logo} component={NavLink} href="/">
-          {/* You can hide text when collapsed if you want */}
-          {!collapsed && "Norrønafly"}
-        </Logo>
+    <aside className="sidebar h-screen text-start text-(--text1-color)">
+      <nav className="h-full flex flex-col shadow-sm bg-(--main-bg-color)">
+        <div className="p-3 pb-2 flex w-full justify-between items-center mt-2 mb-4">
+          <img
+            src={logo}
+            className={`overflow-hidden transition-all ${
+              expanded ? "w-40" : "w-0"
+            }`}
+          />
 
-        {/* Optional small toggle button on top of sidebar */}
-        <div className={collapsed ? "sidebar-toggle-btn-container-collapsed" : "sidebar-toggle-btn-container"}>
           <button
-            className="sidebar-toggle-btn"
-            onClick={toggleCollapsed}
-            aria-label="Toggle sidebar"
+            className="p-1.5 rounded-lg"
+            style={{ backgroundColor: "var(--button-bg)" }}
+            onClick={() => setExpanded((prev) => !prev)}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "var(--button-hover-bg)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "var(--button-bg)";
+            }}
           >
-            {collapsed ? (
-              <i className="fa-solid fa-angles-right icon-md"></i>
-            ) : (
-              <i className="fa-solid fa-angles-left icon-md"></i>
-            )}
+            {expanded ? <ChevronsLeft /> : <ChevronsRight />}
           </button>
         </div>
 
-        <Menu subHeading="WORK">
-          <MenuItem
-            icon={<i className="fa-solid fa-desktop icon-md"></i>}
-            component={NavLink}
-            link="/"
-            isSelected={location.pathname === "/"}
-            textFontSize="1rem"
+        <SidebarContext.Provider value={{ expanded }}>
+          <ul className="flex-1 px-3">{children}</ul>
+        </SidebarContext.Provider>
+
+        <div className="flex px-3 py-6">
+          <img
+            className="w-12 h-12 rounded-full"
+            src={imgurl || avatar}
+            alt=""
+          />
+
+          <div
+            className={`flex items-center overflow-hidden transition-all h-12 ${
+              expanded ? "w-52 ml-3" : "w-0"
+            }`}
           >
-            {!collapsed && "Dashboard"}
-          </MenuItem>
-
-          <MenuItem
-            icon={<i className="fa-solid fa-screwdriver-wrench icon-md"></i>}
-            component={NavLink}
-            link="/tools"
-            isSelected={location.pathname === "/tools"}
-            textFontSize="1rem"
-          >
-            {!collapsed && "Tools"}
-          </MenuItem>
-
-        </Menu>
-        <Menu subHeading="FOOD">
-
-          <MenuItem
-            icon={
-              <div className="icon-div">
-                <i className="fa-solid fa-burger icon-md"></i>
-              </div>
-            }
-            component={NavLink}
-            link="/foodorders"
-            isSelected={location.pathname === "/foodorders"}
-            textFontSize="1rem"
-          >
-            {!collapsed && "Food orders"}
-          </MenuItem>
-
-        </Menu>
-        <Menu subHeading="SOCIAL">
-
-          <MenuItem
-            icon={<div className="icon-sidebar">
-              <i className="fa-solid fa-message icon-md"></i>
-              </div>}
-            component={NavLink}
-            link="/chat"
-            isSelected={location.pathname === "/chat"}
-            textFontSize="1rem"
-          >
-            {!collapsed && "Chat"}
-          </MenuItem>
-
-          <MenuItem
-            icon={
-              <div className="icon-sidebar">
-                <i className="fa-solid fa-users icon-md"></i>
-              </div>
-            }
-            component={NavLink}
-            link="/users"
-            isSelected={location.pathname === "/users"}
-            textFontSize="1rem"
-          >
-            {!collapsed && "Users"}
-          </MenuItem>
-
-        </Menu>
-        <Menu subHeading="OTHER">
-
-          <MenuItem
-            icon={<div className="icon-sidebar">
-              <i className="fa-solid fa-gear icon-md"></i>
-            </div>}
-            component={NavLink}
-            link="/settings"
-            isSelected={location.pathname === "/settings"}
-            textFontSize="1rem"
-          >
-            {!collapsed && "Settings"}
-          </MenuItem>
-        </Menu>
-      </Sidebar>
-      <div className="sidebar-bottom">
-      </div>
-      </div>
-    </div>
+            <div className="leading-4 w-full">
+              <h4 className="font-semibold text-lg">{username}</h4>
+              <p className="text-(--text3-color) text-nowrap">{name}</p>
+            </div>
+            <button onClick={onLogout}>
+              <LogOut size={24} />
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
   );
-};
+}
 
-export default SidebarComponent;
+export default Sidebar;

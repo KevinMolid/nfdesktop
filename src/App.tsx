@@ -13,9 +13,10 @@ import {
 } from "lucide-react";
 
 import Header from "./components/Header";
-import Sidebar from "./components/SidebarNew";
+import Sidebar from "./components/Sidebar";
 import SidebarItem from "./components/SidebarItem";
 import MobileMenu from "./components/MobileMenu";
+import MobileMenuItem from "./components/MobileMenuItem";
 import Dashboard from "./components/Dashboard";
 
 /* Pages */
@@ -70,20 +71,6 @@ function App() {
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
   const [alerts, setAlerts] = useState<ToastWithId[]>([]);
 
-  // --- React Router integration ---
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Map path <-> page name so Sidebar/MobileMenu can keep using activePage + setActivePage
-  const pathToPage: Record<string, string> = {
-    "/": "Dashboard",
-    "/tools": "Tools",
-    "/chat": "Chat",
-    "/foodorders": "Foodorders",
-    "/users": "Users",
-    "/settings": "Settings",
-  };
-
   const pageToPath: Record<string, string> = {
     Dashboard: "/",
     Tools: "/tools",
@@ -93,12 +80,6 @@ function App() {
     Settings: "/settings",
   };
 
-  const activePage = pathToPage[location.pathname] || "Dashboard";
-
-  const setActivePage = (page: string) => {
-    const path = pageToPath[page] ?? "/";
-    navigate(path);
-  };
   // --- end React Router integration ---
 
   useEffect(() => {
@@ -232,12 +213,19 @@ function App() {
     <>
       <Header
         username={user.username}
-        userImgUrl={user.imgurl || ""}
+        name={user.name || user.username}
+        imgurl={user.imgurl || ""}
         onLogout={handleLogout}
-        widgets={widgets}
       />
 
-      <MobileMenu activePage={activePage} setActivePage={setActivePage} />
+      <MobileMenu>
+        <MobileMenuItem icon={<LayoutDashboard />} text="Home" path="/" />
+        <MobileMenuItem icon={<Hammer />} text="Tools" path="/tools" />
+        <MobileMenuItem icon={<Hamburger />} text="Food" path="/foodorders" />
+        <MobileMenuItem icon={<MessageCircle />} text="Chat" path="/chat" />
+        <MobileMenuItem icon={<Users />} text="Users" path="/users" />
+        <MobileMenuItem icon={<Settings />} text="Settings" path="/settings" />
+      </MobileMenu>
 
       <div className="screen">
         <Sidebar

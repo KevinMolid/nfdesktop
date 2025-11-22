@@ -183,7 +183,6 @@ header {
   left: 0;
   width: 100%;
   z-index: 10;
-  border-bottom: 1px solid var(--bg3-color);
 }
 
 @media (max-width: 800px) {
@@ -226,10 +225,38 @@ header {
 
 .bottom-header {
   padding-top: 4px;
+  height: 56px;
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar-btn {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.user-avatar-btn:hover {
+  background: none;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 110%; /* just below avatar */
+  right: 0;
   background-color: var(--bg2-color);
+  border: 1px solid var(--border-color);
+  z-index: 20;
+  padding: 4px;
+  border-radius: 8px;
+  min-width: max-content;
 }
 
 .screen {
@@ -237,6 +264,13 @@ header {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+}
+
+@media (max-width: 800px) {
+  .screen {
+    padding-top: 8px;
+    padding-bottom: 20px;
+  }
 }
 
 .main-container,
@@ -298,47 +332,22 @@ header {
   box-sizing: border-box;
   position: fixed;
   bottom: 0;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
   justify-content: space-around;
   font-size: 1.4rem;
   color: var(--text3-color);
   z-index: 20;
   background-color: var(--bg2-color);
-  padding: 4px 12px 4px 16px;
+  padding: 4px;
   border-top: 1px solid var(--bg3-color);
 }
 
-.sidebar-menu li:hover,
-.mobile-menu li:hover {
-  cursor: pointer;
-}
-
-.sidebar-menu li.active,
-.mobile-menu li.active {
-  color: var(--text-color);
-}
-
-.sidebar-menu li.active p,
-.mobile-menu li.active p{
-  color: var(--text-color);
-}
-
-.sidebar-menu li:hover,
-.mobile-menu li:hover {
-  color: var(--text-color);
-  background-color: var(--bg3-color);
-}
-
-.sidebar-menu li:hover p,
-.mobile-menu li:hover p {
-  color: var(--text-color);
-  background-color: var(--bg3-color);
-}
 
 @media (max-width: 800px) {
   .mobile-menu {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr)
   }
 }
 
@@ -374,11 +383,6 @@ ul {
   height: 40px;
   padding: 2px;
   transition: all 0.2s;
-}
-
-.nflogo:hover {
-  height: 44px;
-  padding: 0;
 }
 
 /* Users */
@@ -574,12 +578,14 @@ ul {
   .main-container {
     margin-top: 52px;
     margin-bottom: 42px;
+    margin-inline: 12px;
   }
 }
 
 @media (max-width: 500px) {
   .main-container {
     padding: 8px;
+    margin-inline: 8px;
   }
 }
 
@@ -701,7 +707,7 @@ input.pin-input:-moz-autofill {
 
 @media (max-width: 500px) {
   .menu-bar {
-      margin-inline: 20px;
+      margin-inline: 8px;
   }
 }
 
