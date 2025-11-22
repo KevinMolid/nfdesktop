@@ -53,5 +53,4 @@ const Dashboard = ({ user, widgets, toggleActive }: DashboardProps) => {
   );
 };
 
-
 export default Dashboard;

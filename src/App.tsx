@@ -3,8 +3,18 @@ import Alert from "./components/Alert";
 
 import SafeWrapper from "./components/SafeWrapper";
 
+import {
+  LayoutDashboard,
+  Hammer,
+  Hamburger,
+  MessageCircle,
+  Users,
+  Settings,
+} from "lucide-react";
+
 import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/SidebarNew";
+import SidebarItem from "./components/SidebarItem";
 import MobileMenu from "./components/MobileMenu";
 import Dashboard from "./components/Dashboard";
 
@@ -12,8 +22,8 @@ import Dashboard from "./components/Dashboard";
 import Messages from "./components/Messages";
 import Tools from "./components/Tools";
 import Foodorders from "./components/Foodorders";
-import Users from "./components/Users";
-import Settings from "./components/Settings";
+import UsersList from "./components/Users";
+import SettingsPage from "./components/Settings";
 
 import { useAutoReloadOnVersion } from "./hooks/useAutoReloadOnVersion";
 import { CURRENT_VERSION } from "./appVersion";
@@ -189,7 +199,9 @@ function App() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
 
-  const setAlertsAdapter: React.Dispatch<React.SetStateAction<Toast>> = (next) => {
+  const setAlertsAdapter: React.Dispatch<React.SetStateAction<Toast>> = (
+    next
+  ) => {
     const base: Toast =
       typeof next === "function"
         ? (next as (prev: Toast) => Toast)({ text: "", type: "" })
@@ -233,7 +245,18 @@ function App() {
           name={user.name || ""}
           imgurl={user.imgurl}
           onLogout={handleLogout}
-        />
+        >
+          <SidebarItem icon={<LayoutDashboard />} text="Dashboard" path="/" />
+          <SidebarItem icon={<Hammer />} text="Tools" path="/tools" />
+          <SidebarItem
+            icon={<Hamburger />}
+            text="Food orders"
+            path="/foodorders"
+          />
+          <SidebarItem icon={<MessageCircle />} text="Chat" path="/chat" />
+          <SidebarItem icon={<Users />} text="Users" path="/users" />
+          <SidebarItem icon={<Settings />} text="Settings" path="/settings" />
+        </Sidebar>
 
         <div className="main-container">
           <div className="alerts-stack">
@@ -280,7 +303,9 @@ function App() {
             <Route
               path="/foodorders"
               element={
-                <SafeWrapper fallback={<div>Kunne ikke laste kebab-modulen</div>}>
+                <SafeWrapper
+                  fallback={<div>Kunne ikke laste kebab-modulen</div>}
+                >
                   <Foodorders
                     user={user}
                     setAlerts={setAlertsAdapter}
@@ -292,14 +317,14 @@ function App() {
 
             <Route
               path="/users"
-              element={<Users user={user} toggleActive={toggleActive} />}
+              element={<UsersList user={user} toggleActive={toggleActive} />}
             />
 
             <Route
               path="/settings"
               element={
                 <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-                  <Settings user={user} />
+                  <SettingsPage user={user} />
                 </SafeWrapper>
               }
             />

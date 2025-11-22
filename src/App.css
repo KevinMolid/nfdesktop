@@ -14,11 +14,18 @@
 }
 
 :root {
-  --main-bg-color: #e6ecee;
-  --bg2-color: #f9fafa;
-  --bg3-color: #eaedef;
+  --brand-color: #e7600b;
+  --brand2-color:rgb(224, 107, 35);
+}
+
+:root {
+  --brand3-color: #e7600b;
+  --main-bg-color: #c8d6e9;
+  --dash-bg-color: #ecf1f8;
+  --bg2-color: #dae3f0;
+  --bg3-color: #f5f8fb;
   --bg4-color: #d9e2e7;
-  --bg5-color: #ccd1d4;
+  --bg5-color: #ffffff;
   --usermsg-bg-color: #e2f0fa;
   --text-color: #000;
   --text2-color: #333;
@@ -53,17 +60,19 @@
 }
 
 [data-theme='dark'] {
-  --main-bg-color: #000000;
-  --bg2-color: #151515;
-  --bg3-color: #333;
-  --bg4-color: #444;
+  --brand3-color: #f0992e;
+  --main-bg-color: #0e0f11;
+  --dash-bg-color: #1f2226;
+  --bg2-color: #17181c;
+  --bg3-color: #272b30;
+  --bg4-color: #2f343b;
   --bg5-color: #555;
   --usermsg-bg-color: #243d50;
   --text-color: #f0f0f0;
-  --text2-color: #9e9e9e;
-  --text3-color: #8e8e8e;
-  --text4-color: #7e7e7e;
-  --text5-color: #6e6e6e;
+  --text2-color: #cfcfcf;
+  --text3-color: #bbbbbb;
+  --text4-color: #9c9c9c;
+  --text5-color: #7b7b7f;
   --line-color: #333;
   --button-bg: #1f1f1f;
   --button-hover-bg: #444;
@@ -103,9 +112,9 @@ html, body {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding-left: 20px;
-  height: 48px;
+  align-items: center;
+  height: 44px;
+  margin-bottom: 8px
 }
 
 @media (max-width: 500px) {
@@ -119,7 +128,8 @@ html, body {
 }
 
 h1 {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
+  font-weight: 500;
   line-height: 1;
 }
 
@@ -140,18 +150,6 @@ small {
   font-size: 0.9em;
   margin-top: 0;
   margin-bottom: 0;
-  line-height: 1;
-}
-
-h3 {
-  font-size: 1.3rem;
-}
-
-h4 {
-  color: var(--text2-color);
-  font-size: 0.9em;
-  margin-top: 12px;
-  margin-bottom: 8px;
   line-height: 1;
 }
 
@@ -234,78 +232,6 @@ header {
 }
 
 /* Sidebar */
-.sidebar {
-  box-sizing: border-box;
-  background-color: var(--bg2-color);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: sticky;
-  align-items: center;
-  width: 60px;
-  height: 100vh;
-  padding: 44px 8px;
-  z-index: 20;
-  transition: all 0.4s;
-}
-
-.sidebar-toggle-btn-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-inline: 24px;
-}
-
-.sidebar-toggle-btn-container-collapsed {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-inline: 16px;
-}
-
-.sidebar-toggle-btn {
-  width: 100%;
-  height: 42px;
-  border-radius: 8px;
-} 
-
-.sidebar-expanded {
-    width: 180px;
-    align-items: start;
-}
-
-.sidebar-container {
-  height: 100svh;
-  text-align: start;
-  display: flex;
-  background: #111;
-}
-
-.sidebar-scroll {
-  height: 100%;
-  overflow-y: auto;
-
-  padding-top: 32px;
-
-  /* Hide scrollbar in Chrome, Edge, Safari */
-  scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* Internet Explorer + Edge Legacy */
-}
-
-.sidebar-scroll::-webkit-scrollbar {
-  display: none;                /* Chrome, Safari, Edge */
-}
-
-.sidebar-bottom {
-  height: 44px;
-}
-
-@media (max-height: 600px) {
-  .sidebar {
-    padding: 18px 8px;
-  }
-}
-
 @media (max-width: 800px) {
   .sidebar {
     display: none;
@@ -313,6 +239,12 @@ header {
   .sidebar-container {
     display: none;
   }
+}
+
+.sidebar button {
+  min-width: 48px;
+  max-width: 48px;
+  padding: 0;
 }
 
 .sidebar-menu {
@@ -399,7 +331,6 @@ header {
 
 ul {
   list-style: none;
-  padding: 0;
   margin: 0;
 }
 
@@ -594,13 +525,28 @@ ul {
 /* */
 
 .main-container {
-  padding: 32px;
+  padding: 12px 32px 32px 32px;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto;       /* still scrollable */
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
+  background-color: var(--dash-bg-color);
+  margin-block: 16px;
+  margin-right: 12px;
+  border-radius: 24px;
+
+  /* Hide scrollbar (Firefox) */
+  scrollbar-width: none;
+
+  /* Hide scrollbar (IE/Edge) */
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar (Chrome/Safari/Edge/Opera) */
+.main-container::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 850px) {
@@ -1817,14 +1763,6 @@ input.pin-input:-moz-autofill {
   color: var(--text3-color);
   font-size: 1.5rem;
   font-weight: 500;
-}
-
-/* Display */
-
-.flex {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .flex-space {

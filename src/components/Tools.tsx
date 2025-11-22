@@ -6,7 +6,6 @@ type ToolsProps = {
 };
 
 const Tools = ({ toggleActive }: ToolsProps) => {
-
   return (
     <div className="container">
       <div className="page-header">
@@ -15,12 +14,11 @@ const Tools = ({ toggleActive }: ToolsProps) => {
 
       <div className="widget-container">
         <SafeWrapper fallback={<div>Could not load Nato Alphabet</div>}>
-            <NatoAlphabet toggleActive={toggleActive} />
+          <NatoAlphabet toggleActive={toggleActive} />
         </SafeWrapper>
       </div>
     </div>
   );
 };
-
 
 export default Tools;
