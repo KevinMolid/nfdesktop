@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
 import bcrypt from "bcryptjs";
-import logoB from "../assets/logo-b.png";
-import logoBW from "../assets/logo-bw.png";
+import logoB from "../assets/logo-black-small.png";
+import logoBW from "../assets/logo-white-small.png";
+
+import Button from "./Button";
 
 const LAST_USER_KEY = "lastLoggedInUser";
 
@@ -64,7 +66,9 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
     setError("");
 
     const uname = username.trim().toUpperCase();
-    const isUsernameMissing = isSwitchingUser ? uname.length === 0 : uname.length === 0;
+    const isUsernameMissing = isSwitchingUser
+      ? uname.length === 0
+      : uname.length === 0;
 
     let newError = "";
     let usernameFieldError = false;
@@ -159,9 +163,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
 
   // NEW: auto-login effect when both fields are valid
   useEffect(() => {
-    const ready =
-      username.trim().length > 0 &&
-      pin.length === 4;
+    const ready = username.trim().length > 0 && pin.length === 4;
 
     if (ready && !autoLoginRef.current) {
       autoLoginRef.current = true; // lock to prevent double calls
@@ -172,13 +174,22 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
 
   return (
     <form className="login-container" onSubmit={handleLogin} noValidate>
-      <div>
-          <img
-            src={isDarkMode ? logoBW : logoB}
-            alt="Norrønafly logo"
-            className="login-logo"
-          />
+      <div className="mb-8">
+        <img src={isDarkMode ? logoBW : logoB} alt="Norrønafly logo" />
       </div>
+
+      {!isSwitchingUser && (
+        <Button
+          variant="tertiary"
+          type="button"
+          title="Change user"
+          aria-label="Switch user"
+          onClick={handleSwitchUser}
+          iconLeft={<i className="fa-solid fa-right-left"></i>}
+        >
+          Switch user
+        </Button>
+      )}
 
       {/* Username */}
       {!isSwitchingUser ? (
@@ -189,16 +200,6 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           <span className="last-user-text" aria-label="Last logged in user">
             {username}
           </span>
-          <button
-            type="button"
-            className="change-user-button"
-            title="Switch user"
-            aria-label="Switch user"
-            onClick={handleSwitchUser}
-            style={{ lineHeight: 0 }}
-          >
-            <i className="fa-solid fa-right-left"></i>
-          </button>
         </div>
       ) : (
         <input
@@ -208,6 +209,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           placeholder="User"
           maxLength={3}
           value={username}
+          autoComplete="new-username"
           onChange={(e) => handleUsernameChange(e.target.value)}
         />
       )}
@@ -225,6 +227,7 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
           value={pin}
           onChange={(e) => handlePinChange(e.target.value)}
           inputMode="numeric"
+          autoComplete="new-password"
           aria-label="PIN"
         />
         <div className="pin-input-placeholder">
@@ -250,13 +253,20 @@ const Login = ({ onLogin }: { onLogin: (user: any) => void }) => {
         </div>
       </div>
 
-      <button type="submit" className="btn login-btn">
-        <i className="fa-solid fa-right-to-bracket"></i>
+      <Button
+        type="submit"
+        className="w-full"
+        iconLeft={<i className="fa-solid fa-right-to-bracket"></i>}
+      >
         Sign in
-      </button>
+      </Button>
 
       <div className="pin-feedback-container">
-        {error && <p className="login-error">{error}</p>}
+        {error && (
+          <p className="bg-red-500 px-8 rounded-full py-2 absolute text-white font-semibold mt-12">
+            {error}
+          </p>
+        )}
       </div>
     </form>
   );

@@ -312,7 +312,7 @@ function App() {
               path="/settings"
               element={
                 <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-                  <SettingsPage user={user} />
+                  <SettingsPage onLogout={handleLogout} user={user} />
                 </SafeWrapper>
               }
             />

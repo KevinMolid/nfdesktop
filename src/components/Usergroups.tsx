@@ -13,17 +13,18 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-type UsergroupsProps = {
-  toggleActive: (name: string) => void;
-};
+import Button from "./Button";
 
 type Group = { id: string; name: string };
 type User = { id: string; username: string; name?: string };
 
-const Usergroups = ({ toggleActive }: UsergroupsProps) => {
+const Usergroups = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") === "dark";
+  });
 
   // Create state
   const [isCreateActive, setIsCreateActive] = useState(false);
@@ -45,6 +46,21 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
 
   // Members of selected group (userIds)
   const [memberIds, setMemberIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const isDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
+      setIsDarkMode(isDark);
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Realtime groups
   useEffect(() => {
@@ -246,196 +262,218 @@ const Usergroups = ({ toggleActive }: UsergroupsProps) => {
     return hay.includes(userFilter.toLowerCase());
   });
 
+  const selectedGroupName = selectedGroupId
+    ? groups.find((g) => g.id === selectedGroupId)?.name || "(No name)"
+    : "";
+
+  const memberSelectedClasses = isDarkMode
+    ? "bg-green-900 hover:bg-green-800"
+    : "bg-green-200 hover:bg-green-300";
+
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">User groups</h3>
         <div className="card-header-right">
           {!isCreateActive && (
-            <button onClick={toggleCreateActive}>
-              <i className="fa-solid fa-plus grey icon-md hover" />
+            <Button
+              size="sm"
+              variant="transparent"
+              onClick={toggleCreateActive}
+              iconLeft={<i className="fa-solid fa-plus" />}
+            >
               Add
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       <div className="card-body">
-        {isCreateActive && (
-          <div className="create-task-box">
-            Create new user group
-            <div className="create-task-input-container">
-              <input
-                type="text"
-                placeholder="Name"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && registerUsergroup()}
-                className="input m-b-1"
-              />
-              <div className="button-group">
-                <button className="save-btn" onClick={registerUsergroup}>
-                  <i className="fa-solid fa-save icon-md" />
-                  Save
-                </button>
-                <button className="delete-btn" onClick={toggleCreateActive}>
-                  <i className="fa-solid fa-xmark icon-md" />
-                  Discard
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {error && <p style={{ color: "red" }}>{error}</p>}
         {success && <p style={{ color: "green" }}>{success}</p>}
 
-        {/* Groups list */}
-        <ul>
-          <li>
-            <h4>Name</h4>
-          </li>
-
-          {groups.map((g) => {
-            const isSelected = selectedGroupId === g.id;
-            return (
-              <li
-                key={g.id}
-                className={`user-group ${isSelected ? "selected-group" : ""}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  position: "relative",
-                  cursor: "pointer",
-                }}
-                onClick={() => selectGroup(g.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    selectGroup(g.id);
-                  }
-                }}
-                tabIndex={0}
-                role="option"
-                aria-selected={isSelected}
+        {isCreateActive ? (
+          /* 1️⃣ CREATE NEW GROUP VIEW */
+          <div className="create-task-box">
+            <h4 className="font-semibold mb-2">Create new user group</h4>
+            <div className="flex flex-col mb-2">
+              <label htmlFor="newGroupName" className="cursor-pointer">
+                Group name
+              </label>
+              <input
+                id="newGroupName"
+                type="text"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && registerUsergroup()}
+                className="text-xl font-bold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color)"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                className="save-btn"
+                onClick={registerUsergroup}
+                iconLeft={<i className="fa-solid fa-save" />}
               >
-                {/* Kebab menu */}
-                <div
-                  ref={openDropdownId === g.id ? dropdownRef : null}
-                  style={{ position: "relative", marginRight: 8 }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div
-                    className="icon-div task-action hover"
-                    onClick={() => toggleDropdown(g.id)}
-                    title="Options"
-                    aria-haspopup="menu"
-                    aria-expanded={openDropdownId === g.id}
+                Save
+              </Button>
+              <Button
+                variant="tertiary"
+                className="delete-btn"
+                onClick={toggleCreateActive}
+                iconLeft={<i className="fa-solid fa-cancel" />}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* 2️⃣ GROUPS LIST + MEMBERS VIEW */
+          <>
+            {/* Groups list */}
+            <ul className="flex flex-col gap-1">
+              {groups.map((g) => {
+                const isSelected = selectedGroupId === g.id;
+                return (
+                  <li
+                    key={g.id}
+                    className={`flex gap-2 hover:bg-(--bg4-color) transition-colors rounded-lg ${
+                      isSelected ? "bg-(--bg4-color)" : ""
+                    }`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      position: "relative",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => selectGroup(g.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        selectGroup(g.id);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="option"
+                    aria-selected={isSelected}
                   >
-                    <i className="fa-solid fa-bars" />
+                    {/* Kebab menu */}
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      ref={openDropdownId === g.id ? dropdownRef : null}
+                      onClick={() => toggleDropdown(g.id)}
+                    >
+                      <i className="fa-solid fa-bars" />
+
+                      {openDropdownId === g.id && (
+                        <div className="task-dropdown" role="menu">
+                          <div
+                            className="dropdown-item hover-border"
+                            role="menuitem"
+                            onClick={() => startEdit(g)}
+                          >
+                            <div className="dropdown-item-icon-container">
+                              <i className="fa-solid fa-pencil grey" />
+                            </div>
+                            <div className="dropdown-item-text-container">
+                              Edit
+                            </div>
+                          </div>
+
+                          <div
+                            className="dropdown-item hover-border"
+                            role="menuitem"
+                            onClick={() => handleDeleteGroup(g.id)}
+                          >
+                            <div className="dropdown-item-icon-container">
+                              <i className="fa-solid fa-trash red" />
+                            </div>
+                            <div className="dropdown-item-text-container">
+                              Delete
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Button>
+
+                    {/* Name */}
+                    <p className="font-semibold" style={{ flex: 1 }}>
+                      {g.name || <em>(No name)</em>}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* Members editor */}
+            <div className="mt-4">
+              {!selectedGroupId ? (
+                <></>
+              ) : (
+                <>
+                  <h4 className="card-title">{selectedGroupName} Members</h4>
+                  <p className="text-(--text3-color)">
+                    Click on a user to add or remove the user from the group
+                  </p>
+                  <div className="my-2 flex gap-2 items-center">
+                    <label htmlFor="nameFilter">
+                      <i className="fa-solid fa-magnifying-glass cursor-pointer text-(--text3-color)"></i>
+                    </label>
+
+                    <input
+                      id="nameFilter"
+                      type="text"
+                      value={userFilter}
+                      onChange={(e) => setUserFilter(e.target.value)}
+                      className="bg-(--bg4-color) px-4 py-2 w-full rounded-full outline-none"
+                    />
                   </div>
 
-                  {openDropdownId === g.id && (
-                    <div className="task-dropdown" role="menu">
-                      <div
-                        className="dropdown-item hover-border"
-                        role="menuitem"
-                        onClick={() => startEdit(g)}
-                      >
-                        <div className="dropdown-item-icon-container">
-                          <i className="fa-solid fa-pencil grey" />
-                        </div>
-                        <div className="dropdown-item-text-container">Edit</div>
-                      </div>
+                  <ul className="user-list flex flex-col gap-1">
+                    {filteredUsers.map((u) => {
+                      const isMember = memberIds.has(u.id);
+                      return (
+                        <li
+                          key={u.id}
+                          className={`flex justify-between py-1 items-center relative cursor-pointer gap-2 rounded-lg transition-colors ${
+                            isMember
+                              ? memberSelectedClasses
+                              : "hover:bg-(--bg4-color)"
+                          }`}
+                          onClick={() => toggleMembership(u)}
+                        >
+                          <div className="grid grid-cols-[42px_auto]">
+                            <strong className="user">{u.username}</strong>
+                            {u.name && <p>{u.name}</p>}
+                          </div>
 
-                      <div
-                        className="dropdown-item hover-border"
-                        role="menuitem"
-                        onClick={() => handleDeleteGroup(g.id)}
-                      >
-                        <div className="dropdown-item-icon-container">
-                          <i className="fa-solid fa-trash red" />
-                        </div>
-                        <div className="dropdown-item-text-container">
-                          Delete
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Name */}
-                <p className="user-name" style={{ flex: 1 }}>
-                  {g.name || <em>(No name)</em>}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-
-        {/* Members editor */}
-        <div className="m-t-2">
-          <h4>Members</h4>
-          {!selectedGroupId ? (
-            <p className="lightgrey">Select a group to manage its members.</p>
-          ) : (
-            <>
-              <div className="create-task-input-container m-b-1">
-                <input
-                  type="text"
-                  placeholder="Filter users by name or username"
-                  value={userFilter}
-                  onChange={(e) => setUserFilter(e.target.value)}
-                  className="input"
-                />
-              </div>
-
-              <ul className="user-list">
-                {filteredUsers.map((u) => {
-                  const isMember = memberIds.has(u.id);
-                  return (
-                    <li
-                      key={u.id}
-                      className={`userlist ${
-                        isMember ? "active-selection" : ""
-                      }`}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        position: "relative",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => toggleMembership(u)}
-                    >
-                      <div
-                        className="icon-div hover"
-                        title={isMember ? "Remove from group" : "Add to group"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleMembership(u);
-                        }}
-                        style={{ marginRight: 8 }}
-                      >
-                        {isMember ? (
-                          <i className="fa-solid fa-check green" />
-                        ) : (
-                          <i className="fa-solid fa-plus grey" />
-                        )}
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column" }}>
-                        <strong className="user">{u.username}</strong>
-                        {u.name && (
-                          <small className="lightgrey">{u.name}</small>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          )}
-        </div>
+                          <div
+                            className="icon-div hover"
+                            title={
+                              isMember ? "Remove from group" : "Add to group"
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMembership(u);
+                            }}
+                            style={{ marginRight: 8 }}
+                          >
+                            {isMember ? (
+                              <i className="fa-solid fa-check green" />
+                            ) : (
+                              <i className="fa-solid fa-plus grey" />
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Edit panel */}

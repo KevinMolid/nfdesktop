@@ -11,6 +11,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
+import Button from "./Button";
+
 type Link = { id: string; name: string; href: string };
 type LinkCategory = { category: string; links: Link[] };
 
@@ -70,7 +72,7 @@ const STATIC_CATEGORIES: LinkCategory[] = [
         name: "Hartzell",
         href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html",
       },
-            { id: "static-lyreco", name: "Lyreco", href: "https://www.lyreco.no/" },
+      { id: "static-lyreco", name: "Lyreco", href: "https://www.lyreco.no/" },
       { id: "static-9", name: "Skygeek", href: "https://skygeek.com/" },
       { id: "static-10", name: "Textron", href: "https://ww2.txtav.com/" },
     ],
@@ -132,7 +134,11 @@ const Links = ({ user, toggleActive }: LinksProps) => {
   const [showForm, setShowForm] = useState(false);
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkHref, setNewLinkHref] = useState("");
-  const [edit, setEdit] = useState<{ id: string; name: string; href: string } | null>(null);
+  const [edit, setEdit] = useState<{
+    id: string;
+    name: string;
+    href: string;
+  } | null>(null);
 
   // Track which dropdown is open (link ID) or null for none
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -243,58 +249,93 @@ const Links = ({ user, toggleActive }: LinksProps) => {
     const href = ensureHttps(edit.href);
     if (!name || !href) return;
 
-    await updateDoc(doc(db, "users", user.id, "links", edit.id), { name, href });
+    await updateDoc(doc(db, "users", user.id, "links", edit.id), {
+      name,
+      href,
+    });
 
     // Let onSnapshot refresh UI; just close the editor
     setEdit(null);
   };
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">Links</h3>
         <div className="card-header-right">
           {!showForm && (
-            <button onClick={() => setShowForm((prev) => !prev)}>
-              <i className="fa-solid fa-plus grey icon-md" /> Add
-            </button>
+            <Button
+              variant="transparent"
+              size="sm"
+              onClick={() => setShowForm((prev) => !prev)}
+              iconLeft={<i className="fa-solid fa-plus" />}
+            >
+              Add
+            </Button>
           )}
-          <button
-            className="close-widget-btn"
+          <Button
+            variant="transparent"
+            size="sm"
             onClick={() => toggleActive("Links")}
           >
-            <i className="fa-solid fa-x icon-md" />
-          </button>
+            <i className="fa-solid fa-x icon" />
+          </Button>
         </div>
       </div>
 
       {showForm && (
-        <div className="create-task-box">
-          Add new link
-          <div className="create-task-input-container">
-            <input
-              type="text"
-              placeholder="Link name"
-              value={newLinkName}
-              onChange={(e) => setNewLinkName(e.target.value)}
-              className="input m-b-1"
-            />
-            <input
-              type="text"
-              placeholder="URL (https://...)"
-              value={newLinkHref}
-              onChange={(e) => setNewLinkHref(e.target.value)}
-              className="input m-b-1"
-            />
-            <div className="button-group">
-              <button className="save-btn" onClick={handleAddLink}>
-                <i className="fa-solid fa-save icon-md" />
+        <div className="create-task-box mb-4 bg-(--dash-bg-color) p-4">
+          <p className="font-semibold">Add new link</p>
+          <p className="mb-2 text-(--text3-color)">
+            The new link will be added to "My links"
+          </p>
+          <div className="flex flex-col gap-1 items-start">
+            <div className="w-full">
+              <label
+                htmlFor="linkName"
+                className="text-lg font-semibold cursor-pointer"
+              >
+                Name
+              </label>
+              <input
+                id="linkName"
+                type="text"
+                placeholder="My link"
+                value={newLinkName}
+                onChange={(e) => setNewLinkName(e.target.value)}
+                className="w-full border-b-2 border-(--bg5-color) py-1 text-lg outline-none active:border-(--text-color) focus:border-(--text-color)"
+              />
+            </div>
+            <div className="w-full mb-2">
+              <label
+                htmlFor="linkURL"
+                className="text-lg font-semibold cursor-pointer"
+              >
+                URL
+              </label>
+              <input
+                id="linkURL"
+                type="text"
+                placeholder="https://..."
+                value={newLinkHref}
+                onChange={(e) => setNewLinkHref(e.target.value)}
+                className="w-full border-b-2 border-(--bg5-color) py-1 text-lg outline-none active:border-(--text-color) focus:border-(--text-color)"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddLink}
+                iconLeft={<i className="fa-solid fa-save" />}
+              >
                 Save
-              </button>
-              <button className="delete-btn" onClick={() => setShowForm(false)}>
-                <i className="fa-solid fa-trash icon-md" />
+              </Button>
+              <Button
+                variant="tertiary"
+                onClick={() => setShowForm(false)}
+                iconLeft={<i className="fa-solid fa-trash" />}
+              >
                 Discard
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -322,7 +363,11 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                 {links.map((link) => (
                   <li
                     key={link.id}
-                    style={{ display: "flex", alignItems: "center", position: "relative" }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      position: "relative",
+                    }}
                   >
                     {/* Kebab menu only for My Links */}
                     {category === MY_LINKS_LABEL && (
@@ -353,7 +398,9 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                               <div className="dropdown-item-icon-container">
                                 <i className="fa-solid fa-pencil grey"></i>
                               </div>
-                              <div className="dropdown-item-text-container">Edit</div>
+                              <div className="dropdown-item-text-container">
+                                Edit
+                              </div>
                             </div>
 
                             <div
@@ -364,7 +411,9 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                               <div className="dropdown-item-icon-container">
                                 <i className="fa-solid fa-trash red"></i>
                               </div>
-                              <div className="dropdown-item-text-container">Delete</div>
+                              <div className="dropdown-item-text-container">
+                                Delete
+                              </div>
                             </div>
                           </div>
                         )}
@@ -395,7 +444,9 @@ const Links = ({ user, toggleActive }: LinksProps) => {
               type="text"
               placeholder="Link name"
               value={edit.name}
-              onChange={(e) => setEdit((s) => (s ? { ...s, name: e.target.value } : s))}
+              onChange={(e) =>
+                setEdit((s) => (s ? { ...s, name: e.target.value } : s))
+              }
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
               className="input m-b-1"
             />
@@ -403,7 +454,9 @@ const Links = ({ user, toggleActive }: LinksProps) => {
               type="text"
               placeholder="URL (https://...)"
               value={edit.href}
-              onChange={(e) => setEdit((s) => (s ? { ...s, href: e.target.value } : s))}
+              onChange={(e) =>
+                setEdit((s) => (s ? { ...s, href: e.target.value } : s))
+              }
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
               className="input m-b-1"
             />
@@ -420,7 +473,6 @@ const Links = ({ user, toggleActive }: LinksProps) => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

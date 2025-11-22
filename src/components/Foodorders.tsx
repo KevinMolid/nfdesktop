@@ -314,9 +314,9 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
       </div>
       <div className="widget-container">
         {/* Order food */}
-        <div className="card has-header grow-1">
+        <div className="card has-header grow">
           <div className="card-header">
-            <h3>Order food</h3>
+            <h3 className="card-title">Order food</h3>
           </div>
 
           <div className="scroll-wrapper">
@@ -511,7 +511,8 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
                           text:
                             (user.role === "admin" && orderFor !== user.username
                               ? `Order for ${selectedUserLabel}: `
-                              : "Ordered ") + `${selectedFood} with ${drinkValue}.`,
+                              : "Ordered ") +
+                            `${selectedFood} with ${drinkValue}.`,
                           type: "success",
                         });
                         // reset state

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import avatar from "../assets/defaultAvatar.png";
 
+import Button from "./Button";
+
 import {
   query,
   collection,
@@ -125,7 +127,7 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
         <h1>Chat</h1>
       </div>
 
-      <div className="card messages-container">
+      <div className="card messages-container mb-2">
         {messages.map((msg: any) => {
           const date: Date | null = msg.createdAt?.toDate?.() || null;
 
@@ -167,15 +169,19 @@ const Messages = ({ username, toggleActive }: MessagesProps) => {
         })}
       </div>
 
-      <div className="message-input-container">
+      <div className="flex w-full gap-2 items-end">
         <textarea
-          className="message-input"
+          className="w-full resize-none border-none bg-(--bg4-color) border rounded-full px-6 py-2 text-lg "
           value={newMessage}
+          placeholder="Aa"
           onChange={(e) => setNewMessage(e.target.value)}
         />
-        <button className="message-btn" onClick={handleSend}>
-          <i className="fa-solid fa-paper-plane m-r-1"></i> Send
-        </button>
+        <Button
+          onClick={handleSend}
+          iconLeft={<i className="fa-solid fa-paper-plane"></i>}
+        >
+          Send
+        </Button>
       </div>
     </div>
   );

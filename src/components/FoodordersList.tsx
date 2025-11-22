@@ -204,9 +204,9 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   };
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
-        <h3>Orders</h3>
+        <h3 className="card-title">Orders</h3>
         <div className="card-header-right icon-container">
           <button onClick={() => setShowOrdersModal(!showOrdersModal)}>
             <i className="fa-solid fa-file"></i> Show Page

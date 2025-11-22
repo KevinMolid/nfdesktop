@@ -1,7 +1,8 @@
 // src/components/AppVersionControl.tsx
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import Button from "./Button";
 
 type User = {
   id: string;
@@ -30,21 +31,26 @@ export default function AppVersionControl({ user }: SettingsProps) {
     await setDoc(doc(db, "meta", "app"), { version: n }, { merge: true });
   };
 
-
   return (
-    <div className="card">
-      <h3>App version (number)</h3>
-      <input
-        className="input m-r-1 version-input"
-        type="number"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && save()}
-        placeholder="e.g. 8"
-      />
-      <button className="save-btn version-btn" disabled={user.role !== "admin"} onClick={save}>
-        <i className="fa-solid fa-save" /> Save
-      </button>
+    <div className="card gap-2">
+      <h3 className="card-title">App version</h3>
+      <div className="flex items-center gap-2 flex-wrap">
+        <input
+          className="text-2xl bg-(--dash-bg-color) py-2 px-4 w-full max-w-32"
+          type="number"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && save()}
+          placeholder="e.g. 8"
+        />
+        <Button
+          disabled={user.role !== "admin"}
+          onClick={save}
+          iconLeft={<i className="fa-solid fa-save" />}
+        >
+          Update
+        </Button>
+      </div>
     </div>
   );
 }

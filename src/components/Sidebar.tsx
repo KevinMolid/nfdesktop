@@ -4,6 +4,8 @@ import logoWhite from "../assets/logo-white-small.png";
 import avatar from "../assets/defaultAvatar.png";
 import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
 
+import Button from "./Button";
+
 type SidebarProps = {
   username: string;
   name: string;
@@ -58,21 +60,13 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
             }`}
           />
 
-          <button
-            className="p-1.5 rounded-lg"
-            style={{ backgroundColor: "var(--button-bg)" }}
+          <Button
+            size="sm"
+            variant="transparent"
             onClick={() => setExpanded((prev) => !prev)}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                "var(--button-hover-bg)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                "var(--button-bg)";
-            }}
           >
             {expanded ? <ChevronsLeft /> : <ChevronsRight />}
-          </button>
+          </Button>
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
@@ -95,9 +89,9 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
               <h4 className="font-semibold text-lg">{username}</h4>
               <p className="text-(--text3-color) text-nowrap">{name}</p>
             </div>
-            <button onClick={onLogout}>
+            <Button variant="transparent" onClick={onLogout}>
               <LogOut size={24} />
-            </button>
+            </Button>
           </div>
         </div>
       </nav>

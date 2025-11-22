@@ -17,6 +17,8 @@ import {
 } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 
+import Button from "./Button";
+
 import { db } from "./firebase";
 import DragableSticker from "./DragableSticker";
 import { StickerData } from "../types";
@@ -719,16 +721,21 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       <div className="card-header">
         <h3 className="card-title">Noticeboard</h3>
         <div className="card-header-right">
-          <button onClick={addSticker}>
-            <i className="fa-solid fa-plus grey icon-md hover" />
+          <Button
+            variant="transparent"
+            size="sm"
+            iconLeft={<i className="fa-solid fa-plus" />}
+            onClick={addSticker}
+          >
             Add
-          </button>
-          <button
-            className="close-widget-btn"
+          </Button>
+          <Button
+            variant="transparent"
+            size="sm"
             onClick={() => toggleActive("Notes")}
           >
-            <i className="fa-solid fa-x icon-md hover" />
-          </button>
+            <i className="fa-solid fa-x" />
+          </Button>
         </div>
       </div>
 
@@ -879,7 +886,11 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                 shareOpenForId != null
                   ? stickers.find((x) => x.id === shareOpenForId)
                   : null;
-              const canUnshare = !!(s && s.source === "shared" && s.createdBy === user.id);
+              const canUnshare = !!(
+                s &&
+                s.source === "shared" &&
+                s.createdBy === user.id
+              );
               return (
                 canUnshare && (
                   <button className="delete-btn" onClick={unshareNote}>
@@ -915,7 +926,6 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
               Cancel
             </button>
           </div>
-
         </div>
       )}
     </div>

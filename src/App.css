@@ -41,8 +41,6 @@
   --text4-color: #777;
   --text5-color: #888;
   --line-color: #aaa;
-  --button-bg: #eee;
-  --button-hover-bg: #ddd;
   --border-color: #ccc;
   --active-selection-color: rgba(0, 0, 0, 0.5);
   --selection-hover-color: rgba(0, 0, 0, 0.5);
@@ -74,7 +72,7 @@
   --bg2-color: #17181c;
   --bg3-color: #272b30;
   --bg4-color: #2f343b;
-  --bg5-color: #555;
+  --bg5-color: #383d45;
   --usermsg-bg-color: #243d50;
   --text-color: #f0f0f0;
   --text2-color: #cfcfcf;
@@ -82,8 +80,6 @@
   --text4-color: #9c9c9c;
   --text5-color: #7b7b7f;
   --line-color: #333;
-  --button-bg: #1f1f1f;
-  --button-hover-bg: #444;
   --border-color: #555;
   --active-selection-color: rgba(255, 255, 255, 0.5);
   --selection-hover-color: rgba(255, 255, 255, 0.5);
@@ -139,11 +135,6 @@ h1 {
   font-size: 1.4rem;
   font-weight: 500;
   line-height: 1;
-}
-
-p {
-  color: var(--text2-color);
-  margin: 0;
 }
 
 small {
@@ -210,17 +201,6 @@ header {
   line-height: 1;
   font-size: 1.3rem;
   letter-spacing: 1px;
-}
-
-.top-header button {
-  background: none;
-  color: white;
-  border: 1px solid white;
-  padding: 8px 16px;
-}
-
-.top-header button:hover {
-  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .bottom-header {
@@ -290,11 +270,6 @@ header {
   }
 }
 
-.sidebar button {
-  min-width: 48px;
-  max-width: 48px;
-  padding: 0;
-}
 
 .sidebar-menu {
   display: flex;
@@ -385,13 +360,6 @@ ul {
   transition: all 0.2s;
 }
 
-/* Users */
-.userlist {
-  display: grid;
-  grid-template-columns: 42px 200px 50px auto;
-  gap: 8px;
-}
-
 @media (max-width: 450px) {
   .userlist {
   grid-template-columns: 42px 160px 50px auto;
@@ -420,39 +388,8 @@ ul {
   outline: none;
 }
 
-.edit-user-btn-container {
-  margin-top: 12px;
-  display: flex;
-  gap: 4px;
-}
-
-.edit-img-container {
-  position: relative;
-  width: max-content;
-  margin-bottom: 8px;
-}
-
 .edit-img-container img {
   display: block;
-}
-
-.edit-img-btn {
-  position: absolute;
-  height: 32px;
-  min-width: 0;
-  width: 32px;
-  padding: 0;
-  bottom: 0;
-  right: -12px;
-  font-size: 1rem;
-  color: var(--text5-color);
-  background-color: var(--bg3-color);
-  border: 2px solid var(--text5-color);
-}
-
-.edit-img-btn:hover {
-  color: var(--text2-color);
-  border: 2px solid var(--text2-color);
 }
 
 .usertag-container {
@@ -503,7 +440,7 @@ ul {
 }
 
 .user {
-  color: #3da8ff;
+  color: #38bdf8;
   font-weight: 500;
 }
 
@@ -528,21 +465,7 @@ ul {
   object-fit: cover;
 }
 
-/* User groups */
-.user-group {
-  border-radius: 8px;
-}
-
-.user-group:hover {
-  background: var(--bg3-color);
-}
-
-.selected-group {
-  background: var(--bg3-color);
-}
-
 /* */
-
 .main-container {
   padding: 12px 32px 32px 32px;
   flex: 1;
@@ -636,21 +559,6 @@ ul {
   text-align: center;
 }
 
-.change-user-button {
-  position: absolute;
-  right: 8px;
-  background-color: transparent;
-  font-size: 1.5rem;
-  color: var(--text5-color);
-  width: 32px;
-  border-radius: 4px;
-}
-
-.change-user-button:hover {
-  background-color: transparent;
-  color: var(--text4-color)
-}
-
 .login-input {
   box-sizing: border-box;
   background-color: var(--bg2-color);
@@ -668,15 +576,6 @@ ul {
 .container-invalid {
   border: 2px solid #e53935 !important;
   border-radius: 20px;
-}
-
-.login-btn {
-  width: 214px;
-}
-
-.login-error {
-  font-size: 0.8rem;
-  color: #e53935;
 }
 
 /* Force autofilled inputs to keep your custom styles */
@@ -791,6 +690,11 @@ input.pin-input:-moz-autofill {
   border-radius: 10px 10px 0 0;
 }
 
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
 @media (max-width: 500px) {
   .card-header {
   padding-left: 12px;
@@ -801,6 +705,7 @@ input.pin-input:-moz-autofill {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 4px;
 }
 
 /* Message */
@@ -891,13 +796,6 @@ input.pin-input:-moz-autofill {
   font-size: 0.8rem;
   text-align: center;
   padding-bottom: 4px;
-}
-
-.create-task-input-container {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 4px;
 }
 
 .new-task-element,
@@ -1229,19 +1127,6 @@ input.pin-input:-moz-autofill {
 }
 
 /* PIN-form */
-.pin-box {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--text-color);
-  background-color: var(--main-bg-color);
-  padding: 10px 40px 20px;
-  border-radius: 10px;
-  z-index: 20;
-  border: 1px solid var(--text4-color);
-}
-
 .pin-form {
   color: var(--text-color);
   display: flex;
@@ -1688,7 +1573,14 @@ input.pin-input:-moz-autofill {
   max-height: calc(100vh - 300px);
   overflow-y: scroll;
   flex-direction: column-reverse;
-  padding-right: 8px;
+
+  /* Hide scrollbar but keep scroll behavior */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE & Edge Legacy */
+}
+
+.messages-container::-webkit-scrollbar {
+  display: none;               /* Chrome, Safari, Opera */
 }
 
 .message-wrapper {
@@ -1732,23 +1624,6 @@ input.pin-input:-moz-autofill {
 
 .message-timestamp {
   color: #7c93a6;
-}
-
-.message-input-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.message-input {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 1rem;
-  height: 50px;
-  padding: 4px 8px;
-  resize: none;
-  color: var(--text-color);
-  background-color: var(--main-bg-color);
 }
 
 .message-btn {
@@ -1863,10 +1738,6 @@ input.pin-input:-moz-autofill {
   background-color: #fec5c5;
 }
 
-.active-selection {
-  border: 1px solid var(--active-selection-color);
-}
-
 /* Hover effects */
 .hover:hover {
   cursor: pointer;
@@ -1875,105 +1746,6 @@ input.pin-input:-moz-autofill {
 .hover-border:hover {
   cursor: pointer;
   border: 1px solid var(--selection-hover-color);
-}
-
-/* Buttons */
-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  height: 32px;
-  min-width: 32px;
-  padding-inline: 16px;
-  font-size: 0.8em;
-  font-weight: 500;
-  font-family: inherit;
-  color: var(--text-color);
-  background-color: var(--button-bg);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1;
-}
-button:hover {
-  background-color: var(--bg2-color);
-}
-
-.close-widget-btn {
-  background: none;
-  padding-inline: 4px;
-  color: var(--text5-color);
-}
-
-.close-widget-btn:hover {
-  background: none;
-  color: var(--text4-color);
-}
-
-.btn {
-  color: white;
-  background-color: #007bff;
-}
-
-.btn:hover {
-  color: white;
-  background-color: #1083ff;
-}
-
-.darkmode-btn {
-  background: none;
-  width: max-content;
-  padding: 0;
-}
-
-.darkmode-btn:hover {
-  background: none;
-}
-
-.close-button {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-}
-
-.close-button-msg {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  height: 100%;
-  right: 0;
-  top: 0;
-  background-color: #00000022;
-  border-radius: 0 10px 10px 0;
-}
-
-.close-button-msg i {
-  font-size: 0.8rem;
-}
-
-.close-button-msg:hover {
-  background-color: #00000033;
-}
-
-.save-btn {
-  color: white;
-  background-color: #109967;
-}
-
-.save-btn:hover {
-  background-color: #0c8559;
-}
-
-.delete-btn {
-  color: white;
-  background-color: #b83434;
-}
-
-.delete-btn:hover {
-  background-color: #a32b2b;
 }
 
 /* Toggle switch */
@@ -2064,18 +1836,6 @@ button:hover {
   color: #fff;
 }
 
-/* Input */
-input {
-  padding: 0.4em;
-  color: var(--text-color);
-  background-color: var(--main-bg-color);
-  border: 1px solid var(--border-color);
-}
-
-textarea {
-    border: 1px solid var(--border-color);
-}
-
 /* Colors */
 .default-select {
   color: var(--text-color);
@@ -2091,15 +1851,11 @@ textarea {
 }
 
 .blue {
-    color: #2999f7
+    color: #38bdf8
 }
 
 .grey {
   color: #a6a6a6;
-}
-
-.lightgrey {
-  color: #ccc;
 }
 
 .orange {
@@ -2473,25 +2229,6 @@ a:hover {
   margin-bottom: 12px;
 }
 
-/* Settings */
-.version-input {
-  box-sizing: border-box;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  max-width: 200px;
-  height: 38px;
-  border: none;
-  border-radius: 19px;
-  text-align: center;
-}
-
-.version-btn {
-  max-width: 200px;
-}
-
-.version-btn:disabled {
-  background-color: var(--bg3-color);
-}
 
 /* Modal */
 .modal {

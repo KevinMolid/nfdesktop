@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import avatar from "../assets/defaultAvatar.png";
 
+import Button from "./Button";
+
 import bcrypt from "bcryptjs";
 import {
   doc,
@@ -8,8 +10,6 @@ import {
   collection,
   addDoc,
   onSnapshot,
-  deleteDoc,
-  setDoc,
   Unsubscribe,
 } from "firebase/firestore";
 import { db } from "./firebase";
@@ -124,13 +124,13 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
     };
   }, []);
 
-  const toggleCreateActive = () => {
-    setIsCreateActive(!isCreateActive);
-  };
-
-  const cancelEditingUser = () => {
-    setSelectedUser(null);
-    setIsEditingImg(false);
+  const startCreateUser = () => {
+    setIsCreateActive(true);
+    setSelectedUser(null); // ensure edit closes
+    setError("");
+    setSuccess("");
+    setUsername("");
+    setPin("");
   };
 
   const registerUser = async (username: string, pin: string) => {
@@ -157,6 +157,7 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
       setUsername("");
       setPin("");
       setError("");
+      setIsCreateActive(false);
     } catch (error) {
       console.error("Error registering user:", error);
       setError("Registration failed.");
@@ -172,6 +173,7 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
       imgurl: newImgUrl,
     });
     setSelectedUser(null);
+    setIsEditingImg(false);
   };
 
   // Helper: get group names a user belongs to
@@ -183,174 +185,257 @@ const Userlist = ({ user, toggleActive }: UsersProps) => {
   };
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
-        <h3 className="card-title">Userlist</h3>
+        <h3 className="card-title">
+          {isCreateActive ? (
+            "Create new user"
+          ) : selectedUser ? (
+            <p>
+              Edit user <span className="user">{selectedUser.username}</span>
+            </p>
+          ) : (
+            "List of users"
+          )}
+        </h3>
         <div className="card-header-right">
-          {!isCreateActive && (
-            <button onClick={toggleCreateActive}>
-              <i className="fa-solid fa-plus grey icon-md hover"></i>
+          {!isCreateActive && !selectedUser && (
+            <Button
+              size="sm"
+              variant="transparent"
+              onClick={startCreateUser}
+              iconLeft={<i className="fa-solid fa-plus"></i>}
+            >
               Add
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       <div className="card-body">
-        {isCreateActive && (
-          <div className="create-task-box">
-            Create new user
-            <div className="create-task-input-container">
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                maxLength={3}
-                onChange={(e) => setUsername(e.target.value.toUpperCase())}
-              />
-              <input
-                type="password"
-                placeholder="PIN-code"
-                value={pin}
-                maxLength={4}
-                onChange={(e) => setPin(e.target.value)}
-              />
-              <div className="button-group">
-                <button
-                  className="save-btn"
-                  onClick={() => registerUser(username, pin)}
-                >
-                  <i className="fa-solid fa-check"></i>
-                  Confirm
-                </button>
-                <button onClick={toggleCreateActive} className="delete-btn">
-                  <i className="fa-solid fa-cancel"></i>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* Feedback messages (always visible) */}
         {error && <p style={{ color: "red" }}>{error}</p>}
         {success && <p style={{ color: "green" }}>{success}</p>}
 
-        <ul>
-          <li className="userlist">
-            <h4>Code</h4>
-            <h4>Name</h4>
-            <h4>Role</h4>
-            <h4>Groups</h4>
-          </li>
-          {users.map((u) => {
-            const userGroups = groupsForUser(u.id);
-            return (
-              <li key={u.id} className="userlist">
-                <p>
-                  <strong className="user">{u.username}</strong>
-                </p>
-                <p className="user-name">
-                  <span
-                    onClick={() => {
-                      setSelectedUser(u);
-                      setEditName(u.name ?? "");
-                      setEditNickname(u.nickname ?? "");
-                      setNewImgUrl(u.imgurl ?? "");
-                    }}
-                  >
-                    {u.name || <em>(No name)</em>}
-                  </span>
-                </p>
-                <p>{u.role === "admin" ? "Admin" : "User"}</p>
-                <p>
-                  {userGroups.length ? (
-                    userGroups.join(", ")
-                  ) : (
-                    <span className="lightgrey">(no groups)</span>
-                  )}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+        {isCreateActive ? (
+          /* 1️⃣ CREATE NEW USER VIEW */
+          <div>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col">
+                <label htmlFor="newUserName" className="cursor-pointer">
+                  User name
+                </label>
+                <input
+                  id="newUserName"
+                  className="text-xl font-bold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color)"
+                  type="text"
+                  value={username}
+                  maxLength={3}
+                  onChange={(e) => setUsername(e.target.value.toUpperCase())}
+                  autoComplete="new-username"
+                  name="nf-create-user-username"
+                />
+              </div>
 
-      {/* Modal or Popup */}
-      {selectedUser && (
-        <div className="edit-user-container">
-          <h3>Edit user: {selectedUser.username}</h3>
-          {(() => {
-            const canEdit =
-              user.role === "admin" || user.username === selectedUser.username;
+              <div className="flex flex-col mb-2">
+                <label htmlFor="newUserPIN" className="cursor-pointer">
+                  PIN
+                </label>
+                <input
+                  id="newUserPIN"
+                  className="text-xl font-bold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color)"
+                  type="password"
+                  value={pin}
+                  maxLength={4}
+                  onChange={(e) => setPin(e.target.value)}
+                  autoComplete="new-password"
+                  name="nf-create-user-pin"
+                />
+              </div>
 
-            return (
-              <>
-                <div className="edit-img-container">
-                  <img
-                    src={selectedUser.imgurl || avatar}
-                    alt=""
-                    className="avatar-large"
-                  />
-                  {canEdit && (
-                    <button
-                      className="edit-img-btn"
-                      onClick={() => setIsEditingImg(!isEditingImg)}
-                    >
-                      <i className="fa-solid fa-pencil"></i>
-                    </button>
-                  )}
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => registerUser(username, pin)}
+                  iconLeft={<i className="fa-solid fa-check"></i>}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  variant="tertiary"
+                  onClick={() => setIsCreateActive(false)}
+                  iconLeft={<i className="fa-solid fa-cancel"></i>}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : selectedUser ? (
+          /* 2️⃣ EDIT USER VIEW */
+          <div className="edit-user-container">
+            {(() => {
+              const canEdit =
+                user.role === "admin" ||
+                user.username === selectedUser.username;
 
-                {isEditingImg && (
-                  <>
-                    <label htmlFor="imgurl">Image URL:</label>
-                    <input
-                      id="imgurl"
-                      value={newImgUrl}
-                      onChange={(e) => setNewImgUrl(e.target.value)}
-                      disabled={!canEdit}
+              return (
+                <>
+                  {/* Avatar & edit button */}
+                  <div className="flex gap-2 mb-2 items-end">
+                    <img
+                      src={selectedUser.imgurl || avatar}
+                      alt=""
+                      className="avatar-large"
                     />
-                  </>
-                )}
+                    {canEdit && !isEditingImg && (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        onClick={() => {
+                          // start image editing mode
+                          setIsEditingImg(true);
+                          setNewImgUrl(selectedUser.imgurl ?? "");
+                        }}
+                      >
+                        <i className="fa-solid fa-pencil"></i>
+                      </Button>
+                    )}
+                  </div>
 
-                <label htmlFor="name">Name:</label>
-                <input
-                  id="name"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  disabled={!canEdit}
-                />
+                  {/* IMAGE EDIT MODE */}
+                  {isEditingImg && (
+                    <>
+                      <label htmlFor="imgurl">Image URL</label>
+                      <input
+                        id="imgurl"
+                        value={newImgUrl}
+                        onChange={(e) => setNewImgUrl(e.target.value)}
+                        disabled={!canEdit}
+                        spellCheck={false}
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <Button
+                          className="save-btn"
+                          onClick={handleSaveUser}
+                          disabled={!canEdit}
+                          iconLeft={<i className="fa-solid fa-check"></i>}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="tertiary"
+                          className="delete-btn"
+                          onClick={() => {
+                            // reset to original image and exit image edit mode
+                            setNewImgUrl(selectedUser.imgurl ?? "");
+                            setIsEditingImg(false);
+                          }}
+                          iconLeft={<i className="fa-solid fa-cancel"></i>}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  )}
 
-                <label htmlFor="nickname">Nickname:</label>
-                <input
-                  id="nickname"
-                  value={editNickname}
-                  onChange={(e) => setEditNickname(e.target.value)}
-                  disabled={!canEdit}
-                />
+                  {/* NORMAL FIELDS (ONLY WHEN NOT EDITING IMAGE) */}
+                  {!isEditingImg && (
+                    <>
+                      <label htmlFor="name">Name:</label>
+                      <input
+                        id="name"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        disabled={!canEdit}
+                        className="mb-1"
+                        spellCheck={false}
+                      />
 
-                <div className="edit-user-btn-container">
-                  <button
-                    className="save-btn"
-                    onClick={handleSaveUser}
-                    disabled={!canEdit}
-                  >
-                    <i className="fa-solid fa-check"></i>
-                    Save
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={() => setSelectedUser(null)}
-                  >
-                    <i className="fa-solid fa-cancel"></i>
-                    Cancel
-                  </button>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      )}
+                      <label htmlFor="nickname" className="cursor-pointer">
+                        Display name
+                      </label>
+                      <input
+                        id="nickname"
+                        value={editNickname}
+                        onChange={(e) => setEditNickname(e.target.value)}
+                        disabled={!canEdit}
+                        className="mb-4"
+                        spellCheck={false}
+                      />
+
+                      <div className="flex gap-2">
+                        <Button
+                          className="save-btn"
+                          onClick={handleSaveUser}
+                          disabled={!canEdit}
+                          iconLeft={<i className="fa-solid fa-check"></i>}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="tertiary"
+                          className="delete-btn"
+                          onClick={() => {
+                            setSelectedUser(null);
+                            setIsEditingImg(false);
+                          }}
+                          iconLeft={<i className="fa-solid fa-cancel"></i>}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        ) : (
+          /* 3️⃣ USER LIST VIEW */
+          <ul className="">
+            <li className="grid grid-cols-[42px_200px_60px_auto]">
+              <h4>Code</h4>
+              <h4>Name</h4>
+              <h4>Role</h4>
+              <h4>Groups</h4>
+            </li>
+            {users.map((u) => {
+              const userGroups = groupsForUser(u.id);
+              return (
+                <li
+                  key={u.id}
+                  className="grid grid-cols-[42px_200px_60px_auto] hover:bg-(--bg4-color) py-1 cursor-pointer rounded-lg"
+                  onClick={() => {
+                    setIsCreateActive(false);
+                    setSelectedUser(u);
+                    setEditName(u.name ?? "");
+                    setEditNickname(u.nickname ?? "");
+                    setNewImgUrl(u.imgurl ?? "");
+                    setIsEditingImg(false);
+                    setError("");
+                    setSuccess("");
+                  }}
+                >
+                  <p>
+                    <strong className="user">{u.username}</strong>
+                  </p>
+                  <p className="user-name">
+                    <span>{u.name || <em>(No name)</em>}</span>
+                  </p>
+                  <p>{u.role === "admin" ? "Admin" : "User"}</p>
+                  <p>
+                    {userGroups.length ? (
+                      userGroups.join(", ")
+                    ) : (
+                      <span className="text-(--text4-color)">(No group)</span>
+                    )}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

@@ -10,6 +10,8 @@ import {
   query,
 } from "firebase/firestore";
 
+import Button from "./Button";
+
 import { TaskData } from "../types";
 import { isValidTask } from "../utils/validators";
 
@@ -133,7 +135,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setTasks(updatedTasks);
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
-    setNewTaskPriority(0)
+    setNewTaskPriority(0);
     setIsEditingNewPriority(false);
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
@@ -153,10 +155,10 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const discardNewTask = () => {
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
-    setNewTaskPriority(0)
+    setNewTaskPriority(0);
     setIsEditingNewPriority(false);
     setIsCreateActive(false);
-  }
+  };
 
   const handleRename = async (id: number, newName: string) => {
     const updatedTasks = tasks.map((task) =>
@@ -241,53 +243,56 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   };
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">Tasklist</h3>
         <div className="card-header-right">
-          <div className="icon-container">
-            <button onClick={toggleFiltering}>
-              <i className="fa-solid fa-filter grey icon-md hover"></i>
-              Filter
-            </button>
-            {isFilterActive && (
-              <div className="filter-dropdown" ref={filterRef}>
-                {["active", "finished", "onhold", "cancelled"].map((status) => (
-                  <div
-                    key={status}
-                    className={`filter filter-${status} hover-border ${
-                      visibleStatuses[status] ? "active-selection" : ""
-                    }`}
-                    onClick={() =>
-                      setVisibleStatuses((prev) => ({
-                        ...prev,
-                        [status]: !prev[status],
-                      }))
-                    }
-                  >
-                    {status === "active" && (
-                      <i className="fa-solid fa-circle lightgrey"></i>
-                    )}
-                    {status === "finished" && (
-                      <i className="fa-solid fa-check green"></i>
-                    )}
-                    {status === "onhold" && (
-                      <i className="fa-solid fa-pause yellow"></i>
-                    )}
-                    {status === "cancelled" && (
-                      <i className="fa-solid fa-xmark red"></i>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <button
-            className="close-widget-btn"
+          <Button
+            variant="transparent"
+            size="sm"
+            iconLeft={<i className="fa-solid fa-filter"></i>}
+            onClick={toggleFiltering}
+          >
+            Filter
+          </Button>
+          {isFilterActive && (
+            <div className="filter-dropdown" ref={filterRef}>
+              {["active", "finished", "onhold", "cancelled"].map((status) => (
+                <div
+                  key={status}
+                  className={`filter filter-${status} hover-border ${
+                    visibleStatuses[status] ? "active-selection" : ""
+                  }`}
+                  onClick={() =>
+                    setVisibleStatuses((prev) => ({
+                      ...prev,
+                      [status]: !prev[status],
+                    }))
+                  }
+                >
+                  {status === "active" && (
+                    <i className="fa-solid fa-circle lightgrey"></i>
+                  )}
+                  {status === "finished" && (
+                    <i className="fa-solid fa-check green"></i>
+                  )}
+                  {status === "onhold" && (
+                    <i className="fa-solid fa-pause yellow"></i>
+                  )}
+                  {status === "cancelled" && (
+                    <i className="fa-solid fa-xmark red"></i>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <Button
+            variant="transparent"
+            size="sm"
             onClick={() => toggleActive("Tasks")}
           >
-            <i className="fa-solid fa-x icon-md hover" />
-          </button>
+            <i className="fa-solid fa-x" />
+          </Button>
         </div>
       </div>
 
@@ -371,15 +376,22 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
             </div>
 
             <div className="new-task-btn-container">
-              <button onClick={addNewTask} className="save-btn">
-                <i className="fa-solid fa-floppy-disk icon-md"></i>
+              <Button
+                onClick={addNewTask}
+                className="save-btn"
+                iconLeft={<i className="fa-solid fa-floppy-disk"></i>}
+              >
                 Save
-              </button>
+              </Button>
 
-              <button onClick={discardNewTask} className="delete-btn">
-                <i className="fa-solid fa-trash icon-md"></i>
+              <Button
+                variant="tertiary"
+                onClick={discardNewTask}
+                className="delete-btn"
+                iconLeft={<i className="fa-solid fa-trash"></i>}
+              >
                 Discard
-              </button>
+              </Button>
             </div>
           </>
         )}

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import Button from "./Button";
+
 export default function DarkModeToggle() {
   const [dark, setDark] = useState(
     () => localStorage.getItem("theme") === "dark"
@@ -17,22 +19,18 @@ export default function DarkModeToggle() {
   }, [dark]);
 
   return (
-    <button className="default-select" onClick={() => setDark(!dark)}>
-      {dark ? (
-        <>
-          <div className="dropdown-item-icon-container">
-            <i className="fa-solid fa-sun grey"></i>
-          </div>
-          <div className="dropdown-item-text-container">Set to Lightmode</div>
-        </>
-      ) : (
-        <>
-          <div className="dropdown-item-icon-container">
-            <i className="fa-solid fa-moon grey"></i>
-          </div>
-          <div className="dropdown-item-text-container">Set to Darkmode</div>
-        </>
-      )}
-    </button>
+    <Button
+      variant="tertiary"
+      onClick={() => setDark(!dark)}
+      iconLeft={
+        dark ? (
+          <i className="fa-solid fa-sun"></i>
+        ) : (
+          <i className="fa-solid fa-moon"></i>
+        )
+      }
+    >
+      {dark ? <>Lightmode</> : <>Darkmode</>}
+    </Button>
   );
 }
