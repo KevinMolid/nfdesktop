@@ -33,7 +33,7 @@ const NatoAlphabet = ({ toggleActive }: NatoProps) => {
   ];
 
   return (
-    <div className="card has-header grow-1">
+    <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">Nato alphabet</h3>
       </div>

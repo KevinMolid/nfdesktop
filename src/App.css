@@ -20,10 +20,18 @@
 
 :root {
   --brand3-color: #e7600b;
-  --main-bg-color: #c8d6e9;
+
+  /*--main-bg-color: #c8d6e9;
   --dash-bg-color: #ecf1f8;
   --bg2-color: #dae3f0;
   --bg3-color: #f5f8fb;
+  --bg4-color: #d9e2e7;
+  --bg5-color: #ffffff;*/
+
+  --main-bg-color: #ffffff;
+  --dash-bg-color: #ecf1f8;
+  --bg2-color: #f5f8fb;
+  --bg3-color: #ffffff;
   --bg4-color: #d9e2e7;
   --bg5-color: #ffffff;
   --usermsg-bg-color: #e2f0fa;
@@ -229,6 +237,13 @@ header {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+}
+
+.main-container,
+.widget-container,
+.container {
+  width: 100%;
+  max-width: none;
 }
 
 /* Sidebar */
@@ -527,9 +542,9 @@ ul {
 .main-container {
   padding: 12px 32px 32px 32px;
   flex: 1;
-  overflow-y: auto;       /* still scrollable */
+  overflow-y: auto;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
   background-color: var(--dash-bg-color);
@@ -575,8 +590,9 @@ ul {
 }
 
 .widget-container {
+  width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 10px;
   flex: 1;
@@ -680,7 +696,6 @@ input.pin-input:-moz-autofill {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 1290px;
   margin-inline: 16px;
 }
 
@@ -1760,7 +1775,7 @@ input.pin-input:-moz-autofill {
 }
 
 .nato-letter {
-  color: var(--text3-color);
+  color: var(--text-color);
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -1877,7 +1892,7 @@ button {
   line-height: 1;
 }
 button:hover {
-  background-color: var(--button-hover-bg);
+  background-color: var(--bg2-color);
 }
 
 .close-widget-btn {

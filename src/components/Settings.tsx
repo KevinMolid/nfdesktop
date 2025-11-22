@@ -15,7 +15,6 @@ import bcrypt from "bcryptjs";
 
 import { useState } from "react";
 
-
 type User = {
   id: string;
   username: string;
@@ -27,51 +26,51 @@ type SettingsProps = {
 };
 
 const Settings = ({ user }: SettingsProps) => {
-    const [showPinForm, setShowPinForm] = useState(false);
-    const [newPin, setNewPin] = useState("");
-    const [showPin, setShowPin] = useState(false);
-    const [feedback, setFeedback] = useState("");
+  const [showPinForm, setShowPinForm] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-    const handlePinUpdate = async () => {
-        if (newPin.length !== 4) {
-          setFeedback("The code must consist of 4 digits!");
-          return;
-        }
-    
-        try {
-          const db = getFirestore();
-          const usersRef = collection(db, "users");
-          const q = query(
-            usersRef,
-            where("username", "==", user.username.toUpperCase())
-          );
-          const querySnapshot = await getDocs(q);
-    
-          if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            const userDocRef = doc(db, "users", userDoc.id);
-            const hashedPin = await bcrypt.hash(newPin, 10);
-    
-            await updateDoc(userDocRef, { pinHash: hashedPin });
-    
-            setFeedback("PIN-kode oppdatert.");
-            setShowPinForm(false);
-            setNewPin("");
-          } else {
-            setFeedback("Bruker ikke funnet.");
-          }
-        } catch (error) {
-          console.error("Error updating PIN:", error);
-          setFeedback("En feil oppstod under oppdatering.");
-        }
-      };
-    
-      const cancelPINupdate = () => {
+  const handlePinUpdate = async () => {
+    if (newPin.length !== 4) {
+      setFeedback("The code must consist of 4 digits!");
+      return;
+    }
+
+    try {
+      const db = getFirestore();
+      const usersRef = collection(db, "users");
+      const q = query(
+        usersRef,
+        where("username", "==", user.username.toUpperCase())
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userDocRef = doc(db, "users", userDoc.id);
+        const hashedPin = await bcrypt.hash(newPin, 10);
+
+        await updateDoc(userDocRef, { pinHash: hashedPin });
+
+        setFeedback("PIN-kode oppdatert.");
         setShowPinForm(false);
         setNewPin("");
-        setShowPin(false);
-        setFeedback("");
-      };
+      } else {
+        setFeedback("Bruker ikke funnet.");
+      }
+    } catch (error) {
+      console.error("Error updating PIN:", error);
+      setFeedback("En feil oppstod under oppdatering.");
+    }
+  };
+
+  const cancelPINupdate = () => {
+    setShowPinForm(false);
+    setNewPin("");
+    setShowPin(false);
+    setFeedback("");
+  };
 
   return (
     <div className="container">
@@ -79,21 +78,23 @@ const Settings = ({ user }: SettingsProps) => {
         <h1>Settings</h1>
       </div>
 
-      <DarkModeToggle />
+      <div className="flex flex-col max-w-40 gap-1 mb-4">
+        <DarkModeToggle />
 
-      <div
-            className="dropdown-item default-select hover-border"
-            onClick={() => {
-              setShowPinForm(true);
-            }}
-          >
-            <div className="dropdown-item-icon-container">
-              <i className="fa-solid fa-asterisk grey m-l-1"></i>
-            </div>
-            <div className="dropdown-item-text-container">Change PIN</div>
+        <button
+          className="default-select"
+          onClick={() => {
+            setShowPinForm(true);
+          }}
+        >
+          <div className="dropdown-item-icon-container">
+            <i className="fa-solid fa-asterisk grey m-l-1"></i>
           </div>
+          <div className="dropdown-item-text-container">Change PIN</div>
+        </button>
+      </div>
 
-      {user.role === "admin" && <AppVersionControl user={user}/>}
+      {user.role === "admin" && <AppVersionControl user={user} />}
 
       {showPinForm && (
         <div className="pin-box">

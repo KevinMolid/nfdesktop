@@ -17,25 +17,22 @@ export default function DarkModeToggle() {
   }, [dark]);
 
   return (
-    <div
-      className="dropdown-item default-select hover-border"
-      onClick={() => setDark(!dark)}
-    >
+    <button className="default-select" onClick={() => setDark(!dark)}>
       {dark ? (
         <>
           <div className="dropdown-item-icon-container">
             <i className="fa-solid fa-sun grey"></i>
           </div>
-          <div className="dropdown-item-text-container">Lightmode</div>
+          <div className="dropdown-item-text-container">Set to Lightmode</div>
         </>
       ) : (
         <>
           <div className="dropdown-item-icon-container">
             <i className="fa-solid fa-moon grey"></i>
           </div>
-          <div className="dropdown-item-text-container">Darkmode</div>
+          <div className="dropdown-item-text-container">Set to Darkmode</div>
         </>
       )}
-    </div>
+    </button>
   );
 }
