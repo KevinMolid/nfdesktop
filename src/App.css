@@ -116,21 +116,14 @@ html, body {
 .page-transition {
   height: 100%;
   width: 100%;
-  animation: page-slide-in 500ms ease-out;
-  will-change: transform, opacity;
+  animation: page-slide-in 400ms cubic-bezier(0, 1.1, 0.5, 1);
+  will-change: transform;
 }
 
 @keyframes page-slide-in {
   /* Start off-screen to the right */
   0% {
-    transform: translateX(110vw);
-    opacity: 0;
-  }
-
-  /* Approaching and slightly overshooting the target (to the left) */
-  70% {
-    transform: translateX(-12px);
-    opacity: 1;
+    transform: translateX(100vw);
   }
 
   /* Roll back to the final position */
