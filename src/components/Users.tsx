@@ -8,7 +8,6 @@ type UsersProps = {
 };
 
 const Users = ({ user, toggleActive }: UsersProps) => {
-
   return (
     <div className="container">
       <div className="page-header">
@@ -17,16 +16,15 @@ const Users = ({ user, toggleActive }: UsersProps) => {
 
       <div className="widget-container">
         <SafeWrapper fallback={<div>Could not load users</div>}>
-            <Userlist user={user} toggleActive={toggleActive} />
+          <Userlist user={user} />
         </SafeWrapper>
 
         <SafeWrapper fallback={<div>Could not load user groups</div>}>
-            <Usergroups toggleActive={toggleActive} />
+          <Usergroups />
         </SafeWrapper>
       </div>
     </div>
   );
 };
-
 
 export default Users;

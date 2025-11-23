@@ -22,7 +22,6 @@ type UsersProps = {
     imgurl?: string;
     role: string;
   };
-  toggleActive: (name: string) => void;
 };
 
 type GroupMembershipState = Record<
@@ -30,7 +29,7 @@ type GroupMembershipState = Record<
   { name: string; members: Set<string> } // Set of userIds
 >;
 
-const Userlist = ({ user, toggleActive }: UsersProps) => {
+const Userlist = ({ user }: UsersProps) => {
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
