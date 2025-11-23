@@ -35,13 +35,7 @@ import { db } from "./components/firebase";
 import "./App.css";
 
 import { useState, useEffect } from "react";
-import {
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 const DEFAULT_WIDGETS = [
   { name: "Links", active: true },
@@ -54,6 +48,10 @@ const LOCAL_STORAGE_KEY = "widgets";
 type ToastType = "success" | "error" | "info" | "warning" | "";
 type Toast = { text: string; type: ToastType };
 type ToastWithId = Toast & { id: string };
+
+const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="page-transition">{children}</div>
+);
 
 function App() {
   type User = {
@@ -70,6 +68,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
   const [alerts, setAlerts] = useState<ToastWithId[]>([]);
+  const location = useLocation();
 
   const pageToPath: Record<string, string> = {
     Dashboard: "/",
@@ -259,67 +258,88 @@ function App() {
             ))}
           </div>
 
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Dashboard
-                  user={user}
-                  widgets={widgets}
-                  toggleActive={toggleActive}
-                />
-              }
-            />
+          <div key={location.pathname} className="page-transition">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Page>
+                    <Dashboard
+                      user={user}
+                      widgets={widgets}
+                      toggleActive={toggleActive}
+                    />
+                  </Page>
+                }
+              />
 
-            <Route
-              path="/tools"
-              element={<Tools toggleActive={toggleActive} />}
-            />
+              <Route
+                path="/tools"
+                element={
+                  <Page>
+                    <Tools toggleActive={toggleActive} />
+                  </Page>
+                }
+              />
 
-            <Route
-              path="/chat"
-              element={
-                <SafeWrapper fallback={<div>Kunne ikke laste meldinger</div>}>
-                  <Messages
-                    username={user.username}
-                    toggleActive={toggleActive}
-                  />
-                </SafeWrapper>
-              }
-            />
+              <Route
+                path="/chat"
+                element={
+                  <Page>
+                    {" "}
+                    <SafeWrapper
+                      fallback={<div>Kunne ikke laste meldinger</div>}
+                    >
+                      <Messages
+                        username={user.username}
+                        toggleActive={toggleActive}
+                      />
+                    </SafeWrapper>
+                  </Page>
+                }
+              />
 
-            <Route
-              path="/foodorders"
-              element={
-                <SafeWrapper
-                  fallback={<div>Kunne ikke laste kebab-modulen</div>}
-                >
-                  <Foodorders
-                    user={user}
-                    setAlerts={setAlertsAdapter}
-                    toggleActive={toggleActive}
-                  />
-                </SafeWrapper>
-              }
-            />
+              <Route
+                path="/foodorders"
+                element={
+                  <Page>
+                    <SafeWrapper
+                      fallback={<div>Kunne ikke laste kebab-modulen</div>}
+                    >
+                      <Foodorders
+                        user={user}
+                        setAlerts={setAlertsAdapter}
+                        toggleActive={toggleActive}
+                      />
+                    </SafeWrapper>
+                  </Page>
+                }
+              />
 
-            <Route
-              path="/users"
-              element={<UsersList user={user} toggleActive={toggleActive} />}
-            />
+              <Route
+                path="/users"
+                element={
+                  <Page>
+                    <UsersList user={user} toggleActive={toggleActive} />
+                  </Page>
+                }
+              />
 
-            <Route
-              path="/settings"
-              element={
-                <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
-                  <SettingsPage onLogout={handleLogout} user={user} />
-                </SafeWrapper>
-              }
-            />
+              <Route
+                path="/settings"
+                element={
+                  <Page>
+                    <SafeWrapper fallback={<div>Kunne ikke laste brukere</div>}>
+                      <SettingsPage onLogout={handleLogout} user={user} />
+                    </SafeWrapper>
+                  </Page>
+                }
+              />
 
-            {/* Fallback: any unknown route goes to Dashboard */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Fallback: any unknown route goes to Dashboard */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
         </div>
       </div>
     </>

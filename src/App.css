@@ -113,6 +113,32 @@ html, body {
   width: 100%;
 }
 
+.page-transition {
+  height: 100%;
+  width: 100%;
+  animation: page-slide-in 500ms ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes page-slide-in {
+  /* Start off-screen to the right */
+  0% {
+    transform: translateX(110vw);
+    opacity: 0;
+  }
+
+  /* Approaching and slightly overshooting the target (to the left) */
+  70% {
+    transform: translateX(-12px);
+    opacity: 1;
+  }
+
+  /* Roll back to the final position */
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
