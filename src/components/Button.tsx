@@ -52,13 +52,13 @@ export default function Button({
           primary:
             "bg-(--brand-color) text-white hover:bg-(--brand2-color) focus:ring-(--text-color)",
           secondary:
-            "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-300",
+            "bg-(--text2-color) text-(--main-bg-color) hover:bg-(--text-color) focus:ring-(--text-color)",
           tertiary:
-            "bg-(--bg4-color) text-(--text4-color) hover:bg-(--bg5-color) focus:ring-gray-300",
+            "bg-(--bg4-color) text-(--text4-color) hover:bg-(--bg5-color) focus:ring-(--text-color)",
           destructive:
-            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-300",
+            "bg-[#cc3b3b] text-white hover:bg-red-700 focus:ring-red-300",
           transparent:
-            "bg-transparent hover:bg-(--bg4-color) text-(--text4-color) focus:ring-gray-200",
+            "bg-transparent hover:bg-(--bg4-color) text-(--text4-color) focus:ring-(--text-color)",
         }[variant],
 
         // Full width

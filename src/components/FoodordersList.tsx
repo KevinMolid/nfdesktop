@@ -9,6 +9,8 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+import Button from "./Button";
+
 type FoodItem = {
   item: string;
   options?: {
@@ -207,15 +209,25 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">Orders</h3>
-        <div className="card-header-right icon-container">
-          <button onClick={() => setShowOrdersModal(!showOrdersModal)}>
-            <i className="fa-solid fa-file"></i> Show Page
-          </button>
+        <div className="card-header-right">
+          <Button
+            size="sm"
+            variant="tertiary"
+            onClick={() => setShowOrdersModal(!showOrdersModal)}
+            iconLeft={<i className="fa-solid fa-file"></i>}
+          >
+            Show Page
+          </Button>
           {user.role === "admin" && orders.length !== 0 && (
-            <button className="delete-btn" onClick={clearAllOrders}>
-              <i className="fa-solid fa-trash"></i>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="delete-btn"
+              onClick={clearAllOrders}
+              iconLeft={<i className="fa-solid fa-trash"></i>}
+            >
               Delete orders
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -266,9 +278,14 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
       {/* Orders Modal */}
       {showOrdersModal && (
         <div className="modal foodorders-modal">
-          <button onClick={() => setShowOrdersModal(!showOrdersModal)}>
-            <i className="fa-solid fa-x"></i> Close
-          </button>
+          <Button
+            variant="tertiary"
+            size="sm"
+            onClick={() => setShowOrdersModal(!showOrdersModal)}
+            iconLeft={<i className="fa-solid fa-x"></i>}
+          >
+            Close
+          </Button>
 
           <ul className="foodorders-modal-list">
             {orders.map((order) => {

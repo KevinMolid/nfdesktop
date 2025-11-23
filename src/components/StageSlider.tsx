@@ -18,13 +18,17 @@ const StageSlider = ({ value, onChange, labels }: StageSliderProps) => {
 
   return (
     <div className="stage-slider">
-
       {/* peppers */}
-      <div className="slider-labels">
+      <div className="slider-labels mb-2">
         {labels.map((_, i) => (
           <span
             key={i}
-            className={i === currentIndex ? "active" : ""}
+            className={
+              " " +
+              (i === currentIndex
+                ? "opacity-100 scale-125 -translate-y-1"
+                : "opacity-60 scale-100")
+            }
             onClick={() => onChange(labels[i])}
           >
             <i

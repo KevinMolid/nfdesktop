@@ -195,7 +195,7 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
     {
       name: "Cheeseburger Tallerken",
       sizes: ["130g", "160g", "255g"],
-      description: "Cheeseburger med pommes frittes ved siden av.",
+      description: "Cheeseburger med pommes ved siden av.",
       img: "https://gulsetgrillen.no/wp-content/uploads/2022/02/burgertallerkenbasic.png",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
@@ -316,7 +316,7 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
         {/* Order food */}
         <div className="card has-header grow">
           <div className="card-header">
-            <h3 className="card-title">Order food</h3>
+            <h3 className="card-title">Select food</h3>
           </div>
 
           <div className="scroll-wrapper">
@@ -330,13 +330,18 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
               {menu.map((food) => (
                 <div
                   key={food.name}
-                  className={`food-card ${
-                    selectedFood === food.name ? "selected" : ""
-                  }`}
+                  className={`food-card pb-4 rounded-lg cursor-pointer transform transition-all duration-200 
+                    hover:-translate-y-1 ${
+                      selectedFood === food.name ? "bg-(--bg3-color)" : ""
+                    }`}
                   onClick={() => handleSelectFood(food.name)}
                 >
                   {food.img ? (
-                    <img src={food.img} alt={food.name} />
+                    <img
+                      src={food.img}
+                      alt={food.name}
+                      className="rounded-lg"
+                    />
                   ) : (
                     <div className="placeholder" />
                   )}
@@ -344,11 +349,13 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
                     <p>NOK</p>
                     <p className="price">{food.prices.join(" / ")}</p>
                   </div>
-                  <div className="food-info">
-                    <h3>{food.name}</h3>
-                  </div>
-                  <div className="food-description">
-                    <p>{food.description}</p>
+                  <div className={"px-2"}>
+                    <div className="text-sm mt-2">
+                      <h3 className="font-semibold">{food.name}</h3>
+                    </div>
+                    <div className="text-sm text-(--text3-color)">
+                      <p>{food.description}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -362,25 +369,29 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
           </div>
 
           {selectedItem && (
-            <div className="food-container">
-              <h2>{selectedItem.name}</h2>
-
-              {user.role === "admin" && (
-                <div className="order-for" style={{ marginBottom: 12 }}>
-                  <h4 style={{ marginBottom: 6 }}>Order for:</h4>
-                  <select
-                    value={orderFor}
-                    onChange={(e) => setOrderFor(e.target.value)}
-                    className="input dropdown"
-                  >
-                    {userOptions.map((u) => (
-                      <option key={u.username} value={u.username}>
-                        {u.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+            <div className="food-container bg-(--bg3-color) mt-4 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl">{selectedItem.name}</h2>
+                {user.role === "admin" && (
+                  <div className="flex my-2">
+                    <select
+                      value={orderFor}
+                      onChange={(e) => setOrderFor(e.target.value)}
+                      className="bg-(--bg2-color) px-4 py-2 cursor-pointer rounded-full"
+                    >
+                      {userOptions.map((u) => (
+                        <option
+                          key={u.username}
+                          value={u.username}
+                          className="cursor-pointer"
+                        >
+                          {u.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
 
               <div className="food-options">
                 {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
@@ -446,7 +457,7 @@ const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
                   ) : null
                 )}
                 <div>
-                  <h4>Drink:</h4>
+                  <h4>Drink</h4>
                   <div>
                     <RadioButton
                       value={drink}

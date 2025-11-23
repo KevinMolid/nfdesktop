@@ -20,7 +20,7 @@ export default function DarkModeToggle() {
 
   return (
     <Button
-      variant="tertiary"
+      variant="secondary"
       onClick={() => setDark(!dark)}
       iconLeft={
         dark ? (

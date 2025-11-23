@@ -81,11 +81,11 @@ const Settings = ({ user, onLogout }: SettingsProps) => {
         <h1>Settings</h1>
       </div>
 
-      <div className="flex flex-col max-w-40 gap-1 mb-4">
+      <div className="flex flex-col sm:flex-row max-w-40 gap-1 mb-4">
         <DarkModeToggle />
 
         <Button
-          variant="tertiary"
+          variant="secondary"
           onClick={() => {
             setShowPinForm(true);
           }}
@@ -95,7 +95,7 @@ const Settings = ({ user, onLogout }: SettingsProps) => {
         </Button>
 
         <Button
-          variant="tertiary"
+          variant="secondary"
           className="pin-btn pin-btn-red"
           onClick={onLogout}
           iconLeft={<LogOut />}
@@ -142,7 +142,6 @@ const Settings = ({ user, onLogout }: SettingsProps) => {
             </div>
             <div className="button-group">
               <Button
-                className="pin-btn save-btn"
                 onClick={handlePinUpdate}
                 iconLeft={<i className="fa-solid fa-floppy-disk"></i>}
               >
@@ -150,7 +149,6 @@ const Settings = ({ user, onLogout }: SettingsProps) => {
               </Button>
               <Button
                 variant="tertiary"
-                className="pin-btn pin-btn-red"
                 onClick={cancelPINupdate}
                 iconLeft={<i className="fa-solid fa-ban"></i>}
               >

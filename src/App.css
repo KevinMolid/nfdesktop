@@ -1806,7 +1806,7 @@ input.pin-input:-moz-autofill {
 }
 
 .label {
-    background-color: var(--button-bg);
+    background-color: var(--bg2-color);
     font-weight: 500;
     display: flex;
     justify-content: center;
@@ -1828,11 +1828,11 @@ input.pin-input:-moz-autofill {
 }
 
 .label:hover {
-    background-color: var(--button-hover-bg);
+    background-color: var(--bg4-color);
 }
 
 .label.active {
-  background: #007bff;
+  background: #38bdf8;
   color: #fff;
 }
 
@@ -1930,17 +1930,11 @@ a:hover {
 .food-card {
   position: relative;
   flex: 0 0 auto;
-  border-radius: 10px;
   cursor: pointer;
-  background-color: var(--bg3-color);
   display: flex;
   width: 180px;
   flex-direction: column;
   overflow: hidden;
-}
-
-.food-card.selected {
-  background-color: var(--bg4-color);
 }
 
 .food-card img {
@@ -1959,8 +1953,7 @@ a:hover {
   right: 2px;
   background-color: var(--bg3-color);
   padding-inline: 12px;
-  height: 20px;
-  border: 1px solid var(--text4-color);
+  padding-block: 2px;
   border-radius: 10px;
 }
 
@@ -1980,36 +1973,6 @@ a:hover {
   justify-content: space-between;
   align-items: baseline;
   padding: 12px 12px 4px;
-}
-
-.food-description {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 0 12px 12px;
-}
-
-.food-info h3 {
-  font-size: 0.8rem;
-  color: var(--text-color);
-  line-height: 1;
-  margin: 0;
-}
-
-.food-info p {
-  font-size: 0.8rem;
-  color: var(--text2-color);
-  font-weight: 500;
-}
-
-.food-description p {
-  font-size: 0.8rem;
-  color: var(--text3-color);
-  font-weight: 400;
-}
-
-.food-card.selected .food-description p {
-  color: var(--text2-color);
 }
 
 .scroll-button {
@@ -2064,10 +2027,6 @@ a:hover {
   justify-content: center;
   align-items: center;
   gap: 8px;
-}
-
-.food-container {
-  margin-top: 12px;
 }
 
 .food-options {
@@ -2223,7 +2182,7 @@ a:hover {
 .order-price {
   display: flex;
   justify-content: center;
-  color: white;
+  color: var(--text-color);
   font-size: 1.8rem;
   font-weight: 500;
   margin-bottom: 12px;

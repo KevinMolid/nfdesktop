@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import avatar from "../assets/defaultAvatar.png";
 
 import { LogOut } from "lucide-react";
+import Button from "./Button";
 
 import logoBlack from "../assets/logo-black-small.png";
 import logoWhite from "../assets/logo-white-small.png";
@@ -81,35 +82,35 @@ const Header = ({ username, name, imgurl, onLogout }: MenuProps) => {
             </a>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2 cursor-pointer hover:bg-(--bg2-color) pl-4 rounded-lg"
+            ref={userMenuRef}
+            onClick={() => setShowUserMenu((prev) => !prev)}
+          >
             <div className="flex items-center overflow-hidden transition-all h-12 text-right">
               <div className="leading-4 w-full">
-                <h4 className="font-semibold text-lg">{username}</h4>
-                <p className="text-(--text3-color) text-nowrap">{name}</p>
+                <h4 className="user">{username}</h4>
+                <p className="text-sm text-nowrap">{name}</p>
               </div>
             </div>
 
             {/* User avatar + dropdown */}
-            <div className="user-menu" ref={userMenuRef}>
-              <button
-                className="user-avatar-btn"
-                onClick={() => setShowUserMenu((prev) => !prev)}
-              >
-                <img
-                  className="w-12 h-12 rounded-full"
-                  src={imgurl || avatar}
-                  alt=""
-                />
-              </button>
+            <div className="user-menu">
+              <img
+                className="w-12 h-12 rounded-full"
+                src={imgurl || avatar}
+                alt=""
+              />
 
               {showUserMenu && (
                 <div className="user-dropdown">
-                  <button className="dropdown-item" onClick={onLogout}>
-                    <div className="dropdown-item-icon-container">
-                      <LogOut size={18} />
-                    </div>
+                  <Button
+                    variant="tertiary"
+                    onClick={onLogout}
+                    iconLeft={<LogOut size={18} />}
+                  >
                     <div className="dropdown-item-text-container">Log out</div>
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
