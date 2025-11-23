@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import avatar from "../assets/defaultAvatar.png";
 
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import Button from "./Button";
 
-import logoBlack from "../assets/logo-black-small.png";
-import logoWhite from "../assets/logo-white-small.png";
+import logo from "../assets/logo-white-small-notext.png";
+
+import { useNavigate } from "react-router-dom";
 
 type MenuProps = {
   username: string;
@@ -15,32 +16,13 @@ type MenuProps = {
 };
 
 const Header = ({ username, name, imgurl, onLogout }: MenuProps) => {
-  const [isDark, setIsDark] = useState(
-    () => localStorage.getItem("theme") === "dark"
-  );
-  const logo = isDark ? logoWhite : logoBlack;
-
   const [showTopHeader, setShowTopHeader] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const headerWrapperRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Watch theme changes
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const isDark =
-        document.documentElement.getAttribute("data-theme") === "dark";
-      setIsDark(isDark);
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  const navigate = useNavigate();
 
   // Close user dropdown on outside click
   useEffect(() => {
@@ -77,9 +59,7 @@ const Header = ({ username, name, imgurl, onLogout }: MenuProps) => {
       <div className="bottom-header">
         <div className="menu-bar">
           <div className="logo">
-            <a href="https://www.norronafly.com/" target="_blank">
-              <img src={logo} alt="Norrønafly logo" className="nflogo" />
-            </a>
+            <img src={logo} alt="Norrønafly logo" className="nflogo" />
           </div>
 
           <div
@@ -97,13 +77,20 @@ const Header = ({ username, name, imgurl, onLogout }: MenuProps) => {
             {/* User avatar + dropdown */}
             <div className="user-menu">
               <img
-                className="w-12 h-12 rounded-full"
+                className="w-10 h-10 rounded-full"
                 src={imgurl || avatar}
                 alt=""
               />
 
               {showUserMenu && (
-                <div className="user-dropdown">
+                <div className="user-dropdown flex gap-1 flex-col">
+                  <Button
+                    variant="tertiary"
+                    onClick={() => navigate("/settings")}
+                    iconLeft={<Settings size={18} />}
+                  >
+                    <div className="dropdown-item-text-container">Settings</div>
+                  </Button>
                   <Button
                     variant="tertiary"
                     onClick={onLogout}

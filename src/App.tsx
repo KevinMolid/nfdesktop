@@ -223,7 +223,6 @@ function App() {
         <MobileMenuItem icon={<Hamburger />} text="Food" path="/foodorders" />
         <MobileMenuItem icon={<MessageCircle />} text="Chat" path="/chat" />
         <MobileMenuItem icon={<Users />} text="Users" path="/users" />
-        <MobileMenuItem icon={<Settings />} text="Settings" path="/settings" />
       </MobileMenu>
 
       <div className="screen">
