@@ -63,12 +63,27 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   });
 
   const filterRef = useRef<HTMLDivElement | null>(null);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof user?.id !== "string" || user.id.includes("//")) {
       console.error("❌ Invalid user ID detected:", user?.id);
     }
   }, [user]);
+
+  /* Handle click outside status dropdown */
+  useEffect(() => {
+    const handleClickOutsideStatus = (event: MouseEvent) => {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsEditingNewPriority(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutsideStatus);
+    return () => document.removeEventListener("mousedown", handleClickOutsideStatus);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -300,102 +315,106 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       {/* Header */}
       <div>
         <ul className="tasklist-header">
-          <li>Action</li>
+          <li>Menu</li>
           <li>Priority</li>
-          <li>Task description</li>
+          <li>Description</li>
           <li>Status</li>
         </ul>
       </div>
 
       {/* New task */}
-      <div
-        className={
-          isCreateActive ? "new-task-element-active" : "new-task-element"
-        }
-        onClick={() => {
-          !isCreateActive && toggleCreateActive();
-        }}
-      >
-        {!isCreateActive && (
+      {!isCreateActive ? (
+        <button
+          type="button"
+          className="new-task-element border-2 border-dashed border-(--border-color) focus:outline-none focus:border-(--text-color)"
+          onClick={toggleCreateActive}
+          aria-expanded="false"
+          aria-label="Create new task"
+        >
           <p className="new-task-title">
-            <i className="fa-solid fa-plus grey hover"></i> New task
+            <i className="fa-solid fa-plus grey hover" aria-hidden="true"></i>
+            New task
           </p>
-        )}
-        {isCreateActive && (
-          <>
-            <div className="task-info">
-              <div className="icon-div new-task-action">
-                <i className="fa-solid fa-bars"></i>
-              </div>
+        </button>
+      ) : (
+        <div
+          className="new-task-element-active"
+          aria-expanded="true"
+        >
+          <div className="task-info">
+            <div className="icon-div new-task-action">
+              <i className="fa-solid fa-bars"></i>
+            </div>
 
-              <div className={`task-priority priority-${newTaskPriority}`}>
-                <span
-                  className="task-priority-number"
-                  onClick={() => setIsEditingNewPriority(!isEditingNewPriority)}
-                >
-                  {newTaskPriority}
-                </span>
-                {isEditingNewPriority && (
-                  <div>
-                    <ul className="priority-dropdown">
-                      {[0, 1, 2, 3].map((num) => (
-                        <li
-                          key={num}
-                          className={`priority-${num}`}
-                          onClick={() => {
-                            setNewTaskPriority(num);
-                            setIsEditingNewPriority(false);
-                          }}
-                        >
+            <button className={`task-priority priority-${newTaskPriority} outline-none focus:ring-2 focus:ring-offset-1`} onClick={() => setIsEditingNewPriority(!isEditingNewPriority)}>
+              <span
+                className="task-priority-number"
+              >
+                {newTaskPriority}
+              </span>
+              {isEditingNewPriority && (
+                <div ref={statusDropdownRef}>
+                  <ul className="priority-dropdown">
+                    {[0, 1, 2, 3].map((num) => (
+                      <li
+                        key={num}
+                        className={`priority-${num} rounded-md`}
+                        onClick={() => {
+                          setNewTaskPriority(num);
+                          setIsEditingNewPriority(false);
+                        }}
+                      >
+                        <button className="w-full h-full rounded-md outline-none cursor-pointer focus:ring-2 focus:ring-offset-1 focus:ring-(--text-color)">
                           {num}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </button>
 
-              <div className="new-task-inputs">
-                <input
-                  className="new-task-input"
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") addNewTask();
-                  }}
-                />
-                <input
-                  className="new-task-input task-description"
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") addNewTask();
-                  }}
-                />
-              </div>
+            <div className="new-task-inputs">
+              <input
+                className="new-task-input"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNewTask();
+                }}
+              />
+              <input
+                className="new-task-input task-description"
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNewTask();
+                }}
+              />
             </div>
+          </div>
 
-            <div className="new-task-btn-container">
-              <Button
-                onClick={addNewTask}
-                className="save-btn"
-                iconLeft={<i className="fa-solid fa-floppy-disk"></i>}
-              >
-                Save
-              </Button>
+          <div className="new-task-btn-container">
+            <Button
+              onClick={addNewTask}
+              className="save-btn"
+              iconLeft={<i className="fa-solid fa-floppy-disk"></i>}
+            >
+              Save
+            </Button>
 
-              <Button
-                variant="tertiary"
-                onClick={discardNewTask}
-                className="delete-btn"
-                iconLeft={<i className="fa-solid fa-trash"></i>}
-              >
-                Discard
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
+            <Button
+              variant="secondary"
+              onClick={discardNewTask}
+              className="delete-btn"
+              iconLeft={<i className="fa-solid fa-trash"></i>}
+            >
+              Discard
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       {Object.entries(visibleStatuses).map(
         ([status, visible]) =>

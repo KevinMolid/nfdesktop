@@ -52,7 +52,7 @@ export default function Button({
           primary:
             "bg-(--brand-color) text-white hover:bg-(--brand2-color) focus:ring-(--text-color)",
           secondary:
-            "bg-(--bg4-color) text-(--text2-color) hover:bg-(--bg5-color) focus:ring-(--text-color)",
+            "bg-(--bg4-color) text-(--text-color) hover:bg-(--bg5-color) focus:ring-(--text-color)",
           tertiary:
             "bg-(--bg4-color) text-(--text4-color) hover:bg-(--bg5-color) focus:ring-(--text-color)",
           destructive:

@@ -15,7 +15,7 @@
 
 :root {
   --brand-color: #e7600b;
-  --brand2-color:rgb(224, 107, 35);
+  --brand2-color: #fa7420;
 }
 
 :root {
@@ -52,15 +52,19 @@
   --red-background-color: #fec5c5;
 
   --pri1-bg-color: #c31700;
+  --pri1-hover-color: #d61d04;
   --pri1-text-color: #ffe2e2;
   --pri1-border-color: #c31700;
   --pri2-bg-color: #e66900;
+  --pri2-hover-color: #f57207;
   --pri2-text-color: #ffedd4;
   --pri2-border-color: #e66900;
   --pri3-bg-color: #f2ae05;
+  --pri3-hover-color: #f8b712;
   --pri3-text-color: #fef9c2;
   --pri3-border-color: #f2ae05;
   --pri0-bg-color: #99a1afdd;
+  --pri0-hover-color: #aeb5c0dd;
   --pri0-text-color: #f3f4f6;
   --pri0-border-color: #99a1af;
 }
@@ -71,8 +75,8 @@
   --dash-bg-color: #1f2226;
   --bg2-color: #17181c;
   --bg3-color: #272b30;
-  --bg4-color: #2f343b;
-  --bg5-color: #383d45;
+  --bg4-color: #383d45;
+  --bg5-color: #464b55;
   --usermsg-bg-color: #243d50;
   --text-color: #f0f0f0;
   --text2-color: #cfcfcf;
@@ -91,15 +95,19 @@
   --red-background-color: #4b2b2b;
 
   --pri1-bg-color: #e04046bb;
+  --pri1-hover-color: #ee4e54bb;
   --pri1-text-color: #fff;
   --pri1-border-color: none;
   --pri2-bg-color: #f6811bcc;
+  --pri2-hover-color: #ff9131cc;
   --pri2-text-color: #fff;
   --pri2-border-color: none;
   --pri3-bg-color: #fcb726cc;
+  --pri3-hover-color: #ffc445cc;
   --pri3-text-color: #fff;
   --pri3-border-color: none;
   --pri0-bg-color: #8c8b8ccc;
+  --pri0-hover-color: #9e9e9ecc;
   --pri0-text-color: #fff;
   --pri0-border-color: none;
 }
@@ -838,7 +846,6 @@ input.pin-input:-moz-autofill {
   box-sizing: border-box;
   min-height: 48px;
   background-color: var(--bg2-color);
-  border: 2px dashed var(--border-color);
   cursor: pointer;
 }
 
@@ -859,6 +866,10 @@ input.pin-input:-moz-autofill {
   width: 100%;
   font-weight: 500;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 }
 
 .new-task-inputs {
@@ -1020,12 +1031,15 @@ input.pin-input:-moz-autofill {
   width: max-content;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
   background-color: var(--bg2-color);
   z-index: 3;
-  padding: 4px;
+  padding: 8px;
   user-select: none;
-  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+  translate: 4px 0px;
+  transition: all;
 }
 
 .priority-dropdown li {
@@ -1034,38 +1048,42 @@ input.pin-input:-moz-autofill {
   align-items: center;
   width: 32px;
   height: 32px;
-}
-
-.priority-dropdown .priority-0:hover,
-.priority-dropdown .priority-1:hover,
-.priority-dropdown .priority-2:hover,
-.priority-dropdown .priority-3:hover {
-  box-sizing: border-box;
-  border: 1px solid var(--text2-color);
-}
+} 
 
 .priority-1 {
   color: var(--pri1-text-color);
   background-color: var(--pri1-bg-color);
-  border: 1px solid var(--pri1-border-color);
 }
 
 .priority-2 {
   color: var(--pri2-text-color);
   background-color: var(--pri2-bg-color);
-  border: 1px solid var(--pri2-border-color);
 }
 
 .priority-3 {
   color: var(--pri3-text-color);
   background-color: var(--pri3-bg-color);
-  border: 1px solid var(--pri3-border-color);
 }
 
 .priority-0 {
   color: var(--pri0-text-color);
   background-color: var(--pri0-bg-color);
-  border: 1px solid var(--pri0-border-color);
+}
+
+.priority-1:hover {
+  background-color: var(--pri1-hover-color);
+}
+
+.priority-2:hover {
+  background-color: var(--pri2-hover-color);
+}
+
+.priority-3:hover {
+  background-color: var(--pri3-hover-color);
+}
+
+.priority-0:hover {
+  background-color: var(--pri0-hover-color);
 }
 
 .task-status {

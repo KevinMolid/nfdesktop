@@ -198,9 +198,9 @@ const Task = ({
       onClick={onClick}
     >
       <div className="task-info">
-        <div onClick={toggleDropdown} className="icon-div task-action hover">
+        <button onClick={toggleDropdown} className="icon-div task-action hover">
           <i className="fa-solid fa-bars"></i>
-        </div>
+        </button>
 
         <div
           className={`task-priority priority-${priority}`}
