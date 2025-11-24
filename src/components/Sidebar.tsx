@@ -50,7 +50,7 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
   }, [expanded]);
 
   return (
-    <aside className="sidebar h-screen text-start text-(--text1-color)">
+    <aside className="sidebar h-screen text-start">
       <nav className="h-full flex flex-col shadow-sm bg-(--main-bg-color)">
         <div className="p-3 pb-2 flex w-full justify-between items-center mt-2 mb-4">
           <img
@@ -86,8 +86,8 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
             }`}
           >
             <div className="leading-4 w-full">
-              <h4 className="font-semibold text-lg">{username}</h4>
-              <p className="text-(--text3-color) text-nowrap">{name}</p>
+              <h4 className="font-semibold text-lg text-(--text-color)">{username}</h4>
+              <p className="text-(--menu-text-color) text-nowrap">{name}</p>
             </div>
             <Button variant="transparent" onClick={onLogout}>
               <LogOut size={24} />

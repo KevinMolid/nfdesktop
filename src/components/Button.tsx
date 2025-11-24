@@ -58,7 +58,7 @@ export default function Button({
           destructive:
             "bg-[#cc3b3b] text-white hover:bg-red-700 focus:ring-red-300",
           transparent:
-            "bg-transparent hover:bg-(--bg4-color) text-(--text4-color) focus:ring-(--text-color)",
+            "bg-transparent hover:bg-(--bg4-color) text-(--menu-text-color) focus:ring-(--text-color)",
         }[variant],
 
         // Full width

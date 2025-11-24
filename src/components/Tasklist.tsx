@@ -326,7 +326,10 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       {!isCreateActive ? (
         <button
           type="button"
-          className="new-task-element border-2 border-dashed border-(--border-color) focus:outline-none focus:border-(--text-color)"
+          className="new-task-element border-2 border-dashed
+            border-(--border-color) focus:outline-none
+            focus:outline-none focus:ring-2 focus:ring-offset-1
+            focus:ring-(--text-color) focus:border-none"
           onClick={toggleCreateActive}
           aria-expanded="false"
           aria-label="Create new task"

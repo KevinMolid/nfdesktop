@@ -136,7 +136,7 @@ const Sticker = ({
 
   return (
     <div
-      className={`sticker-inside ${
+      className={`sticker-inside rounded-md ${
         isShared ? "sticker--shared" : `sticker-${color}`
       }`}
     >

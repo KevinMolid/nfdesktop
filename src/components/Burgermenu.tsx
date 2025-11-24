@@ -56,22 +56,28 @@ const Burgermenu = ({ widgets, toggleActive }: MenuProps) => {
           <ul className="flex flex-col gap-1">
             {widgets.map((widget, index) =>
               widget.active ? (
-                <li
-                  className={`burger-li ${selectedWidgets}`}
+                <li className="w-full"
                   key={"burger" + index}
-                  onClick={() => toggleActive(widget.name)}
                 >
-                  <p>{widget.name}</p>
-                  <i className="fa-solid fa-check"></i>
+                  <button className={`burger-li w-full ${selectedWidgets} focus:outline-none
+                    focus:outline-none focus:ring-2 focus:ring-offset-1
+                    focus:ring-(--text-color)`}
+                    onClick={() => toggleActive(widget.name)}>
+                    <p>{widget.name}</p>
+                    <i className="fa-solid fa-check"></i>
+                  </button>
                 </li>
               ) : (
-                <li
-                  className={`burger-li hover:bg-(--bg4-color) text-(--text-color)`}
+                <li className="w-full"
                   key={"burger" + index}
-                  onClick={() => toggleActive(widget.name)}
                 >
+                  <button className={`burger-li hover:bg-(--bg4-color) text-(--text-color) w-full focus:outline-none
+                    focus:outline-none focus:ring-2 focus:ring-offset-1
+                    focus:ring-(--text-color)`}
+                    onClick={() => toggleActive(widget.name)}>
                   <p>{widget.name}</p>
                   <i className="fa-solid fa-cancel"></i>
+                  </button>
                 </li>
               )
             )}
