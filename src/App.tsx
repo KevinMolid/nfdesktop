@@ -47,7 +47,7 @@ const LOCAL_STORAGE_KEY = "widgets";
 
 type ToastType = "success" | "error" | "info" | "warning" | "";
 type Toast = { text: string; type: ToastType };
-type ToastWithId = Toast & { id: string };
+type ToastWithId = Toast & { id: string; closing?: boolean };
 
 const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="page-transition">{children}</div>
@@ -190,7 +190,32 @@ function App() {
     if (!base?.text) return;
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    setAlerts((prev) => [...prev, { ...base, id }]);
+    setAlerts((prev) => [...prev, { ...base, id, closing: false }]);
+  };
+
+  const getAutoHideDuration = (type: ToastType): number => {
+    switch (type) {
+      case "error":
+      case "warning":
+        return 7000; // keep important stuff longer
+      case "info":
+      case "success":
+      case "":
+      default:
+        return 4000; // default 4s
+    }
+  };
+
+  // 🔧 Start close: trigger slide-down animation, then remove after 250ms
+  const startCloseAlert = (id: string) => {
+    setAlerts((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, closing: true } : a))
+    );
+
+    // Match this with CSS transition duration (250ms)
+    window.setTimeout(() => {
+      setAlerts((prev) => prev.filter((a) => a.id !== id));
+    }, 250);
   };
 
   if (loading) {
@@ -245,14 +270,15 @@ function App() {
         </Sidebar>
 
         <div className="main-container">
+          {/* 🔔 Alerts stack with slide animations */}
           <div className="alerts-stack">
-            {alerts.map((a) => (
+            {[...alerts].reverse().map((a) => (
               <Alert
                 key={a.id}
                 alert={{ text: a.text, type: a.type }}
-                onClose={() =>
-                  setAlerts((prev) => prev.filter((x) => x.id !== a.id))
-                }
+                closing={a.closing}
+                onClose={() => startCloseAlert(a.id)}
+                autoHideDuration={getAutoHideDuration(a.type)}
               />
             ))}
           </div>
@@ -305,11 +331,7 @@ function App() {
                     <SafeWrapper
                       fallback={<div>Kunne ikke laste kebab-modulen</div>}
                     >
-                      <Foodorders
-                        user={user}
-                        setAlerts={setAlertsAdapter}
-                        toggleActive={toggleActive}
-                      />
+                      <Foodorders user={user} setAlerts={setAlertsAdapter} />
                     </SafeWrapper>
                   </Page>
                 }

@@ -752,33 +752,50 @@ input.pin-input:-moz-autofill {
 /* Message */
 .alerts-stack {
   position: fixed;
-  left: 8px;
-  bottom: 8px;
+  left: 0px;
+  bottom: 0px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
   z-index: 1000;
-  max-width: min(420px, 90vw);
+  width: 100%;
 }
 
 .alert {
+  width: 100%;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center; 
   align-items: center; 
-  min-height: 32px;
+  height: 44px;
   gap: 12px;
   padding-left: 32px;
   padding-right: 64px;
-  border-radius: 16px;
   color: #fff;
   background-color: #0fad73;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-bottom: 1px solid var(--dash-bg-color);
+}
+
+/* Base alert style (keep your existing colors etc.) */
+.alert {
+  /* your current padding/background/border-radius/... */
+  transition: transform 250ms ease, opacity 250ms ease;
+}
+
+/* Hidden state: below & transparent */
+.alert--hidden {
+  transform: translateY(44px);
+}
+
+/* Visible state: in place */
+.alert--visible {
+  transform: translateY(0);
 }
 
 .alert p {
+  font-size: 1.2rem;
   color: white;
 }
 
@@ -791,14 +808,14 @@ input.pin-input:-moz-autofill {
 
 @media (max-width: 500px) {
   .alert p {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 }
 
 .alert--success { background-color: #0fad73; }
 .alert--error   { background-color: #ad0f0f; }
 .alert--info    { background-color: #0f73ad; }
-.alert--warning { background-color: #d87a00; }
+.alert--warning { background-color: #d89400; }
 
 .alert__text {
   margin: 0;
@@ -807,6 +824,9 @@ input.pin-input:-moz-autofill {
 
 .alert__close {
   position: absolute;
+  min-width: 40px;
+  width: 10%;
+  max-width: 80px;
   right: 0;
   margin-left: auto;
   line-height: 0;
@@ -815,7 +835,6 @@ input.pin-input:-moz-autofill {
   border: none;
   color: inherit;
   cursor: pointer;
-  border-radius: 0 16px 16px 0;
 }
 
 .alert__close:hover {

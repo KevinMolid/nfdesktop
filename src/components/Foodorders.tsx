@@ -21,10 +21,9 @@ type UsersProps = {
   setAlerts: React.Dispatch<
     React.SetStateAction<{ text: string; type: MessageType }>
   >;
-  toggleActive: (name: string) => void;
 };
 
-const Foodorders = ({ user, setAlerts, toggleActive }: UsersProps) => {
+const Foodorders = ({ user, setAlerts }: UsersProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedFood, setSelectedFood] = useState<string | null>(null);
   const [orderOptions, setOrderOptions] = useState<any>({});

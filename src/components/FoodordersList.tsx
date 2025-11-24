@@ -212,7 +212,7 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
         <div className="card-header-right">
           <Button
             size="sm"
-            variant="tertiary"
+            variant="secondary"
             onClick={() => setShowOrdersModal(!showOrdersModal)}
             iconLeft={<i className="fa-solid fa-file"></i>}
           >
