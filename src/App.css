@@ -835,6 +835,14 @@ input.pin-input:-moz-autofill {
   border: none;
   color: inherit;
   cursor: pointer;
+  transition: all 200ms ease;
+  transform: translateX(100%);
+  transition:
+    transform 320ms cubic-bezier(0.68, -0.55, 0.27, 1.55),
+}
+
+.alert:hover > .alert__close {
+  transform: translateX(0);
 }
 
 .alert__close:hover {
