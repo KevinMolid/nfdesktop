@@ -27,7 +27,7 @@ function Calculator() {
         Please make your app window bigger to see this app.
       </div>
       <div className="hidden sm:flex flex-col gap-2 App w-full max-w-60 bg-(--bg4-color) p-4 rounded-xl shadow">
-        <div className="bg-(--bg2-color) py-2 px-4 min-h-10 rounded-md my-2 text-lg text-(--text2-color) font-semibold">{display}</div>
+        <div className="bg-(--bg2-color) py-2 px-4 min-h-11 rounded-md my-2 text-lg text-(--text2-color) font-semibold">{display}</div>
         <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("7")}
