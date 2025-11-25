@@ -1,4 +1,5 @@
 import NatoAlphabet from "./NatoAlphabet";
+import Calculator from "./Calculator";
 import SafeWrapper from "./SafeWrapper";
 
 type ToolsProps = {
@@ -15,6 +16,10 @@ const Tools = ({ toggleActive }: ToolsProps) => {
       <div className="widget-container">
         <SafeWrapper fallback={<div>Could not load Nato Alphabet</div>}>
           <NatoAlphabet toggleActive={toggleActive} />
+        </SafeWrapper>
+
+        <SafeWrapper fallback={<div>Could not load Calculator</div>}>
+          <Calculator />
         </SafeWrapper>
       </div>
     </div>

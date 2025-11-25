@@ -1702,12 +1702,6 @@ input.pin-input:-moz-autofill {
   background-color: var(--main-bg-color);
 }
 
-.nato-letter {
-  color: var(--text-color);
-  font-size: 1.5rem;
-  font-weight: 500;
-}
-
 .flex-space {
   display: flex;
   justify-content: space-between;

@@ -33,17 +33,17 @@ const NatoAlphabet = ({ toggleActive }: NatoProps) => {
   ];
 
   return (
-    <div className="card has-header grow">
+    <div className="card has-header grow max-w-150">
       <div className="card-header">
         <h3 className="card-title">Nato alphabet</h3>
       </div>
-      <div className="flex gap-1 flex-wrap">
+      <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
         {alphabet.map((i) => {
           return (
             <div key={i.word} className="bg-(--main-bg-color) p-3 md:p-4 basis-1/8 
-              grow flex flex-col justify-center text-center">
-              <p className="nato-letter">{i.letter}</p>
-              <p className="text-sm">{i.word}</p>
+              grow flex flex-col justify-center text-center rounded-md">
+              <p className="nato-letter text-xl font-semibold text-(--text4-color)">{i.letter}</p>
+              <p className="text-xs sm:text-sm">{i.word}</p>
             </div>
           );
         })}
