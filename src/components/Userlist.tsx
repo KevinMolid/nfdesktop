@@ -260,7 +260,7 @@ const Userlist = ({ user }: UsersProps) => {
                   Confirm
                 </Button>
                 <Button
-                  variant="tertiary"
+                  variant="secondary"
                   onClick={() => setIsCreateActive(false)}
                   iconLeft={<i className="fa-solid fa-cancel"></i>}
                 >
@@ -322,7 +322,7 @@ const Userlist = ({ user }: UsersProps) => {
                           Save
                         </Button>
                         <Button
-                          variant="tertiary"
+                          variant="secondary"
                           className="delete-btn"
                           onClick={() => {
                             // reset to original image and exit image edit mode
@@ -340,7 +340,7 @@ const Userlist = ({ user }: UsersProps) => {
                   {/* NORMAL FIELDS (ONLY WHEN NOT EDITING IMAGE) */}
                   {!isEditingImg && (
                     <>
-                      <label htmlFor="name">Name:</label>
+                      <label htmlFor="name" className="cursor-pointer">Name</label>
                       <input
                         id="name"
                         value={editName}
@@ -372,8 +372,7 @@ const Userlist = ({ user }: UsersProps) => {
                           Save
                         </Button>
                         <Button
-                          variant="tertiary"
-                          className="delete-btn"
+                          variant="secondary"
                           onClick={() => {
                             setSelectedUser(null);
                             setIsEditingImg(false);

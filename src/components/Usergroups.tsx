@@ -318,7 +318,7 @@ const Usergroups = () => {
                 Save
               </Button>
               <Button
-                variant="tertiary"
+                variant="secondary"
                 className="delete-btn"
                 onClick={toggleCreateActive}
                 iconLeft={<i className="fa-solid fa-cancel" />}
