@@ -880,7 +880,6 @@ input.pin-input:-moz-autofill {
 .new-task-element {
   box-sizing: border-box;
   min-height: 48px;
-  background-color: var(--bg2-color);
   cursor: pointer;
 }
 
@@ -893,7 +892,6 @@ input.pin-input:-moz-autofill {
   gap: 8px;
   line-height: 1.2;
   min-height: 60px;
-  background-color: var(--bg3-color);
   border: 2px solid var(--border-color);
 }
 
