@@ -373,7 +373,7 @@ ul {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 10px 0;
+  margin: 4px 0;
 }
 
 .ul-heading:hover {

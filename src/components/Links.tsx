@@ -259,7 +259,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
   };
 
   return (
-    <div className="card has-header grow">
+    <div className="card has-header grow max-w-90">
       <div className="card-header">
         <h3 className="card-title">Links</h3>
         <div className="card-header-right">
@@ -345,21 +345,29 @@ const Links = ({ user, toggleActive }: LinksProps) => {
         const isExpanded = expandedCategories[category] ?? false;
 
         return (
-          <div key={category}>
-            <div
-              className="ul-heading"
+          <div key={category} className="mb-1">
+            <button
+              className="ul-heading hover:bg-(--bg3-color) py-2 w-full
+                rounded-full pr-4 hover:pl-4 focus:pl-4 transition-all
+                duration-400 outline-none focus:ring-2 focus:ring-(--text-color) focus:ring-offset-1
+                flex items-center justify-between gap-2"
               onClick={() => toggleCategory(category)}
             >
               <p className="list-p">{category}</p>
               <i
-                className={`fa-solid fa-caret-${
-                  isExpanded ? "up" : "down"
-                } lightgrey`}
+                className={`fa-solid fa-angle-down text-slate-400/80 transition-transform duration-300 ${
+                  isExpanded ? "rotate-180" : "rotate-0"
+                }`}
               />
-            </div>
+            </button>
 
-            {isExpanded && (
-              <ul>
+            {/* Animated wrapper */}
+            <div
+              className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+                isExpanded ? "max-h-96" : "max-h-0"
+              }`}
+            >
+              <ul className="pl-4 py-1 flex flex-col gap-1">
                 {links.map((link) => (
                   <li
                     key={link.id}
@@ -431,7 +439,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                   </li>
                 ))}
               </ul>
-            )}
+            </div>
           </div>
         );
       })}
