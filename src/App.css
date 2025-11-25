@@ -20,8 +20,8 @@
 
 :root {
   --brand3-color: #e7600b;
-  --main-bg-color: #c5d0d6;
-  --dash-bg-color: #d9e2e7;
+  --main-bg-color: #ffffff;
+  --dash-bg-color: #edf2f5;
   --bg2-color: #e4ecf0;
   --bg3-color: #edf2f5;
   --bg4-color: #d9e2e7;
@@ -62,7 +62,7 @@
   --pri0-text-color: #f3f4f6;
   --pri0-border-color: #99a1af;
 
-  --sticker-default-color: #ffffff;
+  --sticker-default-color: #edf2f5;
   --sticker-yellow-color: #FFF9b1;
   --sticker-blue-color: #b1e4ff;
   --sticker-red-color: #fec5c5;

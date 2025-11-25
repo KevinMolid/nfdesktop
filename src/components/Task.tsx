@@ -146,7 +146,7 @@ const Task = ({
       case "active":
         return (
           <i
-            className="fa-solid fa-circle lightgrey hover"
+            className="fa-solid fa-circle text-slate-400/60 hover"
             onClick={toggleStatusDropdown}
           ></i>
         );
@@ -179,7 +179,7 @@ const Task = ({
   const getStatusIconForOption = (option: string) => {
     switch (option) {
       case "active":
-        return <i className="fa-solid fa-circle lightgrey"></i>;
+        return <i className="fa-solid fa-circle text-slate-400/60"></i>;
       case "finished":
         return <i className="fa-solid fa-check green"></i>;
       case "onhold":

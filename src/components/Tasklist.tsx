@@ -286,7 +286,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                   }
                 >
                   {status === "active" && (
-                    <i className="fa-solid fa-circle lightgrey"></i>
+                    <i className="fa-solid fa-circle text-slate-400/60"></i>
                   )}
                   {status === "finished" && (
                     <i className="fa-solid fa-check green"></i>
