@@ -131,14 +131,16 @@ const Sticker = ({
     return () => clearTimeout(id);
   }, [snapAnimating]);
 
-  // Existing click-based controls (still useful)
+  // Existing click-based controls (still useful if you keep them)
   const increaseWidth = () => onResize?.(width + 1, height);
   const decreaseWidth = () => onResize?.(Math.max(1, width - 1), height);
   const increaseHeight = () => onResize?.(width, height + 1);
   const decreaseHeight = () => onResize?.(width, Math.max(1, height - 1));
 
   // ---- DRAG RESIZE: start ----
-  const beginResize = (e: React.MouseEvent, direction: "right" | "bottom") => {
+  type ResizeDirection = "right" | "bottom" | "corner";
+
+  const beginResize = (e: React.MouseEvent, direction: ResizeDirection) => {
     if (!rootRef.current || !onResize || !canResize) return;
 
     e.preventDefault();
@@ -164,15 +166,17 @@ const Sticker = ({
     setGhostCells({ width, height });
     setSnapAnimating(false); // ensure no snap transition during drag
 
-    if (direction === "right") {
+    if (direction === "right" || direction === "corner") {
       setIsResizingRight(true);
-    } else {
+    }
+    if (direction === "bottom" || direction === "corner") {
       setIsResizingBottom(true);
     }
   };
 
   const beginResizeRight = (e: React.MouseEvent) => beginResize(e, "right");
   const beginResizeBottom = (e: React.MouseEvent) => beginResize(e, "bottom");
+  const beginResizeCorner = (e: React.MouseEvent) => beginResize(e, "corner");
 
   // ---- DRAG RESIZE: move + end ----
   useEffect(() => {
@@ -422,20 +426,30 @@ const Sticker = ({
         />
       )}
 
-      {/* Drag resize handles (side + bottom) */}
+      {/* Drag resize handles (side + bottom + corner) */}
       {canResize && (
         <>
+          {/* Right edge */}
           <div
             onMouseDown={beginResizeRight}
             role="separator"
             aria-orientation="vertical"
             className="absolute right-0 top-0 z-[3] h-full w-2 cursor-ew-resize"
           />
+
+          {/* Bottom edge */}
           <div
             onMouseDown={beginResizeBottom}
             role="separator"
             aria-orientation="horizontal"
             className="absolute bottom-0 left-0 z-[3] h-2 w-full cursor-ns-resize"
+          />
+
+          {/* Corner (bottom-right) – resizes both */}
+          <div
+            onMouseDown={beginResizeCorner}
+            role="separator"
+            className="absolute bottom-0 right-0 z-[4] h-3 w-3 cursor-nwse-resize"
           />
         </>
       )}
