@@ -37,12 +37,13 @@ const NatoAlphabet = ({ toggleActive }: NatoProps) => {
       <div className="card-header">
         <h3 className="card-title">Nato alphabet</h3>
       </div>
-      <div className="nato-alphabet-container">
+      <div className="flex gap-1 flex-wrap">
         {alphabet.map((i) => {
           return (
-            <div key={i.word} className="nato-letter-container">
+            <div key={i.word} className="bg-(--main-bg-color) p-3 md:p-4 basis-1/8 
+              grow flex flex-col justify-center text-center">
               <p className="nato-letter">{i.letter}</p>
-              <p>{i.word}</p>
+              <p className="text-sm">{i.word}</p>
             </div>
           );
         })}
