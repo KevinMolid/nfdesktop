@@ -98,6 +98,9 @@ const Sticker = ({
   // Snapped-to-grid target size in cells (for ghost)
   const [ghostCells, setGhostCells] = useState<{ width: number; height: number } | null>(null);
 
+  // Are we currently animating the snap (release → snapped size)?
+  const [snapAnimating, setSnapAnimating] = useState(false);
+
   // Data captured at the start of resize
   const resizeStartRef = useRef<{
     startX: number;
@@ -117,6 +120,16 @@ const Sticker = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Turn off snap anim + explicit size after 200ms
+  useEffect(() => {
+    if (!snapAnimating) return;
+    const id = setTimeout(() => {
+      setSnapAnimating(false);
+      setDragSizePx(null); // let it fall back to natural/grid size
+    }, 200);
+    return () => clearTimeout(id);
+  }, [snapAnimating]);
 
   // Existing click-based controls (still useful)
   const increaseWidth = () => onResize?.(width + 1, height);
@@ -149,6 +162,7 @@ const Sticker = ({
     // Start preview at current size
     setDragSizePx({ width: rect.width, height: rect.height });
     setGhostCells({ width, height });
+    setSnapAnimating(false); // ensure no snap transition during drag
 
     if (direction === "right") {
       setIsResizingRight(true);
@@ -206,14 +220,33 @@ const Sticker = ({
     };
 
     const handleUp = () => {
-      if (onResize && ghostCells) {
-        // Commit snapped size to grid
+      if (resizeStartRef.current && ghostCells && onResize) {
+        const { cellWidthPx, cellHeightPx } = resizeStartRef.current;
+
+        // Where should it snap to, in pixels?
+        const targetWidthPx = ghostCells.width * cellWidthPx;
+        const targetHeightPx = ghostCells.height * cellHeightPx;
+
+        // Trigger snap animation from current dragSizePx -> target
+        setSnapAnimating(true);
+        setDragSizePx((current) => {
+          const from = current ?? {
+            width: targetWidthPx,
+            height: targetHeightPx,
+          };
+          // React will animate between previous width/height and these ones
+          return {
+            width: targetWidthPx,
+            height: targetHeightPx,
+          };
+        });
+
+        // Persist snapped cell dimensions
         onResize(ghostCells.width, ghostCells.height);
       }
 
       setIsResizingRight(false);
       setIsResizingBottom(false);
-      setDragSizePx(null);
       setGhostCells(null);
       resizeStartRef.current = null;
     };
@@ -261,47 +294,49 @@ const Sticker = ({
     }
   };
 
-  // Ghost preview style (snapped, dashed overlay)
-  let ghostStyle: React.CSSProperties | undefined;
+  // Ghost preview width/height in px (snapped to cells)
+  let ghostWidthPx: number | undefined;
+  let ghostHeightPx: number | undefined;
+
   if (ghostCells && resizeStartRef.current) {
     const { cellWidthPx, cellHeightPx } = resizeStartRef.current;
-    ghostStyle = {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: ghostCells.width * cellWidthPx,
-      height: ghostCells.height * cellHeightPx,
-      border: "2px dashed rgba(0, 0, 0, 0.35)",
-      borderRadius: "inherit",
-      pointerEvents: "none",
-      boxSizing: "border-box",
-      zIndex: 1,
-    };
+    ghostWidthPx = ghostCells.width * cellWidthPx;
+    ghostHeightPx = ghostCells.height * cellHeightPx;
   }
 
-  // Live size style while dragging (smooth growth)
-  const liveSizeStyle: React.CSSProperties | undefined = dragSizePx
-    ? {
-        width: dragSizePx.width,
-        height: dragSizePx.height,
-      }
-    : undefined;
+  // Style for the inner container:
+  // - While dragging: width/height = live drag px, no transition
+  // - On snap: animate width/height to snapped px over 200ms
+  const containerStyle: React.CSSProperties = {
+    ...(dragSizePx
+      ? {
+          width: dragSizePx.width,
+          height: dragSizePx.height,
+        }
+      : {}),
+    transition: snapAnimating ? "width 200ms ease-out, height 200ms ease-out" : "none",
+  };
 
   return (
     <div
       ref={rootRef}
-      className={`sticker-inside rounded-md ${
+      className={`relative sticker-inside rounded-md ${
         isShared ? "sticker--shared" : `sticker-${color}`
       }`}
-      style={{
-        position: "relative",
-        ...liveSizeStyle,
-      }}
+      style={containerStyle}
     >
       {/* Ghost overlay (snapped size) */}
-      {ghostStyle && <div className="sticker-resize-ghost" style={ghostStyle} />}
+      {ghostWidthPx != null && ghostHeightPx != null && (
+        <div
+          className="pointer-events-none absolute top-0 left-0 z-[1] box-border rounded-md border-2 border-dashed border-(--text5-color)"
+          style={{
+            width: ghostWidthPx,
+            height: ghostHeightPx,
+          }}
+        />
+      )}
 
-      <div className="sticker-headline" style={{ position: "relative", zIndex: 2 }}>
+      <div className="sticker-headline relative z-[2]">
         {isShared && (
           <div className="sticker-shared-by">
             {createdBy === user.id
@@ -323,7 +358,7 @@ const Sticker = ({
             />
 
             {/* Color palette dropdown */}
-            <div ref={paletteRef} style={{ position: "relative" }}>
+            <div ref={paletteRef} className="relative">
               <i
                 className={`fa-solid fa-palette sticker-icon ${
                   !canChangeColor ? "disabled" : ""
@@ -371,21 +406,19 @@ const Sticker = ({
       {isEditing && canEditContent ? (
         <textarea
           ref={textareaRef}
-          className="sticker-textarea"
+          className="sticker-textarea relative z-[2]"
           spellCheck={false}
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
           onBlur={() => setIsEditing(false)}
           onKeyDown={handleKeyDown}
           autoFocus
-          style={{ position: "relative", zIndex: 2 }}
         />
       ) : (
         <div
-          className="sticker-content"
+          className="sticker-content relative z-[2]"
           dangerouslySetInnerHTML={{ __html: parseBBCode(content) }}
           onClick={() => canEditContent && setIsEditing(true)}
-          style={{ position: "relative", zIndex: 2 }}
         />
       )}
 
@@ -393,18 +426,16 @@ const Sticker = ({
       {canResize && (
         <>
           <div
-            className="sticker-resize-handle sticker-resize-handle--right"
             onMouseDown={beginResizeRight}
             role="separator"
             aria-orientation="vertical"
-            style={{ zIndex: 3 }}
+            className="absolute right-0 top-0 z-[3] h-full w-2 cursor-ew-resize"
           />
           <div
-            className="sticker-resize-handle sticker-resize-handle--bottom"
             onMouseDown={beginResizeBottom}
             role="separator"
             aria-orientation="horizontal"
-            style={{ zIndex: 3 }}
+            className="absolute bottom-0 left-0 z-[3] h-2 w-full cursor-ns-resize"
           />
         </>
       )}
