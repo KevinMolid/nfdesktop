@@ -26,9 +26,9 @@ type StickerProps = {
   // actions
   onColorChange: (color: StickerColor) => void;
   onContentChange: (content: string) => void;
-  onDelete: () => void; // <- no-arg handler (bind id where you call it)
+  onDelete: () => void;
   onResize?: (width: number, height: number) => void;
-  onOpenShare?: () => void; // <- opens share modal in Notes
+  onOpenShare?: () => void;
 
   // drag
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
@@ -81,16 +81,24 @@ const Sticker = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  // NEW: ref for the whole sticker box (for measuring pixel size)
+  // Root element ref (we measure this for pixel sizes)
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   // palette dropdown state
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const paletteRef = useRef<HTMLDivElement | null>(null);
 
-  // NEW: resize state
+  // RESIZE STATE
   const [isResizingRight, setIsResizingRight] = useState(false);
   const [isResizingBottom, setIsResizingBottom] = useState(false);
+
+  // Live pixel size preview while dragging
+  const [dragSizePx, setDragSizePx] = useState<{ width: number; height: number } | null>(null);
+
+  // Snapped-to-grid target size in cells (for ghost)
+  const [ghostCells, setGhostCells] = useState<{ width: number; height: number } | null>(null);
+
+  // Data captured at the start of resize
   const resizeStartRef = useRef<{
     startX: number;
     startY: number;
@@ -110,17 +118,14 @@ const Sticker = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ---- BUTTON RESIZE (existing) ----
+  // Existing click-based controls (still useful)
   const increaseWidth = () => onResize?.(width + 1, height);
   const decreaseWidth = () => onResize?.(Math.max(1, width - 1), height);
   const increaseHeight = () => onResize?.(width, height + 1);
   const decreaseHeight = () => onResize?.(width, Math.max(1, height - 1));
 
-  // ---- DRAG RESIZE: init helpers ----
-  const beginResize = (
-    e: React.MouseEvent,
-    direction: "right" | "bottom"
-  ) => {
+  // ---- DRAG RESIZE: start ----
+  const beginResize = (e: React.MouseEvent, direction: "right" | "bottom") => {
     if (!rootRef.current || !onResize || !canResize) return;
 
     e.preventDefault();
@@ -128,7 +133,7 @@ const Sticker = ({
 
     const rect = rootRef.current.getBoundingClientRect();
 
-    // approximate pixel size of one grid cell in each direction
+    // Each cell is approx this big in px
     const cellWidthPx = rect.width / width;
     const cellHeightPx = rect.height / height;
 
@@ -141,6 +146,10 @@ const Sticker = ({
       cellHeightPx,
     };
 
+    // Start preview at current size
+    setDragSizePx({ width: rect.width, height: rect.height });
+    setGhostCells({ width, height });
+
     if (direction === "right") {
       setIsResizingRight(true);
     } else {
@@ -148,17 +157,16 @@ const Sticker = ({
     }
   };
 
-  const beginResizeRight = (e: React.MouseEvent) =>
-    beginResize(e, "right");
-  const beginResizeBottom = (e: React.MouseEvent) =>
-    beginResize(e, "bottom");
+  const beginResizeRight = (e: React.MouseEvent) => beginResize(e, "right");
+  const beginResizeBottom = (e: React.MouseEvent) => beginResize(e, "bottom");
 
-  // ---- DRAG RESIZE: global mousemove/mouseup ----
+  // ---- DRAG RESIZE: move + end ----
   useEffect(() => {
     if (!isResizingRight && !isResizingBottom) return;
 
     const handleMove = (e: MouseEvent) => {
-      if (!resizeStartRef.current || !onResize) return;
+      if (!resizeStartRef.current) return;
+
       const {
         startX,
         startY,
@@ -168,28 +176,45 @@ const Sticker = ({
         cellHeightPx,
       } = resizeStartRef.current;
 
-      let nextWidth = widthCells;
-      let nextHeight = heightCells;
+      // Current raw pixel size based on drag distance
+      let nextWidthPx = widthCells * cellWidthPx;
+      let nextHeightPx = heightCells * cellHeightPx;
 
       if (isResizingRight) {
         const dx = e.clientX - startX;
-        const deltaCells = Math.round(dx / cellWidthPx);
-        nextWidth = Math.max(1, widthCells + deltaCells);
+        nextWidthPx = Math.max(cellWidthPx, widthCells * cellWidthPx + dx);
       }
 
       if (isResizingBottom) {
         const dy = e.clientY - startY;
-        const deltaCells = Math.round(dy / cellHeightPx);
-        nextHeight = Math.max(1, heightCells + deltaCells);
+        nextHeightPx = Math.max(cellHeightPx, heightCells * cellHeightPx + dy);
       }
 
-      // Always snap to whole cells
-      onResize(nextWidth, nextHeight);
+      setDragSizePx({
+        width: nextWidthPx,
+        height: nextHeightPx,
+      });
+
+      // Compute snapped cell counts for the ghost preview
+      const targetWidthCells = Math.max(1, Math.round(nextWidthPx / cellWidthPx));
+      const targetHeightCells = Math.max(1, Math.round(nextHeightPx / cellHeightPx));
+
+      setGhostCells({
+        width: targetWidthCells,
+        height: targetHeightCells,
+      });
     };
 
     const handleUp = () => {
+      if (onResize && ghostCells) {
+        // Commit snapped size to grid
+        onResize(ghostCells.width, ghostCells.height);
+      }
+
       setIsResizingRight(false);
       setIsResizingBottom(false);
+      setDragSizePx(null);
+      setGhostCells(null);
       resizeStartRef.current = null;
     };
 
@@ -200,7 +225,7 @@ const Sticker = ({
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseup", handleUp);
     };
-  }, [isResizingRight, isResizingBottom, onResize]);
+  }, [isResizingRight, isResizingBottom, onResize, ghostCells]);
 
   /** Parse simple BBCode into HTML */
   function parseBBCode(text: string): string {
@@ -236,14 +261,47 @@ const Sticker = ({
     }
   };
 
+  // Ghost preview style (snapped, dashed overlay)
+  let ghostStyle: React.CSSProperties | undefined;
+  if (ghostCells && resizeStartRef.current) {
+    const { cellWidthPx, cellHeightPx } = resizeStartRef.current;
+    ghostStyle = {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: ghostCells.width * cellWidthPx,
+      height: ghostCells.height * cellHeightPx,
+      border: "2px dashed rgba(0, 0, 0, 0.35)",
+      borderRadius: "inherit",
+      pointerEvents: "none",
+      boxSizing: "border-box",
+      zIndex: 1,
+    };
+  }
+
+  // Live size style while dragging (smooth growth)
+  const liveSizeStyle: React.CSSProperties | undefined = dragSizePx
+    ? {
+        width: dragSizePx.width,
+        height: dragSizePx.height,
+      }
+    : undefined;
+
   return (
     <div
       ref={rootRef}
       className={`sticker-inside rounded-md ${
         isShared ? "sticker--shared" : `sticker-${color}`
       }`}
+      style={{
+        position: "relative",
+        ...liveSizeStyle,
+      }}
     >
-      <div className="sticker-headline">
+      {/* Ghost overlay (snapped size) */}
+      {ghostStyle && <div className="sticker-resize-ghost" style={ghostStyle} />}
+
+      <div className="sticker-headline" style={{ position: "relative", zIndex: 2 }}>
         {isShared && (
           <div className="sticker-shared-by">
             {createdBy === user.id
@@ -320,16 +378,18 @@ const Sticker = ({
           onBlur={() => setIsEditing(false)}
           onKeyDown={handleKeyDown}
           autoFocus
+          style={{ position: "relative", zIndex: 2 }}
         />
       ) : (
         <div
           className="sticker-content"
           dangerouslySetInnerHTML={{ __html: parseBBCode(content) }}
           onClick={() => canEditContent && setIsEditing(true)}
+          style={{ position: "relative", zIndex: 2 }}
         />
       )}
 
-      {/* Drag handles (side + bottom) */}
+      {/* Drag resize handles (side + bottom) */}
       {canResize && (
         <>
           <div
@@ -337,12 +397,14 @@ const Sticker = ({
             onMouseDown={beginResizeRight}
             role="separator"
             aria-orientation="vertical"
+            style={{ zIndex: 3 }}
           />
           <div
             className="sticker-resize-handle sticker-resize-handle--bottom"
             onMouseDown={beginResizeBottom}
             role="separator"
             aria-orientation="horizontal"
+            style={{ zIndex: 3 }}
           />
         </>
       )}
