@@ -39,6 +39,7 @@ export default function AppVersionControl({ user }: SettingsProps) {
           className="text-2xl bg-(--dash-bg-color) py-2 px-4 w-full max-w-32"
           type="number"
           value={value}
+          step={0.001}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && save()}
           placeholder="e.g. 8"
