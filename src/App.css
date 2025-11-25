@@ -1342,6 +1342,39 @@ input.pin-input:-moz-autofill {
   flex-direction: column;
 }
 
+/* Base handle style */
+.sticker-resize-handle {
+  position: absolute;
+  z-index: 5;
+  background: transparent; /* or rgba(0,0,0,0.05) for visible handle */
+}
+
+/* Right edge handle */
+.sticker-resize-handle--right {
+  top: 0;
+  right: 0;
+  width: 10px;           /* drag zone width */
+  height: 100%;
+  cursor: ew-resize;
+}
+
+/* Bottom edge handle */
+.sticker-resize-handle--bottom {
+  left: 0;
+  bottom: 0;
+  height: 10px;          /* drag zone height */
+  width: 100%;
+  cursor: ns-resize;
+}
+
+/* Optional: show a subtle line on hover */
+.sticker-resize-handle--right:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.sticker-resize-handle--bottom:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .drag-handle {
   flex: 1;
   height: 100%;
@@ -1375,34 +1408,6 @@ input.pin-input:-moz-autofill {
 
 .preview-text {
   font-size: 0.5rem;
-}
-
-.resize-controls {
-  position: absolute;
-  display: none;
-  padding: 6px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid none;
-}
-
-.sticker-default .resize-controls,
-.sticker--shared .resize-controls {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.resize-controls.right {
-  top: 50%;
-  right: 4px;
-  transform: translateY(-50%);
-  flex-direction: column;
-  gap: 4px;
-}
-
-.resize-controls.bottom {
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  gap: 4px;
 }
 
 .sticker-default {

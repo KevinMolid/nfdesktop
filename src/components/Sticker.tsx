@@ -26,9 +26,9 @@ type StickerProps = {
   // actions
   onColorChange: (color: StickerColor) => void;
   onContentChange: (content: string) => void;
-  onDelete: () => void;           // <- no-arg handler (bind id where you call it)
+  onDelete: () => void; // <- no-arg handler (bind id where you call it)
   onResize?: (width: number, height: number) => void;
-  onOpenShare?: () => void;       // <- opens share modal in Notes
+  onOpenShare?: () => void; // <- opens share modal in Notes
 
   // drag
   dragHandleProps?: React.HTMLAttributes<HTMLElement>;
@@ -81,9 +81,24 @@ const Sticker = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  // NEW: ref for the whole sticker box (for measuring pixel size)
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
   // palette dropdown state
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const paletteRef = useRef<HTMLDivElement | null>(null);
+
+  // NEW: resize state
+  const [isResizingRight, setIsResizingRight] = useState(false);
+  const [isResizingBottom, setIsResizingBottom] = useState(false);
+  const resizeStartRef = useRef<{
+    startX: number;
+    startY: number;
+    widthCells: number;
+    heightCells: number;
+    cellWidthPx: number;
+    cellHeightPx: number;
+  } | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -95,10 +110,97 @@ const Sticker = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ---- BUTTON RESIZE (existing) ----
   const increaseWidth = () => onResize?.(width + 1, height);
   const decreaseWidth = () => onResize?.(Math.max(1, width - 1), height);
   const increaseHeight = () => onResize?.(width, height + 1);
   const decreaseHeight = () => onResize?.(width, Math.max(1, height - 1));
+
+  // ---- DRAG RESIZE: init helpers ----
+  const beginResize = (
+    e: React.MouseEvent,
+    direction: "right" | "bottom"
+  ) => {
+    if (!rootRef.current || !onResize || !canResize) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const rect = rootRef.current.getBoundingClientRect();
+
+    // approximate pixel size of one grid cell in each direction
+    const cellWidthPx = rect.width / width;
+    const cellHeightPx = rect.height / height;
+
+    resizeStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      widthCells: width,
+      heightCells: height,
+      cellWidthPx,
+      cellHeightPx,
+    };
+
+    if (direction === "right") {
+      setIsResizingRight(true);
+    } else {
+      setIsResizingBottom(true);
+    }
+  };
+
+  const beginResizeRight = (e: React.MouseEvent) =>
+    beginResize(e, "right");
+  const beginResizeBottom = (e: React.MouseEvent) =>
+    beginResize(e, "bottom");
+
+  // ---- DRAG RESIZE: global mousemove/mouseup ----
+  useEffect(() => {
+    if (!isResizingRight && !isResizingBottom) return;
+
+    const handleMove = (e: MouseEvent) => {
+      if (!resizeStartRef.current || !onResize) return;
+      const {
+        startX,
+        startY,
+        widthCells,
+        heightCells,
+        cellWidthPx,
+        cellHeightPx,
+      } = resizeStartRef.current;
+
+      let nextWidth = widthCells;
+      let nextHeight = heightCells;
+
+      if (isResizingRight) {
+        const dx = e.clientX - startX;
+        const deltaCells = Math.round(dx / cellWidthPx);
+        nextWidth = Math.max(1, widthCells + deltaCells);
+      }
+
+      if (isResizingBottom) {
+        const dy = e.clientY - startY;
+        const deltaCells = Math.round(dy / cellHeightPx);
+        nextHeight = Math.max(1, heightCells + deltaCells);
+      }
+
+      // Always snap to whole cells
+      onResize(nextWidth, nextHeight);
+    };
+
+    const handleUp = () => {
+      setIsResizingRight(false);
+      setIsResizingBottom(false);
+      resizeStartRef.current = null;
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, [isResizingRight, isResizingBottom, onResize]);
 
   /** Parse simple BBCode into HTML */
   function parseBBCode(text: string): string {
@@ -136,6 +238,7 @@ const Sticker = ({
 
   return (
     <div
+      ref={rootRef}
       className={`sticker-inside rounded-md ${
         isShared ? "sticker--shared" : `sticker-${color}`
       }`}
@@ -164,7 +267,9 @@ const Sticker = ({
             {/* Color palette dropdown */}
             <div ref={paletteRef} style={{ position: "relative" }}>
               <i
-                className={`fa-solid fa-palette sticker-icon ${!canChangeColor ? "disabled" : ""}`}
+                className={`fa-solid fa-palette sticker-icon ${
+                  !canChangeColor ? "disabled" : ""
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (canChangeColor) setIsPaletteOpen((v) => !v);
@@ -224,30 +329,22 @@ const Sticker = ({
         />
       )}
 
+      {/* Drag handles (side + bottom) */}
       {canResize && (
-        <div className="resize-controls right">
-          <i
-            className="fa-solid fa-arrows-left-right sticker-icon hover"
-            onClick={increaseWidth}
+        <>
+          <div
+            className="sticker-resize-handle sticker-resize-handle--right"
+            onMouseDown={beginResizeRight}
+            role="separator"
+            aria-orientation="vertical"
           />
-          <i
-            className="fa-solid fa-minus sticker-icon hover"
-            onClick={decreaseWidth}
+          <div
+            className="sticker-resize-handle sticker-resize-handle--bottom"
+            onMouseDown={beginResizeBottom}
+            role="separator"
+            aria-orientation="horizontal"
           />
-        </div>
-      )}
-
-      {canResize && (
-        <div className="resize-controls bottom">
-          <i
-            className="fa-solid fa-arrows-up-down sticker-icon hover"
-            onClick={increaseHeight}
-          />
-          <i
-            className="fa-solid fa-minus sticker-icon hover"
-            onClick={decreaseHeight}
-          />
-        </div>
+        </>
       )}
     </div>
   );
