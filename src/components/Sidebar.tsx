@@ -51,7 +51,7 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
 
   return (
     <aside className="sidebar h-screen text-start">
-      <nav className="h-full flex flex-col shadow-sm bg-(--main-bg-color)">
+      <nav className="h-full flex flex-col">
         <div className="p-3 pb-2 flex w-full justify-between items-center mt-2 mb-4">
           <img
             src={logo}
