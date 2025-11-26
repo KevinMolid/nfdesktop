@@ -89,7 +89,7 @@ function Calculator() {
             onClick={() => updateDisplay("*")}
             className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
           >
-            <i className="fa-solid fa-x"></i>
+            <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
         <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">

@@ -306,7 +306,7 @@ const Usergroups = () => {
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && registerUsergroup()}
-                className="text-xl font-bold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color)"
+                className="text-xl font-semibold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color)"
               />
             </div>
             <div className="flex gap-2">

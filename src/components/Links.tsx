@@ -330,7 +330,7 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                 Save
               </Button>
               <Button
-                variant="tertiary"
+                variant="secondary"
                 onClick={() => setShowForm(false)}
                 iconLeft={<i className="fa-solid fa-trash" />}
               >
@@ -446,9 +446,13 @@ const Links = ({ user, toggleActive }: LinksProps) => {
 
       {edit && (
         <div className="create-task-box">
-          <h4>Edit link</h4>
+          <h4 className="mt-4 mb-2 text-xl font-semibold">Edit link</h4>
+          <label htmlFor="editLinkName" className="cursor-pointer">
+              Link name
+          </label>
           <div className="create-task-input-container">
             <input
+              id="editLinkName"
               type="text"
               placeholder="Link name"
               value={edit.name}
@@ -456,9 +460,13 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                 setEdit((s) => (s ? { ...s, name: e.target.value } : s))
               }
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
-              className="input m-b-1"
+              className="w-full text-xl font-semibold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color) mb-2"
             />
+            <label htmlFor="editLinkURL" className="cursor-pointer">
+                Link URL
+            </label>
             <input
+            id="editLinkURL"
               type="text"
               placeholder="URL (https://...)"
               value={edit.href}
@@ -466,17 +474,16 @@ const Links = ({ user, toggleActive }: LinksProps) => {
                 setEdit((s) => (s ? { ...s, href: e.target.value } : s))
               }
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
-              className="input m-b-1"
+              className="w-full text-xl font-semibold text-(--text-color) border-b-2 border-(--line-color) outline-none focus:border-(--text-color) mb-4"
             />
-            <div className="button-group">
-              <button className="save-btn" onClick={saveEdit}>
-                <i className="fa-solid fa-save icon-md" />
-                Update
-              </button>
-              <button className="delete-btn" onClick={cancelEdit}>
-                <i className="fa-solid fa-xmark icon-md" />
-                Cancel
-              </button>
+            <div className="flex gap-2">
+              <Button onClick={saveEdit} iconLeft={<i className="fa-solid fa-save" />}>
+                Save
+              </Button>
+              <Button variant="secondary"
+                onClick={cancelEdit} iconLeft={<i className="fa-solid fa-trash" />}>
+                Discard
+              </Button>
             </div>
           </div>
         </div>
