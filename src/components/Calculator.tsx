@@ -47,10 +47,19 @@ function Calculator() {
   function calculate() {
     if (!display) return;
 
-    // 1) Remember what the user typed
+    const lastChar = display[display.length - 1];
+    const invalidEndings = ["+", "-", "*", "/", ".", "%"];
+
+    // Always update lastDisplay, even if invalid expression
     setLastDisplay(display + " =");
 
-    // 2) Turn patterns like "54%200" into "(54/100*200)"
+    // If the expression ends in an operator, do NOT evaluate it
+    if (invalidEndings.includes(lastChar)) {
+      // Leave `display` untouched
+      return;
+    }
+
+    // 2) Convert percent syntax
     const expressionWithPercent = display.replace(
       /(\d+(\.\d+)?)%(\d+(\.\d+)?)/g,
       (_match, left, _leftDec, right) => `(${left}/100*${right})`
@@ -59,12 +68,12 @@ function Calculator() {
     try {
       const result = eval(expressionWithPercent) as number;
 
-      // 3) Round to, say, 10 decimal places, then strip trailing zeros
       const rounded = parseFloat(result.toFixed(10));
 
       setDisplay(rounded.toString());
     } catch {
-      setDisplay("Error");
+      // fallback: do not change invalid expressions
+      setDisplay(display);
     }
   }
 
@@ -82,25 +91,25 @@ function Calculator() {
         <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={clearAll}
-            className="p-2 bg-(--sticker-red-color) grow rounded-md cursor-pointer"
+            className="p-2 bg-(--bg5-color) hover:bg-(--text5-color) grow rounded-md cursor-pointer"
           >
             C
           </button>
           <button
             onClick={clearEntry}
-            className="p-2 bg-(--sticker-red-color) grow rounded-md cursor-pointer"
+            className="p-2 bg-(--bg5-color) hover:bg-(--text5-color) grow rounded-md cursor-pointer"
           >
             CE
           </button>
           <button
             onClick={() => updateDisplay("%")}
-            className="p-2 bg-(--sticker-blue-color) font-bold grow rounded-md cursor-pointer"
+            className="p-2 bg-(--bg4-color) hover:bg-(--bg5-color) font-bold grow rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-percent"></i>
           </button>
           <button
             onClick={() => updateDisplay("/")}
-            className="p-2 bg-(--sticker-blue-color) font-bold grow rounded-md cursor-pointer"
+            className="p-2 bg-(--bg4-color) hover:bg-(--bg5-color) font-bold grow rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-divide"></i>
           </button>
@@ -126,7 +135,7 @@ function Calculator() {
           </button>
           <button
             onClick={() => updateDisplay("*")}
-            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
+            className="p-2 bg-(--bg4-color) hover:bg-(--bg5-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-xmark"></i>
           </button>
@@ -152,7 +161,7 @@ function Calculator() {
           </button>
           <button
             onClick={() => updateDisplay("-")}
-            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
+            className="p-2 bg-(--bg4-color) hover:bg-(--bg5-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-minus"></i>
           </button>
@@ -178,7 +187,7 @@ function Calculator() {
           </button>
           <button
             onClick={() => updateDisplay("+")}
-            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
+            className="p-2 bg-(--bg4-color) hover:bg-(--bg5-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-plus"></i>
           </button>
@@ -198,7 +207,7 @@ function Calculator() {
           </button>
           <button
             onClick={calculate}
-            className="p-2 bg-(--sticker-green-color) rounded-md cursor-pointer"
+            className="p-2 bg-(--brand-color) hover:bg-(--brand2-color) rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-equals"></i>
           </button>
