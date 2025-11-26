@@ -148,7 +148,7 @@ const Settings = ({ user, onLogout }: SettingsProps) => {
                 Save
               </Button>
               <Button
-                variant="tertiary"
+                variant="secondary"
                 onClick={cancelPINupdate}
                 iconLeft={<i className="fa-solid fa-ban"></i>}
               >
