@@ -74,131 +74,131 @@ function Calculator() {
         <h3 className="card-title">Calculator</h3>
       </div>
 
-      <div className="flex flex-col gap-2 App w-full max-w-60 bg-(--bg4-color) p-4 rounded-xl shadow">
-        <div className="bg-(--bg2-color) py-1 flex gap-1 flex-col justify-center items-end px-4 min-h-14 rounded-md my-2 text-lg text-(--text2-color) text-right">
+      <div className="flex flex-col gap-1 App w-full max-w-84">
+        <div className="bg-(--bg3-color) py-1 flex gap-1 flex-col justify-center items-end px-4 min-h-14 rounded-md mb-1 text-lg text-(--text2-color) text-right">
           <div className="h-4 flex items-center text-xs opacity-70">{formatDisplay(lastDisplay)}</div>
           <div className="h-6 flex items-center font-semibold">{formatDisplay(display)}</div>
         </div>
-        <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
+        <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={clearAll}
-            className="p-2 bg-(--sticker-red-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-red-color) grow rounded-md cursor-pointer"
           >
             C
           </button>
           <button
             onClick={clearEntry}
-            className="p-2 bg-(--sticker-red-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-red-color) grow rounded-md cursor-pointer"
           >
             CE
           </button>
           <button
             onClick={() => updateDisplay("%")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-blue-color) font-bold grow rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-percent"></i>
           </button>
           <button
             onClick={() => updateDisplay("/")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-blue-color) font-bold grow rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-divide"></i>
           </button>
         </div>
-        <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
+        <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("7")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             7
           </button>
           <button
             onClick={() => updateDisplay("8")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             8
           </button>
           <button
             onClick={() => updateDisplay("9")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             9
           </button>
           <button
             onClick={() => updateDisplay("*")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
+        <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("4")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             4
           </button>
           <button
             onClick={() => updateDisplay("5")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             5
           </button>
           <button
             onClick={() => updateDisplay("6")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             6
           </button>
           <button
             onClick={() => updateDisplay("-")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-minus"></i>
           </button>
         </div>
-        <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
+        <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("1")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             1
           </button>
           <button
             onClick={() => updateDisplay("2")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             2
           </button>
           <button
             onClick={() => updateDisplay("3")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             3
           </button>
           <button
             onClick={() => updateDisplay("+")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-blue-color) font-bold rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-plus"></i>
           </button>
         </div>
-        <div className="grid grid-cols-4 gap-1 mb-2 text-lg text-(--text2-color) font-semibold">
+        <div className="grid grid-cols-4 gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("0")}
-            className="p-2 bg-(--bg2-color) rounded-xl shadow-md cursor-pointer col-span-2"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer col-span-2"
           >
             0
           </button>
           <button
             onClick={() => updateDisplay(".")}
-            className="p-2 bg-(--bg2-color) rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--bg3-color) hover:bg-(--bg4-color) rounded-md cursor-pointer"
           >
             .
           </button>
           <button
             onClick={calculate}
-            className="p-2 bg-(--sticker-green-color) rounded-xl shadow-md cursor-pointer"
+            className="p-2 bg-(--sticker-green-color) rounded-md cursor-pointer"
           >
             <i className="fa-solid fa-equals"></i>
           </button>
