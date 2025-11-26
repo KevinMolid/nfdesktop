@@ -11,10 +11,23 @@ function Calculator() {
     }
   }
 
+  function clearEntry() {
+    setDisplay((prev) => prev.slice(0, -1));
+  }
+
   function calculate() {
-    console.log("Hello I calculate for you");
-    const results = eval(display);
-    setDisplay(results);
+    // Turn patterns like "54%200" into "(54/100*200)"
+    const expressionWithPercent = display.replace(
+      /(\d+(\.\d+)?)%(\d+(\.\d+)?)/g,
+      (_match, left, _leftDec, right) => `(${left}/100*${right})`
+    );
+
+    const result = eval(expressionWithPercent) as number;
+
+    // Round to, say, 10 decimal places, then strip trailing zeros
+    const rounded = parseFloat(result.toFixed(10));
+
+    setDisplay(rounded.toString());
   }
 
   return (
@@ -23,11 +36,36 @@ function Calculator() {
         <h3 className="card-title">Calculator</h3>
       </div>
 
-      <div className="sm:hidden">
-        Please make your app window bigger to see this app.
-      </div>
-      <div className="hidden sm:flex flex-col gap-2 App w-full max-w-60 bg-(--bg4-color) p-4 rounded-xl shadow">
-        <div className="bg-(--bg2-color) py-2 px-4 min-h-11 rounded-md my-2 text-lg text-(--text2-color) font-semibold">{display}</div>
+      <div className="flex flex-col gap-2 App w-full max-w-60 bg-(--bg4-color) p-4 rounded-xl shadow">
+        <div className="bg-(--bg2-color) py-2 px-4 min-h-11 rounded-md my-2 text-lg text-(--text2-color) font-semibold text-right">
+          {display}
+        </div>
+        <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
+          <button
+            onClick={() => setDisplay("")}
+            className="p-2 bg-(--sticker-red-color) w-20 rounded-xl shadow-md cursor-pointer"
+          >
+            C
+          </button>
+          <button
+            onClick={clearEntry}
+            className="p-2 bg-(--sticker-red-color) w-20 rounded-xl shadow-md cursor-pointer"
+          >
+            CE
+          </button>
+          <button
+            onClick={() => updateDisplay("%")}
+            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+          >
+            <i className="fa-solid fa-percent"></i>
+          </button>
+          <button
+            onClick={() => updateDisplay("/")}
+            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
+          >
+            <i className="fa-solid fa-divide"></i>
+          </button>
+        </div>
         <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
           <button
             onClick={() => updateDisplay("7")}
@@ -48,10 +86,10 @@ function Calculator() {
             9
           </button>
           <button
-            onClick={() => updateDisplay("/")}
+            onClick={() => updateDisplay("*")}
             className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
           >
-            <i className="fa-solid fa-divide"></i>
+            <i className="fa-solid fa-x"></i>
           </button>
         </div>
         <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
@@ -74,10 +112,10 @@ function Calculator() {
             6
           </button>
           <button
-            onClick={() => updateDisplay("*")}
+            onClick={() => updateDisplay("-")}
             className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
           >
-            <i className="fa-solid fa-x"></i>
+            <i className="fa-solid fa-minus"></i>
           </button>
         </div>
         <div className="flex justify-between gap-1 text-lg text-(--text2-color) font-semibold">
@@ -100,37 +138,32 @@ function Calculator() {
             3
           </button>
           <button
-            onClick={() => updateDisplay("-")}
-            className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
-          >
-            <i className="fa-solid fa-minus"></i>
-          </button>
-        </div>
-        <div className="flex justify-between gap-1 mb-2 text-lg text-(--text2-color) font-semibold">
-          <button
-            onClick={() => updateDisplay("0")}
-            className="p-2 bg-(--bg2-color) w-20 rounded-xl shadow-md cursor-pointer"
-          >
-            0
-          </button>
-          <button
-            onClick={() => setDisplay("")}
-            className="p-2 bg-(--sticker-red-color) w-20 rounded-xl shadow-md cursor-pointer"
-          >
-            C
-          </button>
-          <button
-            onClick={calculate}
-            className="p-2 bg-(--sticker-green-color) w-20 rounded-xl shadow-md cursor-pointer"
-          >
-            <i className="fa-solid fa-equals"></i>
-          </button>
-          <button
             onClick={() => updateDisplay("+")}
             className="p-2 bg-(--sticker-blue-color) font-bold w-20 rounded-xl shadow-md cursor-pointer"
           >
             <i className="fa-solid fa-plus"></i>
           </button>
+        </div>
+        <div className="grid grid-cols-4 gap-1 mb-2 text-lg text-(--text2-color) font-semibold">
+          <button
+            onClick={() => updateDisplay("0")}
+            className="p-2 bg-(--bg2-color) rounded-xl shadow-md cursor-pointer col-span-2"
+          >
+            0
+          </button>
+          <button
+            onClick={() => updateDisplay(".")}
+            className="p-2 bg-(--bg2-color) rounded-xl shadow-md cursor-pointer"
+          >
+            .
+          </button>
+          <button
+            onClick={calculate}
+            className="p-2 bg-(--sticker-green-color) rounded-xl shadow-md cursor-pointer"
+          >
+            <i className="fa-solid fa-equals"></i>
+          </button>
+
         </div>
       </div>
     </div>
