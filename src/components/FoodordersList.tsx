@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { createPortal } from "react-dom";
 import { db } from "./firebase";
 
 import Button from "./Button";
@@ -153,7 +154,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
 
   const escapeJoin = (arr: string[]) => arr.map(escapeHtml).join(", ");
 
-  // NEW: format one item as simple HTML (no name, just order details)
+  // format one item as simple HTML (no name, just order details)
   const formatItemHtml = (item: string, options?: FoodItem["options"]) => {
     const removeList = options?.remove ?? [];
     const extraList = options?.extra ?? [];
@@ -220,110 +221,28 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
     );
   };
 
-  return (
-    <div className="card has-header grow">
-      <div className="card-header">
-        <h3 className="card-title">Orders</h3>
-        <div className="card-header-right">
+  // Modal JSX extracted so we can portal it
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-[1000] flex flex-col 
+      items-center justify-start bg-white overflow-y-auto p-6
+      text-black"
+    >
+      <div className="w-full max-w-4xl">
+        <div className="flex justify-end mb-4">
           <Button
+            variant="transparent"
             size="sm"
-            variant="secondary"
-            onClick={() => setShowOrdersModal(!showOrdersModal)}
-            iconLeft={<i className="fa-solid fa-file"></i>}
-          >
-            Show Page
-          </Button>
-          {user.role === "admin" && orders.length !== 0 && (
-            <Button
-              size="sm"
-              variant="destructive"
-              className="delete-btn"
-              onClick={clearAllOrders}
-              iconLeft={<i className="fa-solid fa-trash"></i>}
-            >
-              Delete orders
-            </Button>
-          )}
-        </div>
-      </div>
-      <div className="card-content">
-        {loading ? (
-          <p>Loading orders...</p>
-        ) : orders.length === 0 ? (
-          <p>There are currently no orders.</p>
-        ) : (
-          <ul className="foodorders-list">
-            {orders.map((order) => (
-              <li
-                className={
-                  order.createdBy === user.username
-                    ? "foodorders-item foodorders-item-user"
-                    : "foodorders-item"
-                }
-                key={order.id}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <p className="message-info">
-                    <strong className="user text-lg">
-                      {usersMap[order.createdBy] || order.createdBy}
-                    </strong>
-                  </p>
-                  <div className="flex gap-1">
-                    {(order.createdBy === user.username ||
-                      user.role === "admin") &&
-                      onEditOrder && (
-                        <Button size="xs"  variant="secondary" onClick={() => onEditOrder(order)}>
-                          Edit
-                        </Button>
-                      )}
-                    {user.role === "admin" && orders.length !== 0 && (
-                      <Button
-                        size="xs"
-                        variant="destructive"
-                        onClick={() => deleteOrder(order.id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <ul>
-                  {order.order?.map((item, index) =>
-                    renderOrder(
-                      item.item,
-                      item.options,
-                      order.drink,
-                      order.price
-                    )
-                  )}
-                  {order.item &&
-                    renderOrder(
-                      order.item,
-                      order.options,
-                      order.drink,
-                      order.price
-                    )}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Orders Modal */}
-      {showOrdersModal && (
-        <div className="modal foodorders-modal">
-          <Button
-            variant="tertiary"
-            size="sm"
-            onClick={() => setShowOrdersModal(!showOrdersModal)}
+            onClick={() => setShowOrdersModal(false)}
             iconLeft={<i className="fa-solid fa-x"></i>}
           >
             Close
           </Button>
+        </div>
 
-          {/* Two-column grid */}
-          <div className="foodorders-modal-grid">
+        {/* Two-column table: left = name, right = order */}
+        <table className="border-collapse mt-8 text-[28px] leading-[1.3]">
+          <tbody>
             {orders.map((order) => {
               const displayName = usersMap[order.createdBy] || order.createdBy;
 
@@ -342,25 +261,129 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
               const itemsHtml = itemBlocks.join("<br /><br />");
 
               return (
-                <>
-                  {/* LEFT COLUMN — ALWAYS NAME */}
-                  <div className="foodorders-modal-name" key={order.id + "-name"}>
-                    <strong>{displayName}</strong>
-                  </div>
+                <tr
+                  key={order.id}
+                 >
+                  {/* LEFT COLUMN — ONLY NAME */}
+                  <td className="align-top whitespace-nowrap font-semibold pr-12 py-1">
+                    {displayName}
+                  </td>
 
-                  {/* RIGHT COLUMN — ORDER CONTENT */}
-                  <div
-                    className="foodorders-modal-text"
-                    key={order.id + "-order"}
+                  {/* RIGHT COLUMN — ONLY ORDER CONTENT */}
+                  <td
+                    className="align-top py-1 pb-8"
                     dangerouslySetInnerHTML={{ __html: itemsHtml }}
                   />
-                </>
+                </tr>
               );
             })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <div className="card has-header grow">
+        <div className="card-header">
+          <h3 className="card-title">Orders</h3>
+          <div className="card-header-right">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setShowOrdersModal(true)}
+              iconLeft={<i className="fa-solid fa-file"></i>}
+            >
+              Show Page
+            </Button>
+            {user.role === "admin" && orders.length !== 0 && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="delete-btn"
+                onClick={clearAllOrders}
+                iconLeft={<i className="fa-solid fa-trash"></i>}
+              >
+                Delete orders
+              </Button>
+            )}
           </div>
         </div>
-      )}
-    </div>
+        <div className="card-content">
+          {loading ? (
+            <p>Loading orders...</p>
+          ) : orders.length === 0 ? (
+            <p>There are currently no orders.</p>
+          ) : (
+            <ul className="foodorders-list">
+              {orders.map((order) => (
+                <li
+                  className={
+                    order.createdBy === user.username
+                      ? "foodorders-item foodorders-item-user"
+                      : "foodorders-item"
+                  }
+                  key={order.id}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="message-info">
+                      <strong className="user text-lg">
+                        {usersMap[order.createdBy] || order.createdBy}
+                      </strong>
+                    </p>
+                    <div className="flex gap-1">
+                      {(order.createdBy === user.username ||
+                        user.role === "admin") &&
+                        onEditOrder && (
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            onClick={() => onEditOrder(order)}
+                          >
+                            Edit
+                          </Button>
+                        )}
+                      {user.role === "admin" && orders.length !== 0 && (
+                        <Button
+                          size="xs"
+                          variant="destructive"
+                          onClick={() => deleteOrder(order.id)}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <ul>
+                    {order.order?.map((item, index) =>
+                      renderOrder(
+                        item.item,
+                        item.options,
+                        order.drink,
+                        order.price
+                      )
+                    )}
+                    {order.item &&
+                      renderOrder(
+                        order.item,
+                        order.options,
+                        order.drink,
+                        order.price
+                      )}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* Portal the modal into <body> so it's truly viewport-fixed */}
+      {showOrdersModal &&
+        typeof document !== "undefined" &&
+        createPortal(modalContent, document.body)}
+    </>
   );
 };
 

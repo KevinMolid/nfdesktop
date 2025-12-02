@@ -2160,30 +2160,6 @@ a:hover {
   gap: 12px;
 }
 
-.foodorders-modal {
-  display: flex;
-  gap: 20px;
-}
-
-.foodorders-modal-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 1.5rem;
-  row-gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.foodorders-modal-row {
-  align-items: flex-start;
-}
-
-.foodorders-modal-name {
-  white-space: nowrap;
-}
-
-.foodorders-modal-text {
-  line-height: 1.35;
-}
 
 .foodorders-item {
   position: relative;
@@ -2250,8 +2226,10 @@ a:hover {
   width: 100vw;
   height: 100vh;
   background-color: var(--main-bg-color);
-  position: fixed;
+  position: fixed !important;
+  inset: 0 !important;
   top: 0;
   left: 0;
-  z-index: 25;
+  z-index: 9999 !important;
+  transform: none !important;
 }
