@@ -2191,13 +2191,14 @@ a:hover {
   max-width: 200px;
   flex-grow: 1;
   padding: 12px;
-  background-color: var(--bg3-color);
+  background-color: var(--bg-color);
   border-radius: 10px;
   padding-bottom: 40px;
+  border: 1px solid var(--border-color)
 }
 
 .foodorders-item-user {
-  background-color: var(--bg4-color);
+  background-color: var(--bg3-color);
 }
 
 .card-content {
@@ -2206,7 +2207,7 @@ a:hover {
 
 .foodorders-item-price {
   position: absolute;
-  background-color: var(--bg2-color);
+  background-color: var(--main-bg-color);
   font-size: 1.4rem;
   font-weight: 500;
   padding-inline: 12px;
@@ -2220,7 +2221,7 @@ a:hover {
 }
 
 .foodorders-item-user .foodorders-item-price {
-  background-color: var(--bg3-color);
+  background-color: var(--main-bg-color);
 }
 
 .order-price-container {
