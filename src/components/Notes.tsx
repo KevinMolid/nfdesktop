@@ -803,11 +803,12 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
       {/* Share modal */}
       {shareOpenForId !== null && (
         <div className="share-note-box" role="dialog" aria-modal="true">
-          <h4>Share note</h4>
+          <h4 className="text-lg font-semibold mb-4">Share note</h4>
 
-          <div>
-            <label className="m-r-1">
+          <div className="mb-4">
+            <label>
               <input
+                className="mr-1"
                 type="checkbox"
                 checked={shareEveryone}
                 onChange={(e) => setShareEveryone(e.target.checked)}
@@ -827,7 +828,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
               }}
             >
               <div>
-                <h5>Users</h5>
+                <h5 className="text-lg mb-2 font-semibold">Users</h5>
                 <ul>
                   {allUsers.map((u) => {
                     const label = u.name?.trim()
@@ -838,6 +839,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                       <li key={u.id}>
                         <label className="checkbox-row">
                           <input
+                            className="mr-2"
                             type="checkbox"
                             checked={checked}
                             onChange={() =>
@@ -853,7 +855,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
               </div>
 
               <div>
-                <h5>User groups</h5>
+                <h5 className="text-lg mb-2 font-semibold">User groups</h5>
                 <ul>
                   {allGroups.map((g) => {
                     const checked = shareGroupIds.includes(g.id);
@@ -861,6 +863,7 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                       <li key={g.id}>
                         <label className="checkbox-row">
                           <input
+                            className="mr-2"
                             type="checkbox"
                             checked={checked}
                             onChange={() =>
@@ -893,10 +896,9 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
               );
               return (
                 canUnshare && (
-                  <button className="delete-btn" onClick={unshareNote}>
-                    <i className="fa-solid fa-unlink icon-md" />
+                  <Button onClick={unshareNote} iconLeft={<i className="fa-solid fa-unlink icon-md" />}>
                     Unshare
-                  </button>
+                  </Button>
                 )
               );
             })()}
@@ -914,17 +916,16 @@ const Notes = ({ user, toggleActive }: NotesProps) => {
                 : "fa-solid fa-share-nodes icon-md";
 
               return (
-                <button className="save-btn" onClick={saveShare}>
-                  <i className={primaryIcon} />
+                <Button onClick={saveShare} iconLeft={<i className={primaryIcon} />}>
                   {primaryLabel}
-                </button>
+                </Button>
               );
             })()}
 
-            <button className="delete-btn" onClick={closeShareModal}>
-              <i className="fa-solid fa-xmark icon-md" />
+            <Button onClick={closeShareModal} iconLeft={<i className="fa-solid fa-xmark icon-md" />}
+              variant="secondary">
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

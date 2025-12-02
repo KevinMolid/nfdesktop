@@ -332,7 +332,7 @@ const Sticker = ({
       {/* Ghost overlay (snapped size) */}
       {ghostWidthPx != null && ghostHeightPx != null && (
         <div
-          className="pointer-events-none absolute top-0 left-0 z-[1] box-border rounded-md border-2 border-dashed border-(--text5-color)"
+          className="pointer-events-none absolute top-0 left-0 z-10 box-border rounded-md border-2 border-dashed border-(--text5-color)"
           style={{
             width: ghostWidthPx,
             height: ghostHeightPx,
@@ -340,7 +340,7 @@ const Sticker = ({
         />
       )}
 
-      <div className="sticker-headline relative z-[2]">
+      <div className="sticker-headline relative z-20">
         {isShared && (
           <div className="sticker-shared-by">
             {createdBy === user.id
@@ -376,7 +376,7 @@ const Sticker = ({
                 aria-expanded={isPaletteOpen}
               />
               {isPaletteOpen && (
-                <div className="color-dropdown" role="menu" style={{ right: 0 }}>
+                <div className="color-dropdown r-0" role="menu">
                   {COLORS.map((c) => (
                     <div
                       key={c}
