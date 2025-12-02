@@ -21,7 +21,7 @@ type FoodItem = {
   };
 };
 
-type FoodOrder = {
+export type FoodOrder = {
   id: string;
   createdBy: string;
   createdAt: Timestamp;
@@ -40,9 +40,11 @@ type User = {
 
 type FoodordersListProps = {
   user: User;
+  // optional so the component can still be used read-only
+  onEditOrder?: (order: FoodOrder) => void;
 };
 
-const FoodordersList = ({ user }: FoodordersListProps) => {
+const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
   const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
@@ -52,9 +54,9 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     const unsubscribe = onSnapshot(
       collection(db, "foodorders"),
       (snapshot) => {
-        const updatedOrders = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        const updatedOrders = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
         })) as unknown as FoodOrder[];
 
         setOrders(updatedOrders);
@@ -72,8 +74,8 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const map: Record<string, string> = {};
-      snapshot.forEach((doc) => {
-        const data = doc.data() as {
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as {
           username: string;
           nickname?: string;
           name?: string;
@@ -89,11 +91,26 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
     return () => unsubscribe();
   }, []);
 
+  const deleteOrder = async (orderId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this order?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "foodorders", orderId));
+      console.log(`Order ${orderId} deleted.`);
+      // onSnapshot will update `orders`
+    } catch (error) {
+      console.error("Error deleting order:", error);
+    }
+  };
+
   const clearAllOrders = async () => {
-    const confirm = window.confirm(
+    const confirmDelete = window.confirm(
       "Are you sure you want to delete all orders?"
     );
-    if (!confirm) return;
+    if (!confirmDelete) return;
 
     try {
       const querySnapshot = await getDocs(collection(db, "foodorders"));
@@ -136,37 +153,35 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
 
   const escapeJoin = (arr: string[]) => arr.map(escapeHtml).join(", ");
 
-  const formatItemBlockHtml = (
-    displayName: string,
-    item: string,
-    options?: FoodItem["options"]
-  ) => {
+  // NEW: format one item as simple HTML (no name, just order details)
+  const formatItemHtml = (item: string, options?: FoodItem["options"]) => {
     const removeList = options?.remove ?? [];
     const extraList = options?.extra ?? [];
     const spice = options?.spice;
     const size = options?.sizes;
 
-    const shortName = (displayName || "").slice(0, 6);
-    const paddedName = shortName.padEnd(6, " ");
-
     const lines: string[] = [];
 
+    // Main line: item + size
     lines.push(
-      `${escapeHtml(paddedName)}\t` +
-        `<strong>${escapeHtml(item)}${escapeHtml(sizeLabel(size))}</strong>`
+      `<strong>${escapeHtml(item)}${escapeHtml(sizeLabel(size))}</strong>`
     );
 
-    if (spice && spice !== "Medium") lines.push(`\t\t${escapeHtml(spice)}`);
-    if (removeList.length > 0) lines.push(`\t\tUten ${escapeJoin(removeList)}`);
-
-    // Extras + empty line under it
-    const prettyExtras = transformExtras(extraList);
-    if (prettyExtras.length > 0) {
-      lines.push(`\t\t${escapeJoin(prettyExtras)}`);
+    if (spice && spice !== "Medium") {
+      lines.push(escapeHtml(spice));
     }
 
-    lines.push("");
-    return lines.join("\n ");
+    if (removeList.length > 0) {
+      lines.push(`Uten ${escapeJoin(removeList)}`);
+    }
+
+    const prettyExtras = transformExtras(extraList);
+    if (prettyExtras.length > 0) {
+      lines.push(escapeJoin(prettyExtras));
+    }
+
+    // Join each part on its own line
+    return lines.join("<br />");
   };
 
   const renderOrder = (
@@ -242,16 +257,36 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
               <li
                 className={
                   order.createdBy === user.username
-                    ? "foodorders-item-user"
+                    ? "foodorders-item foodorders-item-user"
                     : "foodorders-item"
                 }
                 key={order.id}
               >
-                <p className="message-info">
-                  <strong className="user">
-                    {usersMap[order.createdBy] || order.createdBy}
-                  </strong>
-                </p>
+                <div className="flex justify-between items-center mb-1">
+                  <p className="message-info">
+                    <strong className="user text-lg">
+                      {usersMap[order.createdBy] || order.createdBy}
+                    </strong>
+                  </p>
+                  <div className="flex gap-1">
+                    {(order.createdBy === user.username ||
+                      user.role === "admin") &&
+                      onEditOrder && (
+                        <Button size="xs"  variant="secondary" onClick={() => onEditOrder(order)}>
+                          Edit
+                        </Button>
+                      )}
+                    {user.role === "admin" && orders.length !== 0 && (
+                      <Button
+                        size="xs"
+                        variant="destructive"
+                        onClick={() => deleteOrder(order.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <ul>
                   {order.order?.map((item, index) =>
                     renderOrder(
@@ -287,47 +322,42 @@ const FoodordersList = ({ user }: FoodordersListProps) => {
             Close
           </Button>
 
-          <ul className="foodorders-modal-list">
+          {/* Two-column grid */}
+          <div className="foodorders-modal-grid">
             {orders.map((order) => {
               const displayName = usersMap[order.createdBy] || order.createdBy;
 
-              // Build one HTML block per item in the order
-              const blocks: string[] = [];
+              const itemBlocks: string[] = [];
 
               if (order.order?.length) {
                 order.order.forEach((itm) => {
-                  blocks.push(
-                    formatItemBlockHtml(displayName, itm.item, itm.options)
-                  );
+                  itemBlocks.push(formatItemHtml(itm.item, itm.options));
                 });
               }
 
               if (order.item) {
-                blocks.push(
-                  formatItemBlockHtml(displayName, order.item, order.options)
-                );
+                itemBlocks.push(formatItemHtml(order.item, order.options));
               }
 
-              const modalHtml = blocks.join("\n");
+              const itemsHtml = itemBlocks.join("<br /><br />");
 
               return (
-                <li key={order.id}>
-                  <pre
+                <>
+                  {/* LEFT COLUMN — ALWAYS NAME */}
+                  <div className="foodorders-modal-name" key={order.id + "-name"}>
+                    <strong>{displayName}</strong>
+                  </div>
+
+                  {/* RIGHT COLUMN — ORDER CONTENT */}
+                  <div
                     className="foodorders-modal-text"
-                    style={{
-                      whiteSpace: "pre",
-                      lineHeight: 1.35,
-                      margin: 0,
-                      fontFamily: "inherit",
-                      // Optional: control tab stop width if you want tighter columns
-                      // tabSize: 8 as any,
-                    }}
-                    dangerouslySetInnerHTML={{ __html: modalHtml }}
+                    key={order.id + "-order"}
+                    dangerouslySetInnerHTML={{ __html: itemsHtml }}
                   />
-                </li>
+                </>
               );
             })}
-          </ul>
+          </div>
         </div>
       )}
     </div>

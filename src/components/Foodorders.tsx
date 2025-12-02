@@ -3,12 +3,19 @@ import RadioButton from "./RadioButton";
 import StageSlider from "./StageSlider";
 import { AnimatedButton } from "./AnimatedButton";
 
-import FoodordersList from "./FoodordersList";
+import FoodordersList, { FoodOrder } from "./FoodordersList";
 
 import SafeWrapper from "./SafeWrapper";
 
 import { db } from "./firebase";
-import { collection, addDoc, Timestamp, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  collection,
+  addDoc,
+  Timestamp,
+  onSnapshot,
+} from "firebase/firestore";
 
 type MessageType = "success" | "error" | "info" | "warning" | "";
 
@@ -33,6 +40,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
   const [userOptions, setUserOptions] = useState<
     Array<{ username: string; label: string }>
   >([]);
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "users"), (snap) => {
@@ -246,6 +254,15 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     });
   };
 
+  const handleEditOrder = (order: FoodOrder) => {
+    setSelectedFood(order.item || null);
+    setOrderOptions(order.options || {});
+    setDrink(order.drink || "");
+    setOtherDrink(order.drink === "Other" ? order.drink ?? "" : "");
+    setOrderFor(order.createdBy);
+    setEditingOrderId(order.id);
+  };
+
   const handleExtraChange = (name: string) => {
     setOrderOptions((prev: any) => {
       const updated = prev.extra?.includes(name)
@@ -396,7 +413,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                 {(["sizes", "spice", "extra", "remove"] as const).map((type) =>
                   selectedItem[type]?.length ? (
                     <div key={type}>
-                      <h4 className="food-options-header">
+                      <h4 className="food-options-header font-semibold">
                         {type === "sizes"
                           ? "Size"
                           : type === "spice"
@@ -404,7 +421,6 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                           : type === "extra"
                           ? "Extras"
                           : "Without"}
-                        :
                       </h4>
                       {type === "sizes" ? (
                         <RadioButton
@@ -421,7 +437,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                       ) : type === "extra" ? (
                         selectedItem.extra?.map((val: any) => (
                           <div className="options" key={val.name}>
-                            <label>
+                            <label className="flex gap-2">
                               <input
                                 type="checkbox"
                                 checked={
@@ -437,7 +453,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                       ) : (
                         selectedItem[type].map((val: string) => (
                           <div className="options" key={val + "idk"}>
-                            <label>
+                            <label className="flex gap-2">
                               <input
                                 type="checkbox"
                                 name={type}
@@ -456,7 +472,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                   ) : null
                 )}
                 <div>
-                  <h4>Drink</h4>
+                  <h4 className="font-semibold">Drink</h4>
                   <div>
                     <RadioButton
                       value={drink}
@@ -507,25 +523,50 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                         drink === "Other" ? otherDrink.trim() : drink;
 
                       try {
-                        await addDoc(collection(db, "foodorders"), {
-                          item: selectedFood,
-                          options: orderOptions,
-                          drink: drinkValue,
-                          price: finalPrice,
-                          createdAt: Timestamp.now(),
-                          // only admins can set a different user
-                          createdBy:
-                            user.role === "admin" ? orderFor : user.username,
-                        });
-                        setAlerts({
-                          text:
-                            (user.role === "admin" && orderFor !== user.username
-                              ? `Order for ${selectedUserLabel}: `
-                              : "Ordered ") +
-                            `${selectedFood} with ${drinkValue}.`,
-                          type: "success",
-                        });
+                        if (editingOrderId) {
+                          // UPDATE existing order
+                          const ref = doc(db, "foodorders", editingOrderId);
+                          await updateDoc(ref, {
+                            item: selectedFood,
+                            options: orderOptions,
+                            drink: drinkValue,
+                            price: finalPrice,
+                            createdAt: Timestamp.now(), // optional: may want to keep original timestamp
+                            createdBy:
+                              user.role === "admin"
+                                ? orderFor
+                                : user.username,
+                          });
+                          setAlerts({
+                            text: `Updated order for ${selectedUserLabel}: ${selectedFood} with ${drinkValue}.`,
+                            type: "success",
+                          });
+                        } else {
+                          // ADD new order
+                          await addDoc(collection(db, "foodorders"), {
+                            item: selectedFood,
+                            options: orderOptions,
+                            drink: drinkValue,
+                            price: finalPrice,
+                            createdAt: Timestamp.now(),
+                            createdBy:
+                              user.role === "admin"
+                                ? orderFor
+                                : user.username,
+                          });
+                          setAlerts({
+                            text:
+                              (user.role === "admin" &&
+                              orderFor !== user.username
+                                ? `Order for ${selectedUserLabel}: `
+                                : "Ordered ") +
+                              `${selectedFood} with ${drinkValue}.`,
+                            type: "success",
+                          });
+                        }
+
                         // reset state
+                        setEditingOrderId(null);
                         setSelectedFood(null);
                         setDrink("");
                         setOtherDrink("");
@@ -541,7 +582,8 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                       }
                     }}
                   >
-                    <i className="fa-solid fa-cart-shopping"></i> Order
+                    <i className="fa-solid fa-cart-shopping"></i>{" "}
+                    {editingOrderId ? "Update" : "Order"}
                   </AnimatedButton>
                 </div>
               </div>
@@ -550,7 +592,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         </div>
 
         <SafeWrapper fallback={<div>Could not load orders</div>}>
-          <FoodordersList user={user} />
+          <FoodordersList user={user} onEditOrder={handleEditOrder} />
         </SafeWrapper>
       </div>
     </div>
