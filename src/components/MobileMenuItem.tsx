@@ -27,7 +27,7 @@ function MobileMenuItem({ icon, text, path, alert }: MobileMenuItemProps) {
         transition-colors
         ${
           isActive
-            ? "bg-(--bg3-color) text-(--brand3-color)"
+            ? "bg-(--bg3-color) text-(--text-color)"
             : "text-(--text3-color) hover:text-(--text-color) hover:bg-(--dash-bg-color)"
         }
       `}
@@ -36,7 +36,7 @@ function MobileMenuItem({ icon, text, path, alert }: MobileMenuItemProps) {
       <div className="flex items-center justify-center">{icon}</div>
 
       {/* Text under icon */}
-      <span className="text-xs mt-1 leading-none">{text}</span>
+      <span className="text-sm mt-1 leading-none">{text}</span>
 
       {alert && (
         <div className="absolute right-1 top-1 w-2 h-2 rounded bg-(--pri2-bg-color)"></div>

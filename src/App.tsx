@@ -243,11 +243,11 @@ function App() {
       />
 
       <MobileMenu>
-        <MobileMenuItem icon={<LayoutDashboard />} text="Home" path="/" />
-        <MobileMenuItem icon={<Hammer />} text="Tools" path="/tools" />
-        <MobileMenuItem icon={<Hamburger />} text="Food" path="/foodorders" />
-        <MobileMenuItem icon={<MessageCircle />} text="Chat" path="/chat" />
-        <MobileMenuItem icon={<Users />} text="Users" path="/users" />
+        <MobileMenuItem icon={<LayoutDashboard size={28}/>} text="Home" path="/" />
+        <MobileMenuItem icon={<Hammer size={28}/>} text="Tools" path="/tools" />
+        <MobileMenuItem icon={<Hamburger size={28}/>} text="Food" path="/foodorders" />
+        <MobileMenuItem icon={<MessageCircle size={28}/>} text="Chat" path="/chat" />
+        <MobileMenuItem icon={<Users size={28}/>} text="Users" path="/users" />
       </MobileMenu>
 
       <div className="screen">
