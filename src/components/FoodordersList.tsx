@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   onSnapshot,
   collection,
@@ -125,6 +125,49 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
     }
   };
 
+  // ---------- Date grouping ----------
+
+  const dateKey = (ts?: Timestamp) => {
+    if (!ts) return "unknown";
+    const d = ts.toDate();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const dateLabel = (key: string) => {
+    if (key === "unknown") return "Unknown date";
+    const [y, m, d] = key.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const ordersSorted = useMemo(() => {
+    return [...orders].sort(
+      (a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()
+    );
+  }, [orders]);
+
+  const dateGroups = useMemo(() => {
+    const grouped = ordersSorted.reduce<Record<string, FoodOrder[]>>(
+      (acc, o) => {
+        const key = dateKey(o.createdAt);
+        (acc[key] ??= []).push(o);
+        return acc;
+      },
+      {}
+    );
+
+    // Order is preserved because we reduced from a sorted list,
+    // but Object.entries depends on insertion order (which matches insertion).
+    return Object.entries(grouped);
+  }, [ordersSorted]);
+
   // ---------- Helpers for modal formatting ----------
 
   const sizeLabel = (size?: string) => {
@@ -186,6 +229,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
   };
 
   const renderOrder = (
+    key: string,
     item: string,
     options?: FoodItem["options"],
     drink?: string,
@@ -197,7 +241,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
     const spice = options?.spice;
 
     return (
-      <li>
+      <li key={key}>
         <div>
           <strong>
             {item}
@@ -215,8 +259,8 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
         {extraList.map((extra, i) => (
           <div key={i}>{extra}</div>
         ))}
-        <div>{drink}</div>
-        <div className="foodorders-item-price">{price},-</div>
+        {drink && <div>{drink}</div>}
+        {price && <div className="foodorders-item-price">{price},-</div>}
       </li>
     );
   };
@@ -240,45 +284,51 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
           </Button>
         </div>
 
-        {/* Two-column table: left = name, right = order */}
-        <table className="border-collapse mt-8 text-[28px] leading-[1.3]">
-          <tbody>
-            {orders.map((order) => {
-              const displayName = usersMap[order.createdBy] || order.createdBy;
+        {/* Grouped by date (print-friendly) */}
+        <div className="mt-16 space-y-10">
+          {dateGroups.map(([key, group]) => (
+            <div key={key}>
+              {/* Two-column table: left = name, right = order */}
+              <table className="border-collapse text-[28px] leading-[1.3] w-full">
+                <tbody>
+                  {group.map((order) => {
+                    const displayName =
+                      usersMap[order.createdBy] || order.createdBy;
 
-              const itemBlocks: string[] = [];
+                    const itemBlocks: string[] = [];
 
-              if (order.order?.length) {
-                order.order.forEach((itm) => {
-                  itemBlocks.push(formatItemHtml(itm.item, itm.options));
-                });
-              }
+                    if (order.order?.length) {
+                      order.order.forEach((itm) => {
+                        itemBlocks.push(formatItemHtml(itm.item, itm.options));
+                      });
+                    }
 
-              if (order.item) {
-                itemBlocks.push(formatItemHtml(order.item, order.options));
-              }
+                    if (order.item) {
+                      itemBlocks.push(formatItemHtml(order.item, order.options));
+                    }
 
-              const itemsHtml = itemBlocks.join("<br /><br />");
+                    const itemsHtml = itemBlocks.join("<br /><br />");
 
-              return (
-                <tr
-                  key={order.id}
-                 >
-                  {/* LEFT COLUMN — ONLY NAME */}
-                  <td className="align-top whitespace-nowrap font-semibold pr-12 py-1">
-                    {displayName}
-                  </td>
+                    return (
+                      <tr key={order.id}>
+                        {/* LEFT COLUMN — ONLY NAME */}
+                        <td className="align-top whitespace-nowrap font-semibold pr-12 py-1">
+                          {displayName}
+                        </td>
 
-                  {/* RIGHT COLUMN — ONLY ORDER CONTENT */}
-                  <td
-                    className="align-top py-1 pb-8"
-                    dangerouslySetInnerHTML={{ __html: itemsHtml }}
-                  />
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {/* RIGHT COLUMN — ONLY ORDER CONTENT */}
+                        <td
+                          className="align-top py-1 pb-8"
+                          dangerouslySetInnerHTML={{ __html: itemsHtml }}
+                        />
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -310,69 +360,86 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
             )}
           </div>
         </div>
+
         <div className="card-content">
           {loading ? (
             <p>Loading orders...</p>
           ) : orders.length === 0 ? (
             <p>There are currently no orders.</p>
           ) : (
+            // Keep ONE flex container list, and inject date headings as list items
             <ul className="foodorders-list">
-              {orders.map((order) => (
-                <li
-                  className={
-                    order.createdBy === user.username
-                      ? "foodorders-item foodorders-item-user"
-                      : "foodorders-item"
-                  }
-                  key={order.id}
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="message-info">
-                      <strong className="user text-lg">
-                        {usersMap[order.createdBy] || order.createdBy}
-                      </strong>
-                    </p>
-                    <div className="flex gap-1">
-                      {(order.createdBy === user.username ||
-                        user.role === "admin") &&
-                        onEditOrder && (
-                          <Button
-                            size="xs"
-                            variant="secondary"
-                            onClick={() => onEditOrder(order)}
-                          >
-                            Edit
-                          </Button>
-                        )}
-                      {user.role === "admin" && orders.length !== 0 && (
-                        <Button
-                          size="xs"
-                          variant="destructive"
-                          onClick={() => deleteOrder(order.id)}
-                        >
-                          Delete
-                        </Button>
-                      )}
+              {dateGroups.map(([key, group]) => (
+                <div key={key} className="contents">
+                  {/* Date heading as a list item so it participates in the same flex container */}
+                  <li className="w-full">
+                    <div className="text-sm font-semibold text-neutral-400 uppercase tracking-wide mt-2 mb-2">
+                      {dateLabel(key)}
                     </div>
-                  </div>
-                  <ul>
-                    {order.order?.map((item, index) =>
-                      renderOrder(
-                        item.item,
-                        item.options,
-                        order.drink,
-                        order.price
-                      )
-                    )}
-                    {order.item &&
-                      renderOrder(
-                        order.item,
-                        order.options,
-                        order.drink,
-                        order.price
-                      )}
-                  </ul>
-                </li>
+                  </li>
+
+                  {/* Orders for that date (still siblings in the same flex list) */}
+                  {group.map((order) => (
+                    <li
+                      className={
+                        order.createdBy === user.username
+                          ? "foodorders-item foodorders-item-user"
+                          : "foodorders-item"
+                      }
+                      key={order.id}
+                    >
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="message-info">
+                          <strong className="user text-lg">
+                            {usersMap[order.createdBy] || order.createdBy}
+                          </strong>
+                        </p>
+                        <div className="flex gap-1">
+                          {(order.createdBy === user.username ||
+                            user.role === "admin") &&
+                            onEditOrder && (
+                              <Button
+                                size="xs"
+                                variant="secondary"
+                                onClick={() => onEditOrder(order)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          {user.role === "admin" && orders.length !== 0 && (
+                            <Button
+                              size="xs"
+                              variant="destructive"
+                              onClick={() => deleteOrder(order.id)}
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <ul>
+                        {order.order?.map((itm, index) =>
+                          renderOrder(
+                            `${order.id}-multi-${index}`,
+                            itm.item,
+                            itm.options,
+                            order.drink,
+                            order.price
+                          )
+                        )}
+                        {order.item &&
+                          renderOrder(
+                            `${order.id}-single`,
+                            order.item,
+                            order.options,
+                            order.drink,
+                            order.price
+                          )}
+                      </ul>
+                    </li>
+                  ))}
+                </div>
               ))}
             </ul>
           )}

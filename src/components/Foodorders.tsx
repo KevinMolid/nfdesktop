@@ -182,7 +182,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["165"],
+      prices: ["167"],
     },
     {
       name: "Döner Tallerken",
