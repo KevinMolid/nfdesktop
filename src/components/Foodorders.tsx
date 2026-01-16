@@ -185,6 +185,20 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       prices: ["165"],
     },
     {
+      name: "Döner Tallerken",
+      description: "Oksekjøtt med tilbehør ved siden av.",
+      img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
+      spice: ["Mild", "Medium", "Medium+", "Sterk"],
+      extra: [
+        { name: "Ekstra dressing", price: 5 },
+        { name: "Pepper", price: 0 },
+        { name: "Jalapeños", price: 0 },
+        { name: "Ekstra pita", price: 15 },
+      ],
+      remove: ["Løk", "Tomat", "Pepper"],
+      prices: ["190"],
+    },
+    {
       name: "Cheeseburger",
       sizes: ["130g", "160g", "255g"],
       description: "Hamburger med ost.",
