@@ -88,7 +88,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["100", "135"],
+      prices: ["103", "138"],
     },
     {
       name: "Kebab i Rull",
@@ -104,7 +104,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["100", "135"],
+      prices: ["103", "138"],
     },
     {
       name: "Döner i Pita",
@@ -120,7 +120,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["135", "165"],
+      prices: ["137", "167"],
     },
     {
       name: "Döner i Rull",
@@ -136,7 +136,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["135", "165"],
+      prices: ["137", "167"],
     },
     {
       name: "Shawarma i Pita",
@@ -182,7 +182,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["167"],
+      prices: ["168"],
     },
     {
       name: "Döner Tallerken",
@@ -196,7 +196,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper"],
-      prices: ["190"],
+      prices: ["202"],
     },
     {
       name: "Cheeseburger",
