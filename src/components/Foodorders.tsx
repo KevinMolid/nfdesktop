@@ -231,9 +231,9 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
   ];
 
   const drinks = [
-    { name: "Cola", price: 15 },
-    { name: "Cola Zero", price: 15 },
-    { name: "Solo", price: 15 },
+    { name: "Cola", price: 18 },
+    { name: "Cola Zero", price: 18 },
+    { name: "Solo", price: 18 },
     { name: "Other", price: "???" },
     { name: "No drink", price: 0 },
   ];
