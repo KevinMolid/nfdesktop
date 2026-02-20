@@ -173,7 +173,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     {
       name: "Kebab Tallerken",
       description: "Kebabkjøtt med tilbehør ved siden av.",
-      img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
+      img: "https://www.kebabzone.no/cdn/shop/files/kebabtallerken.jpg?v=1722503247&width=1946",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
@@ -187,7 +187,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     {
       name: "Döner Tallerken",
       description: "Oksekjøtt med tilbehør ved siden av.",
-      img: "https://smilelevering.com/wp-content/uploads/2021/09/c017d2e2-7ad8-11eb-935f-cabe328652e3_kebabtallerken-1024x575.jpeg",
+      img: "https://www.kebabzone.no/cdn/shop/files/kebabtallerken.jpg?v=1722503247&width=1946",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
