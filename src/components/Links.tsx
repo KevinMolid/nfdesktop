@@ -23,19 +23,24 @@ const STATIC_CATEGORIES: LinkCategory[] = [
     category: "Norrønafly",
     links: [
       {
-        id: "astrow",
+        id: "Astrow",
         name: "Astrow",
         href: "https://s5.astrow.net/timerecorder_53022_1527000516/",
       },
       {
-        id: "static-2",
+        id: "Eco Online",
         name: "Eco Online",
         href: "https://app.ecoonline.com/login/",
       },
       {
-        id: "static-3",
-        name: "Customs - Emma EDOC",
+        id: "Emma Edoc",
+        name: "Emma EDOC",
         href: "https://emmaedoc.no/",
+      },
+      {
+        id: "Fossum IT",
+        name: "Fossum IT",
+        href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview",
       },
       {
         id: "iChemistry",
@@ -43,12 +48,7 @@ const STATIC_CATEGORIES: LinkCategory[] = [
         href: "https://ichemistry.intersolia.com/main/norronafly",
       },
       {
-        id: "static-1",
-        name: "Reports - Fossum IT",
-        href: "https://norrprop.fossumit.no/norrprop.nsf/index?openview",
-      },
-      {
-        id: "static-4",
+        id: "Tripletex",
         name: "Tripletex",
         href: "https://tripletex.no/execute/login?site=no",
       },
@@ -73,6 +73,7 @@ const STATIC_CATEGORIES: LinkCategory[] = [
         href: "https://online.hartzellprop.com/Instance2EnvMMLogin/html/login.html",
       },
       { id: "static-lyreco", name: "Lyreco", href: "https://www.lyreco.no/" },
+      { id: "Silmid", name: "Silmid", href: "https://www.silmid.com/login/?redirectto=/my-account/" },
       { id: "static-9", name: "Skygeek", href: "https://skygeek.com/" },
       { id: "static-10", name: "Textron", href: "https://ww2.txtav.com/" },
     ],
