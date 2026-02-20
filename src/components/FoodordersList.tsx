@@ -339,14 +339,14 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
         <div className="card-header">
           <h3 className="card-title">Orders</h3>
           <div className="card-header-right">
-            <Button
+            {orders.length !== 0 && <Button
               size="sm"
               variant="secondary"
               onClick={() => setShowOrdersModal(true)}
               iconLeft={<i className="fa-solid fa-file"></i>}
             >
               Show Page
-            </Button>
+            </Button>}
             {user.role === "admin" && orders.length !== 0 && (
               <Button
                 size="sm"
@@ -365,7 +365,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
           {loading ? (
             <p>Loading orders...</p>
           ) : orders.length === 0 ? (
-            <p>There are currently no orders.</p>
+            <p className="text-neutral-400">There are currently no orders.</p>
           ) : (
             // Keep ONE flex container list, and inject date headings as list items
             <ul className="foodorders-list">
