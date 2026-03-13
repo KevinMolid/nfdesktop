@@ -241,7 +241,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
     const spice = options?.spice;
 
     return (
-      <li key={key}>
+      <li key={key} className="">
         <div>
           <strong>
             {item}
@@ -259,7 +259,12 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
         {extraList.map((extra, i) => (
           <div key={i}>{extra}</div>
         ))}
-        {drink && <div>{drink}</div>}
+        {drink && drink !== "No drink" && <div className="font-bold pt-2">
+          {drink === "Solo" ? <p className="bg-yellow-500 text-red-600 w-min px-3 py-0.5 rounded-full border-2">{drink}</p> :
+          drink === "Cola" ? <p className="bg-red-500 text-white w-min px-3 py-0.5 rounded-full border-2">{drink}</p> :
+          drink === "Cola Zero" ? <p className="bg-neutral-900 text-white w-max px-3 py-0.5 rounded-full border-2">{drink}</p> :
+          <p>{drink}</p>}
+        </div>}
         {price && <div className="foodorders-item-price">{price},-</div>}
       </li>
     );
