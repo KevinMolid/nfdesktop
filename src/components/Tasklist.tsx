@@ -430,7 +430,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                     ? "Finished"
                     : status === "onhold"
                     ? "Paused"
-                    : "Calcelled"}{" "}
+                    : "Cancelled"}{" "}
                   tasks
                 </h4>
               )}

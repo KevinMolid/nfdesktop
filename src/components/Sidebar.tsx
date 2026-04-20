@@ -2,7 +2,7 @@ import { useState, createContext, useEffect } from "react";
 import logoBlack from "../assets/logo-black-small.png";
 import logoWhite from "../assets/logo-white-small.png";
 import avatar from "../assets/defaultAvatar.png";
-import { ChevronsLeft, ChevronsRight, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 
 import Button from "./Button";
 
@@ -65,7 +65,7 @@ function Sidebar({ username, name, imgurl, onLogout, children }: SidebarProps) {
             variant="transparent"
             onClick={() => setExpanded((prev) => !prev)}
           >
-            {expanded ? <ChevronsLeft /> : <ChevronsRight />}
+            {expanded ? <ChevronLeft /> : <ChevronRight />}
           </Button>
         </div>
 
