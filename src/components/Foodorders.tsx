@@ -82,12 +82,13 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["103", "138"],
     },
     {
@@ -98,12 +99,13 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["103", "138"],
     },
     {
@@ -114,12 +116,13 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["137", "167"],
     },
     {
@@ -130,6 +133,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
@@ -146,12 +150,13 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["132", "162"],
     },
     {
@@ -162,12 +167,13 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Pommes Frittes", price: 20 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["132", "162"],
     },
     {
@@ -177,11 +183,12 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["168"],
     },
     {
@@ -191,11 +198,12 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
+        { name: "Ekstra agurk", price: 0 },
         { name: "Pepper", price: 0 },
         { name: "Jalapeños", price: 0 },
         { name: "Ekstra pita", price: 15 },
       ],
-      remove: ["Løk", "Tomat", "Pepper"],
+      remove: ["Løk", "Tomat", "Pepper", "Saus"],
       prices: ["202"],
     },
     {
