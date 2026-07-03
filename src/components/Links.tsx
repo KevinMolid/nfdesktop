@@ -198,11 +198,9 @@ const Links = ({ user, toggleActive }: LinksProps) => {
     const newLinkData = { name: newLinkName.trim(), href: newLinkHref.trim() };
 
     const randomId = crypto.randomUUID();
-    const newLink: Link = { id: randomId, ...newLinkData };
 
     await setDoc(doc(db, "users", user.id, "links", randomId), newLinkData);
 
-    setCustomLinks((prev) => [...prev, newLink]);
     setExpandedCategories((prev) => ({ ...prev, "My Links": true }));
     setNewLinkName("");
     setNewLinkHref("");
@@ -287,37 +285,22 @@ const Links = ({ user, toggleActive }: LinksProps) => {
       {showForm && (
         <div className="create-task-box mb-4 bg-(--dash-bg-color) p-4">
           <p className="font-semibold">Add new link</p>
-          <p className="mb-2 text-(--text3-color)">
-            The new link will be added to "My links"
-          </p>
           <div className="flex flex-col gap-1 items-start">
             <div className="w-full">
-              <label
-                htmlFor="linkName"
-                className="text-lg font-semibold cursor-pointer"
-              >
-                Name
-              </label>
               <input
                 id="linkName"
                 type="text"
-                placeholder="My link"
+                placeholder="Name"
                 value={newLinkName}
                 onChange={(e) => setNewLinkName(e.target.value)}
                 className="w-full border-b-2 border-(--bg5-color) py-1 text-lg outline-none active:border-(--text-color) focus:border-(--text-color)"
               />
             </div>
             <div className="w-full mb-2">
-              <label
-                htmlFor="linkURL"
-                className="text-lg font-semibold cursor-pointer"
-              >
-                URL
-              </label>
               <input
                 id="linkURL"
                 type="text"
-                placeholder="https://..."
+                placeholder="URL"
                 value={newLinkHref}
                 onChange={(e) => setNewLinkHref(e.target.value)}
                 className="w-full border-b-2 border-(--bg5-color) py-1 text-lg outline-none active:border-(--text-color) focus:border-(--text-color)"
