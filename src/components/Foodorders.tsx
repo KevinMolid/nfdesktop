@@ -94,7 +94,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     {
       name: "Kebab i Rull",
       description: "Lammekjøtt / Oksekjøtt i hvete-tortilla.",
-      img: "https://i1.vrs.gd/gladkokken/uploads/images/DSC_0442.jpg?width=1000&height=556&format=jpg&quality=80&crop=5159%2C2869%2C0%2C349",
+      img: "https://imageproxy.wolt.com/menu/menu-images/shared/2680ddac-a72d-11ee-8fa4-8ac5f039c133_rullekebab.jpg",
       sizes: ["Normal", "Large"],
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
@@ -179,7 +179,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     {
       name: "Kebab Tallerken",
       description: "Kebabkjøtt med tilbehør ved siden av.",
-      img: "https://www.kebabzone.no/cdn/shop/files/kebabtallerken.jpg?v=1722503247&width=1946",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRP6VGNz9BTp_OjTrUu6RTaWGBNeZJNpZpEsDASYm7JWw&s=10",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
@@ -194,7 +194,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     {
       name: "Döner Tallerken",
       description: "Oksekjøtt med tilbehør ved siden av.",
-      img: "https://www.kebabzone.no/cdn/shop/files/kebabtallerken.jpg?v=1722503247&width=1946",
+      img: "https://imageproxy.wolt.com/assets/685e6698f43200b6b5208a8e",
       spice: ["Mild", "Medium", "Medium+", "Sterk"],
       extra: [
         { name: "Ekstra dressing", price: 5 },
@@ -581,7 +581,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                             options: orderOptions,
                             drink: drinkValue,
                             price: finalPrice,
-                            createdAt: Timestamp.now(), // optional: may want to keep original timestamp
+                            createdAt: Timestamp.now(),
                             createdBy:
                               user.role === "admin"
                                 ? orderFor
