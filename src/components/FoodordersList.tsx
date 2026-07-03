@@ -30,6 +30,7 @@ export type FoodOrder = {
   item?: string;
   options?: FoodItem["options"];
   drink?: string;
+  notes?: string;
   price?: string;
 };
 
@@ -233,6 +234,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
     item: string,
     options?: FoodItem["options"],
     drink?: string,
+    notes?: string,
     price?: string
   ) => {
     const removeList = options?.remove ?? [];
@@ -265,6 +267,11 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
           drink === "Cola Zero" ? <p className="bg-neutral-900 text-white w-max px-3 py-0.5 rounded-full border-2">{drink}</p> :
           <p>{drink}</p>}
         </div>}
+        {notes?.trim() && (
+          <div className="mt-2 text-sm italic text-neutral-300">
+            Note: {notes}
+          </div>
+        )}
         {price && <div className="foodorders-item-price">{price},-</div>}
       </li>
     );
@@ -430,6 +437,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
                             itm.item,
                             itm.options,
                             order.drink,
+                            order.notes,
                             order.price
                           )
                         )}
@@ -439,6 +447,7 @@ const FoodordersList = ({ user, onEditOrder }: FoodordersListProps) => {
                             order.item,
                             order.options,
                             order.drink,
+                            order.notes,
                             order.price
                           )}
                       </ul>

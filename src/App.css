@@ -2101,6 +2101,19 @@ a:hover {
   border-radius: 20px;
   padding: 0;
   padding-inline: 16px;
+  background-color: var(--bg2-color);
+}
+
+.notes-container textarea {
+  font-size: 1.2rem;
+  outline: none;
+  border: none;
+  height: 80px;
+  resize: none;
+  border-radius: 20px;
+  padding: 8px;
+  padding-inline: 16px;
+  background-color: var(--bg2-color);
 }
 
 .confirm-btn {

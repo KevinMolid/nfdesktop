@@ -36,6 +36,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
   const [orderOptions, setOrderOptions] = useState<any>({});
   const [drink, setDrink] = useState<string>("");
   const [otherDrink, setOtherDrink] = useState("");
+  const [notes, setNotes] = useState("");
   const [orderFor, setOrderFor] = useState<string>(user.username);
   const [userOptions, setUserOptions] = useState<
     Array<{ username: string; label: string }>
@@ -309,6 +310,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
     setOrderOptions(order.options || {});
     setDrink(order.drink || "");
     setOtherDrink(order.drink === "Other" ? order.drink ?? "" : "");
+    setNotes(order.notes ?? "");
     setOrderFor(order.createdBy);
     setEditingOrderId(order.id);
   };
@@ -532,7 +534,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                     {drink === "Other" && (
                       <div className="other-drink-container">
                         <label htmlFor="drink">
-                          <h4>Specify drink:</h4>
+                          <h4>Specify:</h4>
                         </label>
                         <input
                           id="drink"
@@ -544,6 +546,22 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                     )}
                   </div>
                 </div>
+
+                <div className="notes-container">
+                  <label htmlFor="notes">
+                    <h4 className="font-semibold">Notes</h4>
+                  </label>
+
+                  <textarea
+                    id="notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    maxLength={250}
+                    spellCheck={false}
+                  />
+                </div>
+
                 <div className="order-btn-container">
                   <div className="order-price-container">
                     <p>NOK</p>
@@ -580,6 +598,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                             item: selectedFood,
                             options: orderOptions,
                             drink: drinkValue,
+                            notes: notes.trim(),
                             price: finalPrice,
                             createdAt: Timestamp.now(),
                             createdBy:
@@ -597,6 +616,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                             item: selectedFood,
                             options: orderOptions,
                             drink: drinkValue,
+                            notes: notes.trim(),
                             price: finalPrice,
                             createdAt: Timestamp.now(),
                             createdBy:
@@ -621,6 +641,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
                         setDrink("");
                         setOtherDrink("");
                         setOrderOptions({});
+                        setNotes("");
                         // reset dropdown to default user
                         setOrderFor(user.username);
                       } catch (error) {
