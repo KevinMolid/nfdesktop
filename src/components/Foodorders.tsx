@@ -158,7 +158,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["132", "162"],
+      prices: ["139", "169"],
     },
     {
       name: "Shawarma i Rull",
@@ -175,7 +175,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["132", "162"],
+      prices: ["139", "169"],
     },
         {
       name: "Marinert Kylling i Pita",
@@ -192,7 +192,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["132", "162"],
+      prices: ["142", "172"],
     },
     {
       name: "Marinert Kylling i Rull",
@@ -209,7 +209,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["132", "162"],
+      prices: ["142", "172"],
     },
     {
       name: "Kebab Tallerken",
@@ -239,7 +239,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["202"],
+      prices: ["209"],
     },
     {
       name: "Cheeseburger",
