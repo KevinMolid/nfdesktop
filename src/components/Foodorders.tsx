@@ -90,7 +90,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["103", "138"],
+      prices: ["105", "140"],
     },
     {
       name: "Kebab i Rull",
@@ -107,7 +107,7 @@ const Foodorders = ({ user, setAlerts }: UsersProps) => {
         { name: "Ekstra pita", price: 15 },
       ],
       remove: ["Løk", "Tomat", "Pepper", "Saus"],
-      prices: ["103", "138"],
+      prices: ["105", "140"],
     },
     {
       name: "Döner i Pita",
