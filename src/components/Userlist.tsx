@@ -175,6 +175,35 @@ const Userlist = ({ user }: UsersProps) => {
     setIsEditingImg(false);
   };
 
+  const handleResetPin = async () => {
+    if (!selectedUser || user.role !== "admin") return;
+
+    const confirmed = window.confirm(
+      `Reset PIN for ${selectedUser.username} to 0000?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError("");
+      setSuccess("");
+
+      const hashedPin = await bcrypt.hash("0000", 10);
+      const ref = doc(db, "users", selectedUser.id);
+
+      await updateDoc(ref, {
+        pinHash: hashedPin,
+      });
+
+      setSuccess(
+        `PIN for ${selectedUser.username} has been reset to 0000.`
+      );
+    } catch (error) {
+      console.error("Error resetting PIN:", error);
+      setError("Failed to reset PIN.");
+    }
+  };
+
   // Helper: get group names a user belongs to
   const groupsForUser = (userId: string): string[] => {
     return Object.values(groupMemberships)
@@ -362,7 +391,7 @@ const Userlist = ({ user }: UsersProps) => {
                         spellCheck={false}
                       />
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <Button
                           className="save-btn"
                           onClick={handleSaveUser}
@@ -371,6 +400,17 @@ const Userlist = ({ user }: UsersProps) => {
                         >
                           Save
                         </Button>
+
+                        {user.role === "admin" && (
+                          <Button
+                            variant="tertiary"
+                            onClick={handleResetPin}
+                            iconLeft={<i className="fa-solid fa-key"></i>}
+                          >
+                            Reset PIN to 0000
+                          </Button>
+                        )}
+
                         <Button
                           variant="secondary"
                           onClick={() => {
