@@ -15,7 +15,22 @@ import Button from "./Button";
 import { TaskData } from "../types";
 import { isValidTask } from "../utils/validators";
 
-const FILTER_STORAGE_KEY = "visibleStatuses";
+const FILTER_STORAGE_KEY = "taskFilters";
+const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
+const STATUSES = ["active", "finished", "onhold", "cancelled"] as const;
+
+type SortMode = "priority" | "title-asc" | "title-desc";
+
+const DEFAULT_VISIBLE_STATUSES: Record<string, boolean> = {
+  active: true,
+  finished: true,
+  onhold: true,
+  cancelled: true,
+};
+
+const DEFAULT_VISIBLE_PRIORITIES: Record<number, boolean> = Object.fromEntries(
+  PRIORITIES.map((priority) => [priority, true])
+) as Record<number, boolean>;
 
 type User = {
   id: string;
@@ -40,27 +55,47 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [activeTask, setActiveTask] = useState<number | null>(null);
 
-  const [visibleStatuses, setVisibleStatuses] = useState<
-    Record<string, boolean>
-  >(() => {
+  const [visibleStatuses, setVisibleStatuses] =
+    useState<Record<string, boolean>>(DEFAULT_VISIBLE_STATUSES);
+  const [visiblePriorities, setVisiblePriorities] =
+    useState<Record<number, boolean>>(DEFAULT_VISIBLE_PRIORITIES);
+  const [sortMode, setSortMode] = useState<SortMode>("priority");
+
+  useEffect(() => {
     const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
-    if (storedFilters) {
-      try {
-        const parsed = JSON.parse(storedFilters);
-        if (parsed && typeof parsed === "object") {
-          return parsed;
-        }
-      } catch (e) {
-        console.error("Error parsing filters from localStorage", e);
+    if (!storedFilters) return;
+
+    try {
+      const parsed = JSON.parse(storedFilters);
+
+      if (parsed.visibleStatuses && typeof parsed.visibleStatuses === "object") {
+        setVisibleStatuses({
+          ...DEFAULT_VISIBLE_STATUSES,
+          ...parsed.visibleStatuses,
+        });
       }
+
+      if (
+        parsed.visiblePriorities &&
+        typeof parsed.visiblePriorities === "object"
+      ) {
+        setVisiblePriorities({
+          ...DEFAULT_VISIBLE_PRIORITIES,
+          ...parsed.visiblePriorities,
+        });
+      }
+
+      if (
+        parsed.sortMode === "priority" ||
+        parsed.sortMode === "title-asc" ||
+        parsed.sortMode === "title-desc"
+      ) {
+        setSortMode(parsed.sortMode);
+      }
+    } catch (e) {
+      console.error("Error parsing task filters from localStorage", e);
     }
-    return {
-      active: true,
-      finished: true,
-      onhold: true,
-      cancelled: true,
-    };
-  });
+  }, []);
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
@@ -82,7 +117,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       }
     };
     document.addEventListener("mousedown", handleClickOutsideStatus);
-    return () => document.removeEventListener("mousedown", handleClickOutsideStatus);
+  return () => document.removeEventListener("mousedown", handleClickOutsideStatus);
   }, []);
 
   useEffect(() => {
@@ -127,8 +162,15 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   }, [user?.id]);
 
   useEffect(() => {
-    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(visibleStatuses));
-  }, [visibleStatuses]);
+    localStorage.setItem(
+      FILTER_STORAGE_KEY,
+      JSON.stringify({
+        visibleStatuses,
+        visiblePriorities,
+        sortMode,
+      })
+    );
+  }, [visibleStatuses, visiblePriorities, sortMode]);
 
   const toggleCreateActive = () => {
     setIsCreateActive(!isCreateActive);
@@ -257,50 +299,196 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     await deleteDoc(doc(db, "users", user.id, "tasks", id.toString()));
   };
 
+  const activeFilterCategoryCount =
+    (Object.values(visibleStatuses).some((visible) => !visible) ? 1 : 0) +
+    (PRIORITIES.some((priority) => !visiblePriorities[priority]) ? 1 : 0) +
+    (sortMode !== "priority" ? 1 : 0);
+
+  const resetFilters = () => {
+    setVisibleStatuses({ ...DEFAULT_VISIBLE_STATUSES });
+    setVisiblePriorities({ ...DEFAULT_VISIBLE_PRIORITIES });
+    setSortMode("priority");
+  };
+
+  const compareTasks = (a: TaskData, b: TaskData) => {
+    if (sortMode === "title-asc") {
+      return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    }
+
+    if (sortMode === "title-desc") {
+      return b.name.localeCompare(a.name, undefined, { sensitivity: "base" });
+    }
+
+    const aPriority =
+      typeof a.priority === "number" && a.priority >= 1 && a.priority <= 10
+        ? a.priority
+        : 11;
+
+    const bPriority =
+      typeof b.priority === "number" && b.priority >= 1 && b.priority <= 10
+        ? b.priority
+        : 11;
+
+    return aPriority - bPriority;
+  };
+
+
   return (
     <div className="card has-header grow">
       <div className="card-header">
         <h3 className="card-title">Tasklist</h3>
         <div className="card-header-right">
-          <Button
-            variant="transparent"
-            size="sm"
-            iconLeft={<i className="fa-solid fa-filter"></i>}
-            onClick={toggleFiltering}
-          >
-            Filter
-          </Button>
-          {isFilterActive && (
-            <div className="filter-dropdown" ref={filterRef}>
-              {["active", "finished", "onhold", "cancelled"].map((status) => (
-                <div
-                  key={status}
-                  className={`filter filter-${status} hover-border ${
-                    visibleStatuses[status] ? "active-selection" : ""
-                  }`}
-                  onClick={() =>
-                    setVisibleStatuses((prev) => ({
-                      ...prev,
-                      [status]: !prev[status],
-                    }))
-                  }
-                >
-                  {status === "active" && (
-                    <i className="fa-solid fa-circle text-slate-400/60"></i>
-                  )}
-                  {status === "finished" && (
-                    <i className="fa-solid fa-check green"></i>
-                  )}
-                  {status === "onhold" && (
-                    <i className="fa-solid fa-pause yellow"></i>
-                  )}
-                  {status === "cancelled" && (
-                    <i className="fa-solid fa-xmark red"></i>
-                  )}
+          <div className="task-filter-control" ref={filterRef}>
+            <Button
+              variant="transparent"
+              size="sm"
+              iconLeft={<i className="fa-solid fa-filter"></i>}
+              onClick={toggleFiltering}
+              className={
+                activeFilterCategoryCount > 0
+                  ? "task-filter-trigger-active"
+                  : ""
+              }
+            >
+              Filter
+              {activeFilterCategoryCount > 0 && (
+                <span className="task-filter-count">
+                  {activeFilterCategoryCount}
+                </span>
+              )}
+            </Button>
+
+            {isFilterActive && (
+              <div className="task-filter-panel">
+                <div className="task-filter-section">
+                  <div className="task-filter-section-title">Status</div>
+                  <div className="task-filter-options">
+                    {STATUSES.map((status) => {
+                      const labels: Record<string, string> = {
+                        active: "Active",
+                        finished: "Finished",
+                        onhold: "Paused",
+                        cancelled: "Cancelled",
+                      };
+
+                      const icons: Record<string, string> = {
+                        active: "fa-circle",
+                        finished: "fa-check",
+                        onhold: "fa-pause",
+                        cancelled: "fa-xmark",
+                      };
+
+                      return (
+                        <button
+                          type="button"
+                          key={status}
+                          className={`task-filter-option task-filter-status-${status} ${
+                            visibleStatuses[status] ? "is-selected" : ""
+                          }`}
+                          onClick={() =>
+                            setVisibleStatuses((prev) => ({
+                              ...prev,
+                              [status]: !prev[status],
+                            }))
+                          }
+                          aria-pressed={visibleStatuses[status]}
+                        >
+                          <span className="task-filter-check">
+                            {visibleStatuses[status] && (
+                              <i className="fa-solid fa-check"></i>
+                            )}
+                          </span>
+                          <i className={`fa-solid ${icons[status]}`}></i>
+                          <span>{labels[status]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+
+                <div className="task-filter-section">
+                  <div className="task-filter-section-title">Priority</div>
+                  <div className="task-filter-priorities">
+                    {PRIORITIES.map((priority) => (
+                      <button
+                        type="button"
+                        key={priority}
+                        className={`task-filter-priority priority-${priority} ${
+                          visiblePriorities[priority]
+                            ? "is-selected"
+                            : "is-filtered-out"
+                        }`}
+                        onClick={() =>
+                          setVisiblePriorities((prev) => ({
+                            ...prev,
+                            [priority]: !prev[priority],
+                          }))
+                        }
+                        aria-pressed={visiblePriorities[priority]}
+                      >
+                        {priority === 0 ? "-" : priority}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="task-filter-section">
+                  <div className="task-filter-section-title">Sort by</div>
+                  <div className="task-sort-options">
+                    <button
+                      type="button"
+                      className={`task-sort-option ${
+                        sortMode === "priority" ? "is-selected" : ""
+                      }`}
+                      onClick={() => setSortMode("priority")}
+                    >
+                      <span className="task-sort-radio">
+                        {sortMode === "priority" && <span />}
+                      </span>
+                      Priority
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`task-sort-option ${
+                        sortMode === "title-asc" ? "is-selected" : ""
+                      }`}
+                      onClick={() => setSortMode("title-asc")}
+                    >
+                      <span className="task-sort-radio">
+                        {sortMode === "title-asc" && <span />}
+                      </span>
+                      Title A–Z
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`task-sort-option ${
+                        sortMode === "title-desc" ? "is-selected" : ""
+                      }`}
+                      onClick={() => setSortMode("title-desc")}
+                    >
+                      <span className="task-sort-radio">
+                        {sortMode === "title-desc" && <span />}
+                      </span>
+                      Title Z–A
+                    </button>
+                  </div>
+                </div>
+
+                <div className="task-filter-footer">
+                  <button
+                    type="button"
+                    className="task-filter-reset"
+                    onClick={resetFilters}
+                    disabled={activeFilterCategoryCount === 0}
+                  >
+                    Reset filters
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <Button
             variant="transparent"
             size="sm"
@@ -353,12 +541,12 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
               <span
                 className="task-priority-number"
               >
-                {newTaskPriority}
+                {newTaskPriority === 0 ? "-" : newTaskPriority}
               </span>
               {isEditingNewPriority && (
                 <div ref={statusDropdownRef}>
                   <ul className="priority-dropdown">
-                    {[0, 1, 2, 3].map((num) => (
+                    {PRIORITIES.map((num) => (
                       <li
                         key={num}
                         className={`priority-${num} rounded-md`}
@@ -368,7 +556,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                         }}
                       >
                         <button className="w-full h-full rounded-md outline-none cursor-pointer focus:ring-2 focus:ring-offset-1 focus:ring-(--text-color)">
-                          {num}
+                          {num === 0 ? "-" : num}
                         </button>
                       </li>
                     ))}
@@ -422,7 +610,18 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       {Object.entries(visibleStatuses).map(
         ([status, visible]) =>
           visible &&
-          tasks.some((t) => t.status === status) && (
+          tasks.some((task) => {
+            const normalizedPriority =
+              typeof task.priority === "number" &&
+              PRIORITIES.includes(task.priority)
+                ? task.priority
+                : 0;
+
+            return (
+              task.status === status &&
+              visiblePriorities[normalizedPriority]
+            );
+          }) && (
             <div key={status}>
               {status !== "active" && (
                 <h4 className="card-title">
@@ -434,35 +633,22 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                   tasks
                 </h4>
               )}
+
               <ul className="task-list">
                 {tasks
-                  .filter((t) => t.status === status)
-                  .sort((a, b) => {
-                    const priorities = [1, 2, 3, 0];
+                  .filter((task) => {
+                    const normalizedPriority =
+                      typeof task.priority === "number" &&
+                      PRIORITIES.includes(task.priority)
+                        ? task.priority
+                        : 0;
 
-                    const getPriorityIndex = (task: TaskData) => {
-                      if (typeof task.priority !== "number") {
-                        console.warn("Task has non-number priority:", task);
-                        return priorities.length; // send to end of list
-                      }
-
-                      const index = priorities.indexOf(task.priority);
-                      if (index === -1) {
-                        console.warn(
-                          "Task has unexpected priority value:",
-                          task
-                        );
-                        return priorities.length; // send to end of list
-                      }
-
-                      return index;
-                    };
-
-                    const aIndex = getPriorityIndex(a);
-                    const bIndex = getPriorityIndex(b);
-
-                    return aIndex - bIndex;
+                    return (
+                      task.status === status &&
+                      visiblePriorities[normalizedPriority]
+                    );
                   })
+                  .sort(compareTasks)
                   .map((task, index) => (
                     <Task
                       key={task.id}

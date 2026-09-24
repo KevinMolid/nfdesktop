@@ -17,6 +17,7 @@ type TaskProps = {
 };
 
 const STATUS_OPTIONS = ["active", "finished", "onhold", "cancelled"];
+const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 const STATUS_LABELS: Record<string, string> = {
   active: "active",
   finished: "finished",
@@ -210,12 +211,12 @@ const Task = ({
             className="task-priority-number"
             onClick={() => setIsEditingPriority(!isEditingPriority)}
           >
-            {priority ? priority : "0"}
+            {priority === 0 ? "-" : priority}
           </span>
           {isEditingPriority && (
             <div>
               <ul className="priority-dropdown">
-                {[0, 1, 2, 3].map((num) => {
+                {PRIORITIES.map((num) => {
                   return (
                     <li
                       className={`priority-${num}`}
@@ -225,7 +226,7 @@ const Task = ({
                         if (onPriorityChange) onPriorityChange(id, num);
                       }}
                     >
-                      {num}
+                      {num === 0 ? "-" : num}
                     </li>
                   );
                 })}
