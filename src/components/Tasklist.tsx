@@ -19,7 +19,10 @@ const FILTER_STORAGE_KEY = "taskFilters";
 const PRIORITIES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0];
 const STATUSES = ["active", "finished", "onhold", "cancelled"] as const;
 
-type SortMode = "priority" | "title-asc" | "title-desc";
+type SortMode = "priority" | "title-asc" | "title-desc" | "category-asc";
+type TaskWithCategory = TaskData & { category?: string };
+const NO_CATEGORY = "__no_category__";
+const CATEGORY_MAX_LENGTH = 12;
 
 const DEFAULT_VISIBLE_STATUSES: Record<string, boolean> = {
   active: true,
@@ -50,9 +53,10 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [newTaskDescription, setNewTaskDescription] =
     useState("Task description");
   const [newTaskPriority, setNewTaskPriority] = useState(0);
+  const [newTaskCategory, setNewTaskCategory] = useState("");
   const [isEditingNewPriority, setIsEditingNewPriority] = useState(false);
 
-  const [tasks, setTasks] = useState<TaskData[]>([]);
+  const [tasks, setTasks] = useState<TaskWithCategory[]>([]);
   const [activeTask, setActiveTask] = useState<number | null>(null);
 
   const [visibleStatuses, setVisibleStatuses] =
@@ -60,6 +64,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const [visiblePriorities, setVisiblePriorities] =
     useState<Record<number, boolean>>(DEFAULT_VISIBLE_PRIORITIES);
   const [sortMode, setSortMode] = useState<SortMode>("priority");
+  const [visibleCategories, setVisibleCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const storedFilters = localStorage.getItem(FILTER_STORAGE_KEY);
@@ -85,10 +90,15 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
         });
       }
 
+      if (parsed.visibleCategories && typeof parsed.visibleCategories === "object") {
+        setVisibleCategories(parsed.visibleCategories);
+      }
+
       if (
         parsed.sortMode === "priority" ||
         parsed.sortMode === "title-asc" ||
-        parsed.sortMode === "title-desc"
+        parsed.sortMode === "title-desc" ||
+        parsed.sortMode === "category-asc"
       ) {
         setSortMode(parsed.sortMode);
       }
@@ -152,7 +162,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       (snapshot) => {
         const dbTasks = snapshot.docs
           .map((d) => d.data())
-          .filter(isValidTask) as TaskData[];
+          .filter(isValidTask) as TaskWithCategory[];
         setTasks(dbTasks);
       },
       (err) => console.error("❌ Tasks listener error:", err)
@@ -161,16 +171,36 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     return () => unsubscribe();
   }, [user?.id]);
 
+  const categoryOptions = Array.from(
+    new Set(
+      tasks
+        .map((task) => task.category?.trim())
+        .filter((category): category is string => Boolean(category))
+    )
+  ).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+  useEffect(() => {
+    setVisibleCategories((prev) => {
+      const next = { ...prev };
+      for (const category of categoryOptions) {
+        if (next[category] === undefined) next[category] = true;
+      }
+      if (next[NO_CATEGORY] === undefined) next[NO_CATEGORY] = true;
+      return next;
+    });
+  }, [tasks]);
+
   useEffect(() => {
     localStorage.setItem(
       FILTER_STORAGE_KEY,
       JSON.stringify({
         visibleStatuses,
         visiblePriorities,
+        visibleCategories,
         sortMode,
       })
     );
-  }, [visibleStatuses, visiblePriorities, sortMode]);
+  }, [visibleStatuses, visiblePriorities, visibleCategories, sortMode]);
 
   const toggleCreateActive = () => {
     setIsCreateActive(!isCreateActive);
@@ -185,6 +215,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       priority: newTaskPriority,
       name: newTaskName,
       description: newTaskDescription,
+      category: newTaskCategory.trim().slice(0, CATEGORY_MAX_LENGTH),
       id: Date.now(),
       status: "active",
     };
@@ -193,6 +224,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
     setNewTaskPriority(0);
+    setNewTaskCategory("");
     setIsEditingNewPriority(false);
     setIsCreateActive(false);
     const taskPath = `users/${user.id}/tasks/${newTask.id}`;
@@ -213,6 +245,7 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     setNewTaskName("New task");
     setNewTaskDescription("Task description");
     setNewTaskPriority(0);
+    setNewTaskCategory("");
     setIsEditingNewPriority(false);
     setIsCreateActive(false);
   };
@@ -289,6 +322,18 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
     );
   };
 
+  const handleCategoryChange = async (id: number, newCategory: string) => {
+    const category = newCategory.trim().slice(0, CATEGORY_MAX_LENGTH);
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, category } : task
+    );
+    setTasks(updatedTasks);
+    await setDoc(
+      doc(db, "users", user.id, "tasks", id.toString()),
+      updatedTasks.find((task) => task.id === id)!
+    );
+  };
+
   const deleteTask = async (id: number) => {
     const updatedTasks = tasks.filter((t) => t.id !== id);
     setTasks(updatedTasks);
@@ -302,15 +347,28 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
   const activeFilterCategoryCount =
     (Object.values(visibleStatuses).some((visible) => !visible) ? 1 : 0) +
     (PRIORITIES.some((priority) => !visiblePriorities[priority]) ? 1 : 0) +
+    (Object.values(visibleCategories).some((visible) => !visible) ? 1 : 0) +
     (sortMode !== "priority" ? 1 : 0);
 
   const resetFilters = () => {
     setVisibleStatuses({ ...DEFAULT_VISIBLE_STATUSES });
     setVisiblePriorities({ ...DEFAULT_VISIBLE_PRIORITIES });
+    setVisibleCategories(
+      Object.fromEntries([...categoryOptions, NO_CATEGORY].map((category) => [category, true]))
+    );
     setSortMode("priority");
   };
 
-  const compareTasks = (a: TaskData, b: TaskData) => {
+  const compareTasks = (a: TaskWithCategory, b: TaskWithCategory) => {
+    if (sortMode === "category-asc") {
+      const categoryCompare = (a.category ?? "").localeCompare(
+        b.category ?? "",
+        undefined,
+        { sensitivity: "base" }
+      );
+      return categoryCompare || a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    }
+
     if (sortMode === "title-asc") {
       return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
     }
@@ -433,6 +491,34 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                 </div>
 
                 <div className="task-filter-section">
+                  <div className="task-filter-section-title">Category</div>
+                  <div className="task-filter-options">
+                    {[...categoryOptions, NO_CATEGORY].map((category) => {
+                      const selected = visibleCategories[category] !== false;
+                      return (
+                        <button
+                          type="button"
+                          key={category}
+                          className={`task-filter-option ${selected ? "is-selected" : ""}`}
+                          onClick={() =>
+                            setVisibleCategories((prev) => ({
+                              ...prev,
+                              [category]: !selected,
+                            }))
+                          }
+                          aria-pressed={selected}
+                        >
+                          <span className="task-filter-check">
+                            {selected && <i className="fa-solid fa-check"></i>}
+                          </span>
+                          <span>{category === NO_CATEGORY ? "No category" : category}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="task-filter-section">
                   <div className="task-filter-section-title">Sort by</div>
                   <div className="task-sort-options">
                     <button
@@ -473,6 +559,18 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                       </span>
                       Title Z–A
                     </button>
+                    <button
+                      type="button"
+                      className={`task-sort-option ${
+                        sortMode === "category-asc" ? "is-selected" : ""
+                      }`}
+                      onClick={() => setSortMode("category-asc")}
+                    >
+                      <span className="task-sort-radio">
+                        {sortMode === "category-asc" && <span />}
+                      </span>
+                      Category A–Z
+                    </button>
                   </div>
                 </div>
 
@@ -500,15 +598,6 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
       </div>
 
       {/* Tasklist */}
-      {/* Header */}
-      <div>
-        <ul className="tasklist-header">
-          <li>Menu</li>
-          <li>Priority</li>
-          <li>Description</li>
-          <li>Status</li>
-        </ul>
-      </div>
 
       {/* New task */}
       {!isCreateActive ? (
@@ -533,10 +622,6 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
           aria-expanded="true"
         >
           <div className="task-info">
-            <div className="icon-div new-task-action">
-              <i className="fa-solid fa-bars"></i>
-            </div>
-
             <button className={`task-priority priority-${newTaskPriority} outline-none focus:ring-2 focus:ring-offset-1`} onClick={() => setIsEditingNewPriority(!isEditingNewPriority)}>
               <span
                 className="task-priority-number"
@@ -583,6 +668,24 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                 }}
               />
             </div>
+            <div className="new-task-category-column">
+              <input
+                className="new-task-input task-category-input"
+                value={newTaskCategory}
+                list="task-category-options"
+                placeholder="Category"
+                maxLength={CATEGORY_MAX_LENGTH}
+                onChange={(e) => setNewTaskCategory(e.target.value.slice(0, CATEGORY_MAX_LENGTH))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addNewTask();
+                }}
+              />
+              <datalist id="task-category-options">
+                {categoryOptions.map((category) => (
+                  <option key={category} value={category} />
+                ))}
+              </datalist>
+            </div>
           </div>
 
           <div className="new-task-btn-container">
@@ -617,9 +720,11 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                 ? task.priority
                 : 0;
 
+            const categoryKey = task.category?.trim() || NO_CATEGORY;
             return (
               task.status === status &&
-              visiblePriorities[normalizedPriority]
+              visiblePriorities[normalizedPriority] &&
+              visibleCategories[categoryKey] !== false
             );
           }) && (
             <div key={status}>
@@ -643,9 +748,11 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                         ? task.priority
                         : 0;
 
+                    const categoryKey = task.category?.trim() || NO_CATEGORY;
                     return (
                       task.status === status &&
-                      visiblePriorities[normalizedPriority]
+                      visiblePriorities[normalizedPriority] &&
+                      visibleCategories[categoryKey] !== false
                     );
                   })
                   .sort(compareTasks)
@@ -661,6 +768,8 @@ const ToDo = ({ user, toggleActive }: TasklistProps) => {
                       onRename={handleRename}
                       onDescriptionChange={handleDescriptionChange}
                       onPriorityChange={handlePriorityChange}
+                      onCategoryChange={handleCategoryChange}
+                      categoryOptions={categoryOptions}
                     />
                   ))}
               </ul>
